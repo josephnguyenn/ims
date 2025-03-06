@@ -9,6 +9,9 @@ use App\Http\Controllers\ShipmentSupplierController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DeliverySupplierController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderProductController;
 
 
 
@@ -81,4 +84,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/delivery-suppliers', [DeliverySupplierController::class, 'store']); // ❌ Only Admin can add
     Route::put('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'update']); // ❌ Only Admin can update
     Route::delete('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'destroy']); // ❌ Only Admin can delete
+});
+
+//customer routes//
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/customers', [CustomerController::class, 'index']); // ✅ View all customers
+    Route::get('/customers/{id}', [CustomerController::class, 'show']); // ✅ View a single customer
+    Route::post('/customers', [CustomerController::class, 'store']); // ❌ Only Admin can add
+    Route::put('/customers/{id}', [CustomerController::class, 'update']); // ❌ Only Admin can update
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy']); // ❌ Only Admin can delete
+});
+
+//order routes//
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'index']); // ✅ View all orders
+    Route::get('/orders/{id}', [OrderController::class, 'show']); // ✅ View a single order
+    Route::post('/orders', [OrderController::class, 'store']); // ❌ Only Admin can create
+    Route::put('/orders/{id}', [OrderController::class, 'update']); // ❌ Only Admin can update
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']); // ❌ Only Admin can delete
+});
+
+//order product routes//
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/order-products', [OrderProductController::class, 'index']); // ✅ View all order products
+    Route::get('/order-products/{order_id}', [OrderProductController::class, 'show']); // ✅ View products in an order
+    Route::post('/order-products', [OrderProductController::class, 'store']); // ❌ Only Admin can add products to an order
+    Route::delete('/order-products/{id}', [OrderProductController::class, 'destroy']); // ❌ Only Admin can remove products
 });
