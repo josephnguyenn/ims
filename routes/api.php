@@ -12,6 +12,7 @@ use App\Http\Controllers\DeliverySupplierController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderProductController;
+use App\Http\Controllers\ReportController;
 
 
 
@@ -66,10 +67,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/shipments', [ShipmentController::class, 'index']); // ✅ View all shipments
     Route::get('/shipments/{id}', [ShipmentController::class, 'show']); // ✅ View a single shipment
-    Route::post('/shipments', [ShipmentController::class, 'store']); // ❌ Only Admin can add
-    Route::put('/shipments/{id}', [ShipmentController::class, 'update']); // ❌ Only Admin can update
-    Route::delete('/shipments/{id}', [ShipmentController::class, 'destroy']); // ❌ Only Admin can delete
+    Route::post('/shipments', [ShipmentController::class, 'store']); // ✅ Add shipment
+    Route::put('/shipments/{id}', [ShipmentController::class, 'update']); // ✅ Update shipment
+    Route::delete('/shipments/{id}', [ShipmentController::class, 'destroy']); // ✅ Delete shipment
 });
+
 
 //Product Routes anyone can crud product//
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -107,7 +109,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
 //order product routes//
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/order-products', [OrderProductController::class, 'index']); // ✅ View all order products
-    Route::get('/order-products/{order_id}', [OrderProductController::class, 'show']); // ✅ View products in an order
-    Route::post('/order-products', [OrderProductController::class, 'store']); // ❌ Only Admin can add products to an order
-    Route::delete('/order-products/{id}', [OrderProductController::class, 'destroy']); // ❌ Only Admin can remove products
+    Route::get('/order-products/{id}', [OrderProductController::class, 'show']); // ✅ View order product by ID
+    Route::post('/order-products', [OrderProductController::class, 'store']); // ✅ Add product to order
+    Route::put('/order-products/{id}', [OrderProductController::class, 'update']); // ✅ FIXED: Add update route
+    Route::delete('/order-products/{id}', [OrderProductController::class, 'destroy']); // ✅ Remove product from order
 });
+
+
+//report route//
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/reports/sales', [ReportController::class, 'salesReport']); // ✅ Sales & Revenue Report
+    Route::get('/reports/top-products', [ReportController::class, 'topSellingProducts']); // ✅ Best-Selling Products
+    Route::get('/reports/monthly-sales', [ReportController::class, 'monthlySalesReport']); // ✅ Monthly Sales Report
+});
+

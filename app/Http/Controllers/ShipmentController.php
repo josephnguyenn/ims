@@ -3,27 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shipment;
-use App\Models\ShipmentSupplier;
-use App\Models\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ShipmentController extends Controller
 {
-    // ✅ View all shipments (cost is now dynamically calculated)
+    // ✅ View all shipments
     public function index()
     {
-        $shipments = Shipment::with(['supplier', 'storage'])->get();
-
-        // Append cost dynamically
-        $shipments->each(function ($shipment) {
-            $shipment->cost = $shipment->cost; 
-        });
-
-        return response()->json($shipments, 200);
+        return response()->json(Shipment::with(['supplier', 'storage'])->get(), 200);
     }
 
-    // ✅ Create shipment (cost removed from request)
+    // ✅ Create a new shipment
     public function store(Request $request)
     {
         if (Auth::user()->role !== 'admin') {
@@ -43,7 +34,7 @@ class ShipmentController extends Controller
         return response()->json(['message' => 'Shipment created successfully', 'shipment' => $shipment], 201);
     }
 
-    // ✅ View a single shipment (cost is calculated dynamically)
+    // ✅ View a single shipment
     public function show($id)
     {
         $shipment = Shipment::with(['supplier', 'storage'])->find($id);
@@ -52,8 +43,50 @@ class ShipmentController extends Controller
             return response()->json(['message' => 'Shipment not found'], 404);
         }
 
-        $shipment->cost = $shipment->cost; // Add cost dynamically
-
         return response()->json($shipment, 200);
+    }
+
+    // ✅ UPDATE SHIPMENT (Fixing BadMethodCallException)
+    public function update(Request $request, $id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+
+        $shipment = Shipment::find($id);
+
+        if (!$shipment) {
+            return response()->json(['message' => 'Shipment not found'], 404);
+        }
+
+        $request->validate([
+            'shipment_supplier_id' => 'sometimes|exists:shipment_suppliers,id',
+            'storage_id' => 'sometimes|exists:storages,id',
+            'order_date' => 'sometimes|date',
+            'received_date' => 'nullable|date',
+            'expired_date' => 'nullable|date'
+        ]);
+
+        $shipment->update($request->all());
+
+        return response()->json(['message' => 'Shipment updated successfully', 'shipment' => $shipment], 200);
+    }
+
+    // ✅ DELETE SHIPMENT (Fixing BadMethodCallException)
+    public function destroy($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+
+        $shipment = Shipment::find($id);
+
+        if (!$shipment) {
+            return response()->json(['message' => 'Shipment not found'], 404);
+        }
+
+        $shipment->delete();
+
+        return response()->json(['message' => 'Shipment deleted successfully'], 200);
     }
 }
