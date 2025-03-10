@@ -13,7 +13,6 @@ class UserController extends Controller
         return response()->json(User::all(), 200);
     }
 
-
     // ✅ Only Admins can create new users
     public function store(Request $request)
     {
@@ -49,5 +48,4 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 }
-//end the code
 ?>
