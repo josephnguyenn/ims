@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// ✅ Load Customers into Table
+// ✅ Load Customers
 function loadCustomerData() {
     fetch("http://localhost/ims/public/api/customers", {
         headers: {
@@ -19,16 +19,16 @@ function loadCustomerData() {
     })
     .then(response => response.json())
     .then(customers => {
-        let customerTable = document.getElementById("customer-table");
-        customerTable.innerHTML = "";
+        const table = document.getElementById("customer-table");
+        table.innerHTML = "";
 
         if (customers.length === 0) {
-            customerTable.innerHTML = "<tr><td colspan='9'>No customers found.</td></tr>";
+            table.innerHTML = "<tr><td colspan='9'>No customers found.</td></tr>";
             return;
         }
 
         customers.forEach(customer => {
-            let row = document.createElement("tr");
+            const row = document.createElement("tr");
             row.innerHTML = `
                 <td>${customer.id}</td>
                 <td>${customer.name}</td>
@@ -43,19 +43,19 @@ function loadCustomerData() {
                     <button onclick="deleteCustomer(${customer.id})">Delete</button>
                 </td>
             `;
-            customerTable.appendChild(row);
+            table.appendChild(row);
         });
     })
-    .catch(error => console.error("Error loading customer data:", error));
+    .catch(error => console.error("Error loading customers:", error));
 }
 
-// ✅ Function to Add Customer
+// ✅ Add Customer
 function addCustomer() {
-    let name = document.getElementById("customer_name").value;
-    let email = document.getElementById("customer_email").value;
-    let phone = document.getElementById("customer_phone").value;
-    let address = document.getElementById("customer_address").value;
-    let vat_code = document.getElementById("customer_vat_code").value;
+    const name = document.getElementById("customer_name").value;
+    const email = document.getElementById("customer_email").value;
+    const phone = document.getElementById("customer_phone").value;
+    const address = document.getElementById("customer_address").value;
+    const vat_code = document.getElementById("customer_vat_code").value;
 
     fetch("http://localhost/ims/public/api/customers", {
         method: "POST",
@@ -68,12 +68,12 @@ function addCustomer() {
     .then(response => response.json())
     .then(() => {
         alert("Customer added!");
-        document.getElementById("addCustomerForm").style.display = "none";
+        closeModal("addCustomerForm");
         loadCustomerData();
     });
 }
 
-// ✅ Function to Open Edit Customer Modal
+// ✅ Open Edit Modal
 function openEditCustomerModal(id, name, email, phone, address, vat_code) {
     document.getElementById("edit_customer_id").value = id;
     document.getElementById("edit_customer_name").value = name;
@@ -82,17 +82,17 @@ function openEditCustomerModal(id, name, email, phone, address, vat_code) {
     document.getElementById("edit_customer_address").value = address;
     document.getElementById("edit_customer_vat_code").value = vat_code;
 
-    document.getElementById("editCustomerForm").style.display = "block";
+    openModal("editCustomerForm");
 }
 
-// ✅ Function to Update Customer
+// ✅ Update Customer
 function updateCustomer() {
-    let id = document.getElementById("edit_customer_id").value;
-    let name = document.getElementById("edit_customer_name").value;
-    let email = document.getElementById("edit_customer_email").value;
-    let phone = document.getElementById("edit_customer_phone").value;
-    let address = document.getElementById("edit_customer_address").value;
-    let vat_code = document.getElementById("edit_customer_vat_code").value;
+    const id = document.getElementById("edit_customer_id").value;
+    const name = document.getElementById("edit_customer_name").value;
+    const email = document.getElementById("edit_customer_email").value;
+    const phone = document.getElementById("edit_customer_phone").value;
+    const address = document.getElementById("edit_customer_address").value;
+    const vat_code = document.getElementById("edit_customer_vat_code").value;
 
     fetch(`http://localhost/ims/public/api/customers/${id}`, {
         method: "PUT",
@@ -104,7 +104,18 @@ function updateCustomer() {
     })
     .then(() => {
         alert("Customer updated!");
-        document.getElementById("editCustomerForm").style.display = "none";
+        closeModal("editCustomerForm");
         loadCustomerData();
     });
+}
+
+// ✅ Modal Functions
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = "flex"; // To match your existing flexbox layout
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = "none";
 }

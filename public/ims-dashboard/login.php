@@ -14,17 +14,24 @@ if (isset($_SESSION['token'])) {
     <title>Login - IMS</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="login-page">
     <div class="login-container">
-        <h2>Login to IMS</h2>
-        <form id="login-form">
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p id="error-message" class="error"></p>
-    </div>
+            <h2>Hệ Thống Quản Lý Kho Hàng</h2>
+            <img src="uploads/images/logo.png" alt="Tappo Market" class="logo">
 
+            <form id="login-form">
+
+                <label for="email">Tên đăng nhập</label>
+                <input type="text" id="email" required>
+
+                <label for="password">Mật khẩu</label>
+                <input type="password" id="password" required>
+
+                <button type="submit">Đăng nhập</button>
+            </form>
+
+            <p id="error-message" class="error"></p>
+    </div>
     <script src="js/login.js"></script>
 </body>
 </html>

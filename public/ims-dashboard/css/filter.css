@@ -1,0 +1,22 @@
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-bar input,
+.filter-bar select,
+.filter-bar button {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #94b9f1;
+    font-size: 14px;
+}
+
+.filter-bar button {
+    background-color: #1a4ba8;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}

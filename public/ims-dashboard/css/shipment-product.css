@@ -1,0 +1,28 @@
+.shipment-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns of equal width */
+    gap: 15px; /* Space between grid items */
+    margin-bottom: 20px;
+    background-color: #CCE0FF; /* Optional: Add a background color */
+    padding: 15px; /* Optional: Add padding */
+    border: 1px solid #ddd; /* Optional: Add a border */
+    border-radius: 10px; /* Optional: Add rounded corners */
+}
+
+.shipment-meta h3 {
+    grid-column: span 3; /* Make the heading span all 3 columns */
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+}
+
+.shipment-meta p {
+    margin: 0;
+    font-size: 14px;
+    color: black;
+}
+
+.shipment-meta:empty {
+    display: none;
+}

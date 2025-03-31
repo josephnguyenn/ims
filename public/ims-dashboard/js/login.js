@@ -29,7 +29,7 @@ document.getElementById("login-form").addEventListener("submit", function(event)
             });
 
         } else {
-            document.getElementById("error-message").innerText = data.message || "Invalid login!";
+            document.getElementById("error-message").innerText = data.message || "Lỗi Đăng nhập!";
         }
     })
     .catch(error => console.error("Error:", error));

@@ -35,7 +35,7 @@ function loadStorageData() {
                 <td>${storage.name}</td>
                 <td>${storage.location}</td>
                 <td>
-                    <button onclick="editStorage(${storage.id}, '${storage.name}', '${storage.location}')">Edit</button>
+                    <button onclick="openEditForm(${storage.id}, '${storage.name}', '${storage.location}')">Edit</button>
                     <button onclick="deleteStorage(${storage.id})">Delete</button>
                 </td>
             `;
@@ -97,31 +97,45 @@ function deleteStorage(id) {
     });
 }
 
-// ✅ Function to Edit Storage
-function editStorage(id, name, location) {
-    let newName = prompt("Edit Storage Name:", name);
-    let newLocation = prompt("Edit Storage Location:", location);
+// Open Edit Form
+function openEditForm(id, name, location) {
+    document.getElementById("edit-storage-id").value = id;
+    document.getElementById("edit-storage-name").value = name;
+    document.getElementById("edit-storage-location").value = location;
+    document.getElementById("editStorageForm").style.display = 'block';
+}
 
-    if (newName !== null && newLocation !== null) {
-        let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        fetch(`http://localhost/ims/public/api/storages/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + sessionStorage.getItem("token"),
-                "X-CSRF-TOKEN": csrfToken
-            },
-            body: JSON.stringify({ name: newName, location: newLocation })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message === "Storage updated successfully") {
-                alert("Storage updated!");
-                loadStorageData(); // ✅ Refresh table dynamically
-            } else {
-                alert("Error updating storage.");
-            }
+// Handle Update
+document.addEventListener("DOMContentLoaded", function () {
+    const editForm = document.getElementById("edit-storage-form");
+    if (editForm) {
+        editForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            updateStorage();
         });
     }
+});
+
+function updateStorage() {
+    const id = document.getElementById("edit-storage-id").value;
+    const name = document.getElementById("edit-storage-name").value;
+    const location = document.getElementById("edit-storage-location").value;
+
+    fetch(`http://localhost/ims/public/api/storages/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        },
+        body: JSON.stringify({ name, location })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("Storage updated successfully!");
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error("❌ Error updating storage:", error);
+        alert("Failed to update storage.");
+    });
 }

@@ -30,6 +30,8 @@ $users = fetchData("http://localhost/ims/public/api/users");
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+    <?php include "../includes/header.php"; ?>
+    <div class="main">
     <?php include "../includes/sidebar.php"; ?>
 
     <div class="main-content">
@@ -81,7 +83,7 @@ $users = fetchData("http://localhost/ims/public/api/users");
             </form>
         </div>
     </div>
-
+</div>
     <script src="../js/users.js"></script>
 </body>
 </html>

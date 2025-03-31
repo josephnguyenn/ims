@@ -11,18 +11,50 @@ use Illuminate\Support\Facades\DB;
 class ReportController extends Controller
 {
     // ✅ Get Sales and Revenue Reports
-    public function salesReport()
+    public function salesReport(Request $request)
     {
-        $totalRevenue = Order::sum('paid_amount');
-        $totalSales = Order::sum(DB::raw('(SELECT SUM(price * quantity) FROM order_products WHERE order_products.order_id = orders.id)'));
-        $totalDebt = Customer::sum(DB::raw('(SELECT SUM(price * quantity) FROM order_products WHERE order_products.order_id IN (SELECT id FROM orders WHERE orders.customer_id = customers.id)) - (SELECT SUM(paid_amount) FROM orders WHERE orders.customer_id = customers.id)'));
-
+        $from = $request->query('from');
+        $to = $request->query('to');
+    
+        $orderQuery = Order::query();
+        $customerQuery = Customer::query();
+    
+        if ($from && $to) {
+            $orderQuery->whereBetween('created_at', [$from, $to]);
+            $customerQuery->whereHas('orders', function ($q) use ($from, $to) {
+                $q->whereBetween('created_at', [$from, $to]);
+            });
+        }
+    
+        $totalRevenue = $orderQuery->sum('paid_amount');
+    
+        $totalSales = $orderQuery->sum(DB::raw('(
+            SELECT SUM(price * quantity)
+            FROM order_products
+            WHERE order_products.order_id = orders.id
+        )'));
+    
+        $totalDebt = $customerQuery->sum(DB::raw('(
+            SELECT SUM(price * quantity)
+            FROM order_products
+            WHERE order_products.order_id IN (
+                SELECT id FROM orders WHERE orders.customer_id = customers.id
+                ' . ($from && $to ? "AND orders.created_at BETWEEN '$from' AND '$to'" : "") . '
+            )
+        ) - (
+            SELECT SUM(paid_amount)
+            FROM orders
+            WHERE orders.customer_id = customers.id
+            ' . ($from && $to ? "AND orders.created_at BETWEEN '$from' AND '$to'" : "") . '
+        )'));
+    
         return response()->json([
             'total_sales' => $totalSales,
             'total_revenue' => $totalRevenue,
             'total_debt' => $totalDebt
         ]);
     }
+    
 
     // ✅ Get Top-Selling Products
     public function topSellingProducts()

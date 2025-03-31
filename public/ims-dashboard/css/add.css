@@ -1,0 +1,12 @@
+.add-row {
+    margin-bottom: 10px;
+}
+.add-row label {
+    display: block;
+    margin-bottom: 5px;
+}
+.add-row input, .add-row select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}

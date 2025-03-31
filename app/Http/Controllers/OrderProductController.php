@@ -64,10 +64,6 @@ class OrderProductController extends Controller
     {
         $orderProducts = OrderProduct::where('order_id', $order_id)->with('product')->get();
 
-        if ($orderProducts->isEmpty()) {
-            return response()->json(['message' => 'No products found for this order'], 404);
-        }
-
         return response()->json($orderProducts, 200);
     }
 

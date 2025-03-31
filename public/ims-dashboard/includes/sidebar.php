@@ -9,6 +9,7 @@
         <li><a href="customers.php">Customers</a></li>
         <li><a href="delivery-suppliers.php">Delivery Suppliers</a></li>
         <li><a href="orders.php">Orders</a></li>
+        <li><a href="revenue.php">Revenue</a></li>
         <li><a href="users.php">Users</a></li>
         <li><a href="../logout.php">Logout</a></li>
     </ul>

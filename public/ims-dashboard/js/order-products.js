@@ -157,3 +157,29 @@ function deleteOrderProduct(orderProductId, orderId) {
     })
     .catch(error => console.error("❌ Error deleting product:", error));
 }
+
+// ✅ Function to Update Total Price Dynamically
+function updateTotalPrice() {
+    let quantity = document.getElementById("quantity").value;
+    let price = document.getElementById("price").value;
+    let totalPrice = document.getElementById("total_price");
+
+    if (quantity && price) {
+        totalPrice.textContent = `$${(quantity * price).toFixed(2)}`;
+    } else {
+        totalPrice.textContent = "$0.00";
+    }
+}
+
+// ✅ Function to Update Edit Total Price Dynamically
+function updateEditTotalPrice() {
+    let quantity = document.getElementById("edit_quantity").value;
+    let price = document.getElementById("edit_price").value;
+    let totalPrice = document.getElementById("edit_total_price");
+
+    if (quantity && price) {
+        totalPrice.textContent = `$${(quantity * price).toFixed(2)}`;
+    } else {
+        totalPrice.textContent = "$0.00";
+    }
+}

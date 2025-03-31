@@ -91,6 +91,9 @@ class ProductController extends Controller
         $shipment = Shipment::find($product->shipment_id);
         $shipment->calculateTotalCost();
 
+        \Log::info('Update request data:', $request->all());
+        \Log::info('Product updated:', $product->toArray());
+
         return response()->json(['message' => 'Product updated successfully', 'product' => $product], 200);
     }
 

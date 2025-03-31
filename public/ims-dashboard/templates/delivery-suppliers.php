@@ -34,13 +34,17 @@ $_SESSION['csrf_token'] = $csrfToken;
     <link rel="stylesheet" href="../css/style.css">
     <meta name="csrf-token" content="<?= $csrfToken ?>">
 </head>
-<body>
+<body> 
+    <?php include "../includes/header.php"; ?>
+    <div class="main">
     <?php include "../includes/sidebar.php"; ?>
 
     <div class="main-content">
-        <h1>Delivery Supplier Management</h1>
-        <button onclick="document.getElementById('addDeliverySupplierForm').style.display='block'">Add Supplier</button>
-
+        <div class="main-content-header">
+            <h1>Delivery Supplier Management</h1>
+            <button class="add-button" onclick="document.getElementById('addDeliverySupplierForm').style.display='block'">Add Supplier</button>
+        </div>
+    
         <table border="1">
             <thead>
                 <tr>
@@ -75,7 +79,7 @@ $_SESSION['csrf_token'] = $csrfToken;
             </form>
         </div>
     </div>
-
+</div>
     <script src="../js/delivery-suppliers.js"></script>
 </body>
 </html>
