@@ -59,13 +59,22 @@ function addUser() {
         },
         body: JSON.stringify({ name, email, role, password })
     })
+    .then(async response => {
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Error response:", error);
+            throw new Error("Failed to add user: " + response.status);
+        }
+        return response.json();
+    })
     .then(() => {
         alert("User added!");
         document.getElementById("addUserForm").style.display = "none";
         loadUsers();
     })
-    .catch(error => console.error("Error adding user:", error));
+    .catch(error => alert("Error adding user: " + error));
 }
+
 
 // ✅ Function to Open Edit User Form
 function openEditUserForm(userId, name, email, role) {

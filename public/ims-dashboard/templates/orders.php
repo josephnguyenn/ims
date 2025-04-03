@@ -18,7 +18,16 @@ function fetchData($apiUrl) {
     return json_decode($response, true);
 }
 
-$orders = fetchData("http://localhost/ims/public/api/orders");
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$perPage = 10;
+
+$allOrders = fetchData("http://localhost/ims/public/api/orders");
+$totalOrders = count($allOrders);
+$totalPages = ceil($totalOrders / $perPage);
+
+// Slice orders for current page
+$start = ($page - 1) * $perPage;
+$orders = array_slice($allOrders, $start, $perPage);
 $customers = fetchData("http://localhost/ims/public/api/customers");
 $deliverySuppliers = fetchData("http://localhost/ims/public/api/delivery-suppliers");
 ?>
@@ -70,6 +79,14 @@ $deliverySuppliers = fetchData("http://localhost/ims/public/api/delivery-supplie
                 <?php endforeach; ?>
             </tbody>
         </table>
+
+        <div class="pagination">
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?page=<?= $i ?>" class="<?= ($i === $page) ? 'active' : '' ?>">
+            <?= $i ?>
+        </a>
+    <?php endfor; ?>
+</div>
 
         <!-- ✅ Thêm Đơn hàng Modal -->
         <div id="addOrderModal" class="modal">
@@ -132,5 +149,28 @@ $deliverySuppliers = fetchData("http://localhost/ims/public/api/delivery-supplie
 </div>
     <link rel="stylesheet" href="../css/add.css">
     <script src="../js/orders.js"></script>
+    <style>
+    .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+    }
+    .pagination a {
+        padding: 6px 12px;
+        margin: 0 2px;
+        border: 1px solid #ccc;
+        text-decoration: none;
+        color: #333;
+    }
+    .pagination a.active {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+    .pagination a:hover:not(.active) {
+        background-color: #ddd;
+    }
+        </style>
+
 </body>
 </html>

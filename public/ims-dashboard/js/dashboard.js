@@ -11,23 +11,23 @@ function loadDashboard(from = null, to = null) {
         params = `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
     }
 
-    // Fetch Revenue, Sales, Debt
+    // ✅ Revenue, Sales, Debt
     fetch(`http://localhost/ims/public/api/reports/sales${params}`, {
         headers: { "Authorization": `Bearer ${token}` }
     })
     .then(res => res.json())
     .then(data => {
+        const estimated = parseFloat(data.total_sales) || 0;
         const revenue = parseFloat(data.total_revenue) || 0;
         const debt = parseFloat(data.total_debt) || 0;
-        const actual = revenue - debt;
+        const actual = estimated - debt;
 
-        document.getElementById("dashboard-revenue").textContent = `${revenue.toFixed(2)}Kč`;
-        document.getElementById("dashboard-debt").textContent = `${debt.toFixed(2)}Kč`;
-        document.getElementById("dashboard-actual").textContent = `${actual.toFixed(2)}Kč`;
+        document.getElementById("dashboard-revenue").textContent = `${revenue.toFixed(2)}CZK`;
+        document.getElementById("dashboard-debt").textContent = `${debt.toFixed(2)}CZK`;
+        document.getElementById("dashboard-actual").textContent = `${actual.toFixed(2)}CZK`;
     });
 
-    console.log(`Request URL: http://localhost/ims/public/api/orders${params}`);
-    // Fetch Actual Order Count with filtering
+    // ✅ Actual Order Count (with filtering if available)
     fetch(`http://localhost/ims/public/api/orders${params}`, {
         headers: { "Authorization": `Bearer ${token}` }
     })
@@ -37,7 +37,7 @@ function loadDashboard(from = null, to = null) {
         document.getElementById("dashboard-orders").textContent = count;
     });
 
-    // Fetch Top Selling Products
+    // ✅ Top Selling Products
     fetch("http://localhost/ims/public/api/reports/top-products", {
         headers: { "Authorization": `Bearer ${token}` }
     })
@@ -51,7 +51,7 @@ function loadDashboard(from = null, to = null) {
         });
     });
 
-    // Fetch Most Imported Products
+    // ✅ Most Imported Products
     fetch("http://localhost/ims/public/api/products", {
         headers: { "Authorization": `Bearer ${token}` }
     })
@@ -67,44 +67,41 @@ function loadDashboard(from = null, to = null) {
         });
     });
 
-    // Fetch Nearly Expired Shipments
-    fetch("http://localhost/ims/public/api/shipments", {
+    // ✅ Nearly Expired Shipments
+    fetch("http://localhost/ims/public/api/products", {
         headers: { "Authorization": `Bearer ${token}` }
     })
     .then(res => res.json())
-    .then(shipments => {
-        const tbody = document.querySelector("#expired-shipments tbody");
+    .then(products => {
+        const tbody = document.querySelector("#expired-products tbody");
         tbody.innerHTML = "";
         const now = new Date();
         const in30days = new Date();
         in30days.setDate(now.getDate() + 30);
-
-        shipments.filter(s => s.expired_date && new Date(s.expired_date) <= in30days)
-        .forEach(s => {
-            const row = `<tr><td>#${s.id}</td><td>${s.storage?.name || 'Unknown'}</td><td>${s.supplier?.name || 'Unknown'}</td><td>${s.expired_date}</td></tr>`;
+    
+        products
+            .filter(p => {
+                const expiry = new Date(p.expired_date);
+                return p.expired_date && expiry > new Date() && expiry <= in30days;
+            })
+            .forEach(p => {
+            const row = `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.code}</td>
+                    <td>${p.shipment_id ? `Shipment #${p.shipment_id}` : "N/A"}</td>
+                    <td>${p.expired_date}</td>
+                </tr>
+            `;
             tbody.innerHTML += row;
         });
     });
-}   
-
-
-function formatDate(date) {
-    let d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
-
-    return [year, month, day].join('-');
 }
-
-// Apply date filter
+// ✅ Reset filter
+// ✅ Apply date filter
 function filterDashboard() {
     const from = document.getElementById("from_date").value;
     const to = document.getElementById("to_date").value;
     loadDashboard(from, to);
 }
+

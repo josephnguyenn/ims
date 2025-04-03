@@ -1,5 +1,9 @@
+let allOrders = [];
+const ORDERS_PER_PAGE = 10;
+
 document.addEventListener("DOMContentLoaded", function () {
-    loadOrders();
+    const currentPage = getPageFromURL();
+    loadOrders(currentPage);
 
     document.getElementById("order-form").addEventListener("submit", function (event) {
         event.preventDefault();
@@ -12,45 +16,70 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
             editOrder();
         });
-    } else {
-        console.error("❌ Edit Order Form not found!");
     }
 });
 
-// ✅ Function to Load Orders
-function loadOrders() {
+function getPageFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return parseInt(params.get("page")) || 1;
+}
+
+function loadOrders(page = 1) {
     fetch("http://localhost/ims/public/api/orders", {
         headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
     })
-    .then(response => response.json())
-    .then(orders => {
-        let orderTable = document.getElementById("order-table");
-        orderTable.innerHTML = "";
-
-        if (orders.length === 0) {
-            orderTable.innerHTML = "<tr><td colspan='6'>No orders found.</td></tr>";
-            return;
-        }
-
-        orders.forEach(order => {
-            let row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${order.id}</td>
-                <td>${order.customer.name}</td>
-                <td>${order.delivery_supplier.name}</td>
-                <td>${order.total_price}Kč</td>
-                <td>${order.paid_amount}Kč</td>
-                <td>
-                    <button onclick="window.location.href='order-products.php?order_id=${order.id}'">Quản lý sản phẩm</button>
-                    <button onclick="openEditOrderForm(${order.id}, ${order.delivery_supplier.id}, ${order.paid_amount})">Sửa</button>
-                    <button onclick="deleteOrder(${order.id})">Xóa</button>
-                </td>
-            `;
-            orderTable.appendChild(row);
-        });
-    })
-    .catch(error => console.error("Error loading orders:", error));
+    .then(res => res.json())
+    .then(data => {
+        allOrders = data;
+        renderOrders(page);
+        renderPagination(page);
+    });
 }
+
+function renderOrders(page) {
+    const orderTable = document.getElementById("order-table");
+    orderTable.innerHTML = "";
+
+    const start = (page - 1) * ORDERS_PER_PAGE;
+    const paginated = allOrders.slice(start, start + ORDERS_PER_PAGE);
+
+    if (paginated.length === 0) {
+        orderTable.innerHTML = "<tr><td colspan='6'>No orders found.</td></tr>";
+        return;
+    }
+
+    paginated.forEach(order => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${order.id}</td>
+            <td>${order.customer.name}</td>
+            <td>${order.delivery_supplier.name}</td>
+            <td>${order.total_price}Kč</td>
+            <td>${order.paid_amount}Kč</td>
+            <td>
+                <button onclick="window.location.href='order-products.php?order_id=${order.id}'">Quản lý sản phẩm</button>
+                <button onclick="openEditOrderForm(${order.id}, ${order.delivery_supplier.id}, ${order.paid_amount})">Sửa</button>
+                <button onclick="deleteOrder(${order.id})">Xóa</button>
+            </td>
+        `;
+        orderTable.appendChild(row);
+    });
+}
+
+function renderPagination(currentPage) {
+    const totalPages = Math.ceil(allOrders.length / ORDERS_PER_PAGE);
+    const container = document.querySelector(".pagination");
+    container.innerHTML = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+        const link = document.createElement("a");
+        link.href = `?page=${i}`;
+        link.textContent = i;
+        if (i === currentPage) link.classList.add("active");
+        container.appendChild(link);
+    }
+}
+
 
 // ✅ Open Modal
 function openModal(modalId) {

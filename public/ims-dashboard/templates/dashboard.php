@@ -114,8 +114,8 @@ $_SESSION['csrf_token'] = $csrfToken;
             </div>
         </div>
 
-        <h2 class="section-title">🧯 Lô hàng sắp hết hạng (Trong 30 ngày)</h2>
-        <table id="expired-shipments">
+        <h2 class="section-title">🧯 Sản phẩm sắp hết hạn (Trong 30 ngày)</h2>
+        <table id="expired-products">
             <thead>
                 <tr>
                     <th>Mã lô hàng</th>

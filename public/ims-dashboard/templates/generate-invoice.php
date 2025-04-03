@@ -6,7 +6,7 @@ if (!isset($_SESSION['token'])) {
 }
 
 if (!isset($_GET['order_id'])) {
-    die("Order ID is required.");
+    die("ID objednávky je vyžadováno.");
 }
 $order_id = $_GET['order_id'];
 
@@ -26,7 +26,7 @@ $order = fetchData("http://localhost/ims/public/api/orders/$order_id");
 $orderProducts = fetchData("http://localhost/ims/public/api/order-products/$order_id");
 
 if (!$order || !isset($order['id'])) {
-    die("Order not found.");
+    die("Objednávka nebyla nalezena.");
 }
 
 $customer = $order['customer'] ?? [
@@ -37,14 +37,14 @@ $customer = $order['customer'] ?? [
     'phone' => '',
 ];
 
-$date = date('d/m/Y', strtotime($order['created_at'] ?? date('Y-m-d')));
+$date = date('d.m.Y', strtotime($order['created_at'] ?? date('Y-m-d')));
 ?>
 
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>Hóa Đơn - Order #<?= htmlspecialchars($order['id']) ?></title>
+    <title>Faktura - Objednávka #<?= htmlspecialchars($order['id']) ?></title>
     <link rel="stylesheet" href="../css/invoice.css">
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
@@ -56,19 +56,36 @@ $date = date('d/m/Y', strtotime($order['created_at'] ?? date('Y-m-d')));
         .totals { text-align: right; margin-top: 20px; }
         .highlight { font-weight: bold; font-size: 18px; }
         .info-table td { border: none; padding: 4px 8px; }
+        .download-pdf-btn {
+        background-color: #007bff; /* Blue background */
+        color: white; /* White text */
+        border: none; /* Remove border */
+        padding: 10px 20px; /* Add padding */
+        font-size: 16px; /* Increase font size */
+        border-radius: 5px; /* Rounded corners */
+        cursor: pointer; /* Pointer cursor on hover */
+        transition: background-color 0.3s ease; /* Smooth hover effect */
+    }
+
+    .download-pdf-btn:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
+    .download-pdf-btn:active {
+        background-color: #003f7f; /* Even darker blue when clicked */
+    }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
-<button onclick="downloadPDF()">📄 Download PDF</button>
-<script>
+<button class="download-pdf-btn" onclick="downloadPDF()">📄 Stáhnout PDF</button><script>
 function downloadPDF() {
     const element = document.querySelector(".invoice-wrapper");
     const opt = {
         margin:       0,
-        filename:     'invoice-<?= $order_id ?>.pdf',
+        filename:     'faktura-<?= $order_id ?>.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -82,52 +99,54 @@ function downloadPDF() {
 <div class="invoice-header">
     <img src="../uploads/images/logo.png" alt="Tappo Market" class="header-logo">
     <div class="invoice-title">
-        <h1>HÓA ĐƠN - CHỨNG TỪ THUẾ</h1>
-        <p>Số hóa đơn: HD-<?= date('dmY') ?>-<?= htmlspecialchars($order['id']) ?></p>
+        <h1>FAKTURA - DAŇOVÝ DOKLAD</h1>
+        <p>Číslo faktury: FA-<?= date('dmY') ?>-<?= htmlspecialchars($order['id']) ?></p>
     </div>
 </div>
 
 <div class="info-box">
     <div class="info-section">
-        <h3>Nhà cung cấp</h3>
-        <p><strong>Tên:</strong> Chợ Tappo</p>
-        <p><strong>Địa chỉ:</strong> 123 Chợ Tappo Street</p>
-        <p><strong>Thành phố:</strong> TP Hồ Chí Minh</p>
-        <p><strong>Mã bưu chính:</strong> 700000</p>
-        <p><strong>Nhận dạng:</strong> SUP-001</p>
-        <p><strong>Ngân hàng:</strong> Ngân hàng TCB</p>
-        <p><strong>Số tài khoản:</strong> 123456789</p>
-        <p><strong>Ngày phát hành:</strong> <?= $date ?></p>
-        <p><strong>Ngày phát hành thuế:</strong> <?= $date ?></p>
+        <h3>Dodavatel</h3>
+        <p><strong>Název:</strong> Tappo Market</p>
+        <p><strong>Adresa:</strong> 123 Tappo Market Street</p>
+        <p><strong>Město:</strong> Ho Či Minovo Město</p>
+        <p><strong>PSČ:</strong> 700000</p>
+        <p><strong>Identifikace:</strong> SUP-001</p>
+        <p><strong>DIČ:</strong> 123456789</p>
+        <p><strong>Banka:</strong> TCB Banka</p>
+        <p><strong>Číslo účtu:</strong> 123456789</p>
+        <p><strong>Datum vydání:</strong> <?= $date ?></p>
+        <p><strong>Datum daňového dokladu:</strong> <?= $date ?></p>
     </div>
     <div class="info-section">
-        <h3>Khách hàng</h3>
-        <p><strong>Tên:</strong> <?= htmlspecialchars($customer['name']) ?></p>
-        <p><strong>Địa chỉ:</strong> <?= htmlspecialchars($customer['address']) ?></p>
-        <p><strong>Thành phố:</strong> <?= htmlspecialchars($customer['city']) ?></p>
-        <p><strong>Mã bưu chính:</strong> <?= htmlspecialchars($customer['postal_code']) ?></p>
+        <h3>Zákazník</h3>
+        <p><strong>Jméno:</strong> <?= htmlspecialchars($customer['name']) ?></p>
+        <p><strong>Adresa:</strong> <?= htmlspecialchars($customer['address']) ?></p>
+        <p><strong>Město:</strong> <?= htmlspecialchars($customer['city']) ?></p>
+        <p><strong>PSČ:</strong> <?= htmlspecialchars($customer['postal_code']) ?></p>
         <p><strong>Email:</strong> <?= htmlspecialchars($customer['email']) ?></p>
-        <p><strong>SĐT:</strong> <?= htmlspecialchars($customer['phone']) ?></p>
-        <p><strong>Mã KH:</strong> <?= htmlspecialchars($customer['id']) ?></p>
-        <p><strong>MST:</strong> <?= htmlspecialchars($customer['vat_code']) ?></p>
-        <p><strong>Hạn thanh toán:</strong> <?= date('d/m/Y', strtotime('+5 days')) ?></p>
+        <p><strong>Telefon:</strong> <?= htmlspecialchars($customer['phone']) ?></p>
+        <p><strong>ID zákazníka:</strong> <?= htmlspecialchars($customer['id']) ?></p>
+        <p><strong>DIČ:</strong> <?= htmlspecialchars($customer['tax_code']) ?></p>
+        <p><strong>IČ:</strong> <?= htmlspecialchars($customer['vat_code']) ?></p>
+        <p><strong>Splatnost:</strong> <?= date('d.m.Y', strtotime('+5 days')) ?></p>
     </div>
 </div>
 
 
 
     <div class="section">
-        <div class="section-title">Chi tiết thanh toán</div>
+        <div class="section-title">Podrobnosti o platbě</div>
         <table>
             <thead>
                 <tr>
-                    <th>Mục</th>
-                    <th>Số lượng</th>
-                    <th>Giá</th>
-                    <th>Tổng chưa VAT</th>
-                    <th>VAT</th>
-                    <th>Tỷ lệ thuế (%)</th>
-                    <th>Tổng cộng bao gồm VAT</th>
+                    <th>Položka</th>
+                    <th>Množství</th>
+                    <th>Cena</th>
+                    <th>Celkem bez DPH</th>
+                    <th>DPH</th>
+                    <th>Sazba DPH (%)</th>
+                    <th>Celkem s DPH</th>
                 </tr>
             </thead>
             <tbody>
@@ -154,24 +173,24 @@ function downloadPDF() {
                         <tr>
                             <td><?= htmlspecialchars($product['name']) ?></td>
                             <td><?= $qty ?></td>
-                            <td>$<?= number_format($price, 2) ?></td>
-                            <td>$<?= number_format($preVAT, 2) ?></td>
-                            <td>$<?= number_format($vatAmount, 2) ?></td>
+                            <td><?= number_format($price, 2) ?> CZK</td>
+                            <td><?= number_format($preVAT, 2) ?> CZK</td>
+                            <td><?= number_format($vatAmount, 2) ?> CZK</td>
                             <td><?= $vatRate ?>%</td>
-                            <td>$<?= number_format($lineTotal, 2) ?></td>
+                            <td><?= number_format($lineTotal, 2) ?> CZK</td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="7">Không có sản phẩm trong đơn hàng.</td></tr>
+                    <tr><td colspan="7">Žádné produkty v objednávce.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 
     <div class="totals-box">
-        <p><strong>Tổng chưa VAT:</strong> $<?= number_format($subtotal, 2) ?></p>
-        <p><strong>VAT:</strong> $<?= number_format($totalVAT, 2) ?></p>
-        <p class="highlight">Tổng phải trả: <strong>$<?= number_format($totalAmount, 2) ?></strong></p>
+        <p><strong>Celkem bez DPH:</strong> <?= number_format($subtotal, 2) ?> CZK</p>
+        <p><strong>DPH:</strong> <?= number_format($totalVAT, 2) ?> CZK</p>
+        <p class="highlight">Celkem k úhradě: <strong><?= number_format($totalAmount, 2) ?> CZK</strong></p>
     </div>
     </div>
 
