@@ -5,7 +5,7 @@ if (!isset($_SESSION['token'])) {
     exit();
 }
 
-// Fetch Storage & Shipment Suppliers Data
+// Lấy dữ liệu Kho & Nhà cung cấp lô hàng
 function fetchData($apiUrl) {
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -21,17 +21,17 @@ function fetchData($apiUrl) {
 $storages = fetchData("http://localhost/ims/public/api/storages");
 $shipmentSuppliers = fetchData("http://localhost/ims/public/api/shipment-suppliers");
 
-// Generate CSRF token
+// Tạo mã CSRF
 $csrfToken = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrfToken;
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shipment Management</title>
+    <title>Quản lý lô hàng</title>
     <link rel="stylesheet" href="../css/style.css">
     <meta name="csrf-token" content="<?= $csrfToken ?>">
 </head>
@@ -45,68 +45,68 @@ $_SESSION['csrf_token'] = $csrfToken;
 
     <div class="main-content">
         <div class="main-content-header">
-            <h1>Shipment Management</h1>
-            <button class="add-button" onclick="openModal('addShipmentForm')">Add Shipment</button>
+            <h1>Quản lý lô hàng</h1>
+            <button class="add-button" onclick="openModal('addShipmentForm')">Thêm Lô Hàng</button>
         </div>
         
         <table border="1">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Supplier</th>
-                    <th>Storage</th>
-                    <th>Order Date</th>
-                    <th>Received Date</th>
-                    <th>Expired Date</th>
-                    <th>Cost</th>
-                    <th>Actions</th>
+                    <th>Mã lô</th>
+                    <th>Nhà cung cấp</th>
+                    <th>Kho</th>
+                    <th>Ngày đặt</th>
+                    <th>Ngày nhận</th>
+                    <th>Ngày hết hạn</th>
+                    <th>Chi phí</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody id="shipment-table">
-                <tr><td colspan="8">Loading...</td></tr>
+                <tr><td colspan="8">Đang tải...</td></tr>
             </tbody>
         </table>
 
-        <!-- Add Shipment Form (Modal) -->
+        <!-- Form Thêm Lô Hàng (Modal) -->
         <div id="addShipmentForm" class="modal" style="display: none;">
             <div class="modal-content">
-                <h2>Add Shipment</h2>
+                <h2>Thêm Lô Hàng</h2>
                 <form id="shipment-form">
                     <div class="add-row">
-                        <label for="shipment_supplier_id">Shipment Supplier:</label>
+                        <label for="shipment_supplier_id">Nhà cung cấp lô hàng:</label>
                         <select id="shipment_supplier_id" required>
-                            <option value="">Select Supplier</option>
+                            <option value="">Chọn nhà cung cấp</option>
                             <?php foreach ($shipmentSuppliers as $supplier): ?>
                                 <option value="<?= htmlspecialchars($supplier['id']) ?>"><?= htmlspecialchars($supplier['name']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="add-row">
-                        <label for="storage_id">Storage Location:</label>
+                        <label for="storage_id">Vị trí kho:</label>
                         <select id="storage_id" required>
-                            <option value="">Select Storage</option>
+                            <option value="">Chọn kho</option>
                             <?php foreach ($storages as $storage): ?>
                                 <option value="<?= htmlspecialchars($storage['id']) ?>"><?= htmlspecialchars($storage['name']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="add-row">                
-                        <label for="order_date">Order Date:</label>
+                        <label for="order_date">Ngày đặt:</label>
                         <input type="date" id="order_date" required>
                     </div>                    
                     
                     <div class="add-row">                
-                        <label for="received_date">Received Date:</label>
+                        <label for="received_date">Ngày nhận:</label>
                         <input type="date" id="received_date">
                     </div>
 
                     <div class="add-row">                
-                        <label for="expired_date">Expired Date:</label>
+                        <label for="expired_date">Ngày hết hạn:</label>
                         <input type="date" id="expired_date">
                     </div>
 
-                    <button type="submit">Save</button>
-                    <button type="button" onclick="closeModal('addShipmentForm')">Cancel</button>
+                    <button type="submit">Lưu</button>
+                    <button type="button" onclick="closeModal('addShipmentForm')">Hủy</button>
                 </form>
             </div>
         </div>

@@ -85,19 +85,19 @@ $_SESSION['csrf_token'] = $csrfToken;
 
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h2>Estimated Revenue</h2>
+                    <h2>Doanh thu dự kiế </h2>
                     <p>$<?= number_format($totalSales, 2) ?></p>
                 </div>
                 <div class="dashboard-card">
-                    <h2>Total Orders</h2>
+                    <h2>Tổng số đơn hàng</h2>
                     <p><?= $totalOrders ?></p>
                 </div>
                 <div class="dashboard-card">
-                    <h2>Debt to Be Collected</h2>
+                    <h2>Nợ cần thu</h2>
                     <p>$<?= number_format($totalDebt, 2) ?></p>
                 </div>
                 <div class="dashboard-card">
-                    <h2>Actual Revenue</h2>
+                    <h2>Doanh thu thực tế</h2>
                     <p>$<?= number_format($actualRevenue, 2) ?></p>
                 </div>
             </div>

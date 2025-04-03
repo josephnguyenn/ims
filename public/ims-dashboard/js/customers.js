@@ -37,10 +37,20 @@ function loadCustomerData() {
                 <td>${customer.address}</td>
                 <td>${customer.vat_code || "N/A"}</td>
                 <td>${customer.total_orders}</td>
-                <td>${customer.total_debt}</td>
+                <td>${customer.total_debt}Kč</td>
                 <td>
-                    <button onclick="openEditCustomerModal(${customer.id}, '${customer.name}', '${customer.email}', '${customer.phone}', '${customer.address}', '${customer.vat_code}')">Edit</button>
-                    <button onclick="deleteCustomer(${customer.id})">Delete</button>
+                <button onclick="openEditCustomerModal(
+                    ${customer.id}, 
+                    '${customer.name}', 
+                    '${customer.email}', 
+                    '${customer.phone}', 
+                    '${customer.address}', 
+                    '${customer.vat_code ?? ''}', 
+                    '${customer.city ?? ''}', 
+                    '${customer.postal_code ?? ''}', 
+                    '${customer.tax_code ?? ''}'
+                )">Sửa</button>                    
+                <button onclick="deleteCustomer(${customer.id})">Xóa</button>
                 </td>
             `;
             table.appendChild(row);
@@ -54,8 +64,11 @@ function addCustomer() {
     const name = document.getElementById("customer_name").value;
     const email = document.getElementById("customer_email").value;
     const phone = document.getElementById("customer_phone").value;
+    const city = document.getElementById("customer_city").value;
+    const postal_code = document.getElementById("customer_postal_code").value;
     const address = document.getElementById("customer_address").value;
     const vat_code = document.getElementById("customer_vat_code").value;
+    const tax_code = document.getElementById("customer_tax_code").value;
 
     fetch("http://localhost/ims/public/api/customers", {
         method: "POST",
@@ -63,9 +76,9 @@ function addCustomer() {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         },
-        body: JSON.stringify({ name, email, phone, address, vat_code })
+        body: JSON.stringify({ name, email, phone, address, vat_code, city, postal_code, tax_code })
     })
-    .then(response => response.json())
+    .then(response => response.json())  
     .then(() => {
         alert("Customer added!");
         closeModal("addCustomerForm");
@@ -74,14 +87,16 @@ function addCustomer() {
 }
 
 // ✅ Open Edit Modal
-function openEditCustomerModal(id, name, email, phone, address, vat_code) {
+function openEditCustomerModal(id, name, email, phone, address, vat_code, city, postal_code, tax_code) {
     document.getElementById("edit_customer_id").value = id;
     document.getElementById("edit_customer_name").value = name;
     document.getElementById("edit_customer_email").value = email;
     document.getElementById("edit_customer_phone").value = phone;
     document.getElementById("edit_customer_address").value = address;
     document.getElementById("edit_customer_vat_code").value = vat_code;
-
+    document.getElementById("edit_customer_tax_code").value = tax_code;
+    document.getElementById("edit_customer_city").value = city;
+    document.getElementById("edit_customer_postal_code").value = postal_code;
     openModal("editCustomerForm");
 }
 
@@ -92,6 +107,9 @@ function updateCustomer() {
     const email = document.getElementById("edit_customer_email").value;
     const phone = document.getElementById("edit_customer_phone").value;
     const address = document.getElementById("edit_customer_address").value;
+    const tax_code = document.getElementById("edit_customer_tax_code").value;
+    const city = document.getElementById("edit_customer_city").value;
+    const postal_code = document.getElementById("edit_customer_postal_code").value;
     const vat_code = document.getElementById("edit_customer_vat_code").value;
 
     fetch(`http://localhost/ims/public/api/customers/${id}`, {
@@ -100,7 +118,7 @@ function updateCustomer() {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         },
-        body: JSON.stringify({ name, email, phone, address, vat_code })
+        body: JSON.stringify({ name, email, phone, address, vat_code, city, postal_code, tax_code })
     })
     .then(() => {
         alert("Customer updated!");

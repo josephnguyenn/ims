@@ -1,15 +1,13 @@
-// //document.addEventListener("DOMContentLoaded", function () {
-//     loadProductData();
-
-//     const productForm = document.getElementById("product-form");
-//     if (productForm) {
-//         productForm.addEventListener("submit", function (event) {
-//             event.preventDefault();
-//             addProduct();
-//         });
-//     }
-
 document.addEventListener("DOMContentLoaded", function () {
+
+    const productForm = document.getElementById("product-form");
+    if (productForm) {
+        productForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            addProduct();
+        });
+    }
+
     const editForm = document.getElementById("edit-product-form");
     if (editForm) {
         editForm.addEventListener("submit", function (event) {
@@ -18,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }    
 });
+
 
 function getShipmentIdFromURL() {
     const params = new URLSearchParams(window.location.search);
@@ -79,6 +78,7 @@ function addProduct() {
     let originalQuantity = document.getElementById("original_quantity").value;
     let price = document.getElementById("price").value;
     let cost = document.getElementById("cost").value;
+    let expiredDate = document.getElementById("expired_date").value;
     let taxInput = document.getElementById("tax").value.trim();
     let tax = taxInput === "" ? null : parseFloat(taxInput);
     let category = document.getElementById("category").value;
@@ -102,6 +102,7 @@ function addProduct() {
             price, 
             cost, 
             tax,
+            expired_date: expiredDate,
             category, 
             shipment_id: shipmentId 
         })  
@@ -134,6 +135,7 @@ function openEditModal(productId) {
         document.getElementById("edit_price").value = product.price;
         document.getElementById("edit_cost").value = product.cost;
         document.getElementById("edit_tax").value = product.tax || 0;
+        document.getElementById("edit_expired_date").value = product.expired_date || "";
         document.getElementById("edit_category").value = product.category;
         document.getElementById("edit_shipment_id").value = product.shipment_id;
 
@@ -156,6 +158,7 @@ function updateProduct() {
     let price = document.getElementById("edit_price").value;
     let cost = document.getElementById("edit_cost").value;
     let taxInput = document.getElementById("edit_tax").value.trim();
+    let expiredDate = document.getElementById("edit_expired_date").value;
     let tax = taxInput === "" ? null : parseFloat(taxInput)
     let category = document.getElementById("edit_category").value;
     let shipmentId = document.getElementById("edit_shipment_id").value;
@@ -168,6 +171,7 @@ function updateProduct() {
             original_quantity: originalQuantity,
             price,
             cost,
+            expired_date: expiredDate,
             tax,
             category,
             shipment_id: shipmentId
@@ -187,6 +191,7 @@ function updateProduct() {
             cost, 
             tax,
             category, 
+            expired_date: expiredDate, // ← ADD THIS
             shipment_id: shipmentId 
         })
     })
@@ -233,4 +238,41 @@ function closeModal(modalId) {
         return;
     }
     modal.style.display = 'none';
+}
+
+function suggestProductCode() {
+    const input = document.getElementById("product_code").value;
+    const suggestionBox = document.getElementById("suggestions");
+    if (input.length < 2) {
+        suggestionBox.innerHTML = '';
+        return;
+    }
+
+    fetch(`http://localhost/ims/public/api/products/search?code=${encodeURIComponent(input)}`, {
+        headers: {
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        }
+    })
+    .then(res => res.json())
+    .then(products => {
+        suggestionBox.innerHTML = '';
+        if (!Array.isArray(products)) return;
+    
+        products.forEach(p => {
+            const div = document.createElement("div");
+            div.classList.add("suggestion-item");
+            div.innerHTML = `${p.code} | ${p.name} | ${p.price}Kč | ${p.cost}Kč | Tax: ${p.tax}%`;
+            div.onclick = () => {
+                document.getElementById("product_name").value = p.name;
+                document.getElementById("product_code").value = p.code;
+                document.getElementById("price").value = p.price;
+                document.getElementById("cost").value = p.cost;
+                document.getElementById("tax").value = p.tax;
+                document.getElementById("category").value = p.category;
+                suggestionBox.innerHTML = '';
+            };
+            suggestionBox.appendChild(div);
+        });
+    })
+    
 }

@@ -33,8 +33,8 @@ function loadDeliverySuppliers() {
                 <td>${supplier.id}</td>
                 <td>${supplier.name}</td>
                 <td>
-                    <button onclick="openEditDeliverySupplierModal(${supplier.id}, '${supplier.name}')">Edit</button>
-                    <button onclick="deleteDeliverySupplier(${supplier.id})">Delete</button>
+                    <button onclick="openEditDeliverySupplierModal(${supplier.id}, '${supplier.name}')">Sửa</button>
+                    <button onclick="deleteDeliverySupplier(${supplier.id})">Xóa</button>
                 </td>
             `;
             supplierTable.appendChild(row);

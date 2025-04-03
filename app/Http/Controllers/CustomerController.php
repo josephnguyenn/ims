@@ -33,7 +33,10 @@ class CustomerController extends Controller
             'email' => 'required|string|email|unique:customers',
             'address' => 'nullable|string',
             'phone' => 'nullable|string',
-            'vat_code' => 'nullable|string'
+            'vat_code' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'city' => 'nullable|string',
+            'tax_code' => 'nullable|string'
         ]);
 
         $customer = Customer::create($request->all());
@@ -74,7 +77,10 @@ class CustomerController extends Controller
             'email' => 'sometimes|string|email|unique:customers,email,' . $customer->id,
             'address' => 'sometimes|string',
             'phone' => 'sometimes|string',
-            'vat_code' => 'sometimes|string'
+            'vat_code' => 'sometimes|string',
+            'postal_code' => 'sometimes|string',
+            'city' => 'sometimes|string',
+            'tax_code' => 'sometimes|string' // ✅ No need to validate tax_code if not provided
         ]);
 
         $customer->update($request->all());

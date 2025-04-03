@@ -38,12 +38,12 @@ function loadOrders() {
                 <td>${order.id}</td>
                 <td>${order.customer.name}</td>
                 <td>${order.delivery_supplier.name}</td>
-                <td>$${order.total_price}</td>
-                <td>$${order.paid_amount}</td>
+                <td>${order.total_price}Kč</td>
+                <td>${order.paid_amount}Kč</td>
                 <td>
-                    <button onclick="window.location.href='order-products.php?order_id=${order.id}'">Manage Products</button>
-                    <button onclick="openEditOrderForm(${order.id}, ${order.delivery_supplier.id}, ${order.paid_amount})">Edit</button>
-                    <button onclick="deleteOrder(${order.id})">Delete</button>
+                    <button onclick="window.location.href='order-products.php?order_id=${order.id}'">Quản lý sản phẩm</button>
+                    <button onclick="openEditOrderForm(${order.id}, ${order.delivery_supplier.id}, ${order.paid_amount})">Sửa</button>
+                    <button onclick="deleteOrder(${order.id})">Xóa</button>
                 </td>
             `;
             orderTable.appendChild(row);

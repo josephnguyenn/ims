@@ -369,3 +369,9 @@ td button.delete {
     cursor: pointer;
     color: #1a4ba8;
 }
+
+button[disabled] {
+    background-color: #ccc;
+    cursor: not-allowed;
+    color: #666;
+}

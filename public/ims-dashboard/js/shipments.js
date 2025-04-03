@@ -32,8 +32,8 @@ function loadShipmentData() {
                 <td>${shipment.expired_date || "N/A"}</td>
                 <td>${shipment.cost}</td>
                 <td>
-                    <button onclick="window.location.href='products.php?shipment_id=${shipment.id}'">Manage Products</button>
-                    <button onclick="deleteShipment(${shipment.id})">Delete</button>
+                    <button onclick="window.location.href='products.php?shipment_id=${shipment.id}'">Quản lý hàng hóa</button>
+                    <button onclick="deleteShipment(${shipment.id})">Xóa</button>
                 </td>
             `;
             shipmentTable.appendChild(row);

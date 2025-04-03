@@ -73,8 +73,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
-//Product Routes anyone can crud product//
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/products/search', [ProductController::class, 'searchByCode']); // ← Put this BEFORE the resource route
     Route::apiResource('products', ProductController::class);
 });
 

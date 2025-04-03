@@ -12,10 +12,21 @@ use Illuminate\Support\Facades\Auth;
 class OrderController extends Controller
 {
     // ✅ View all orders (Admin & Staff)
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(OrderModel::with('customer', 'deliverySupplier', 'orderProducts.product')->get(), 200);
+        $query = OrderModel::with('customer', 'deliverySupplier', 'orderProducts.product');
+        
+        // Check if both from and to dates are provided
+        if ($request->has('from') && $request->has('to')) {
+            $from = $request->input('from') . " 00:00:00";
+            $to = $request->input('to') . " 23:59:59";
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+        
+        $orders = $query->get(); // This line ensures the filtered query is executed.
+        return response()->json($orders, 200);
     }
+    
 
     // ✅ Only Admins can create an order
     public function store(Request $request)

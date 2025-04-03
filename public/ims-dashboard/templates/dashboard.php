@@ -14,7 +14,7 @@ $_SESSION['csrf_token'] = $csrfToken;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Dashboard - IMS</title>
+    <title>Trang Chủ - Tappo Market</title>
     <link rel="stylesheet" href="../css/style.css">
     <meta name="csrf-token" content="<?= $csrfToken ?>">
     <style>
@@ -85,43 +85,43 @@ $_SESSION['csrf_token'] = $csrfToken;
 
     <div class="main-content">
         <div class="dashboard-header">
-            <h1>Main Dashboard</h1>
+            <h1>Trang Chủ - Tappo Market</h1>
             <div class="date-filter">
-                <label for="from_date">From:</label>
+                <label for="from_date">Từ:</label>
                 <input type="date" id="from_date">
-                <label for="to_date">To:</label>
+                <label for="to_date">Đến:</label>
                 <input type="date" id="to_date">
-                <button onclick="filterDashboard()">Apply</button>
+                <button onclick="filterDashboard()">Xác nhận</button>
             </div>
         </div>
 
         <div class="dashboard-grid">
             <div class="dashboard-card">
-                <h2>Total Revenue</h2>
-                <p id="dashboard-revenue">$0</p>
+                <h2>Tổng doanh thu</h2>
+                <p id="dashboard-revenue">0Kč</p>
             </div>
             <div class="dashboard-card">
-                <h2>Total Orders</h2>
+                <h2>Tổng đơn đặt hàng</h2>
                 <p id="dashboard-orders">0</p>
             </div>
             <div class="dashboard-card">
-                <h2>Total Debt</h2>
-                <p id="dashboard-debt">$0</p>
+                <h2>Tổng nợ</h2>
+                <p id="dashboard-debt">0Kč</p>
             </div>
             <div class="dashboard-card">
-                <h2>Actual Revenue</h2>
-                <p id="dashboard-actual">$0</p>
+                <h2>Doanh thu thực tế</h2>
+                <p id="dashboard-actual">0Kč</p>
             </div>
         </div>
 
-        <h2 class="section-title">🧯 Nearly Expired Shipments (Next 30 Days)</h2>
+        <h2 class="section-title">🧯 Lô hàng sắp hết hạng (Trong 30 ngày)</h2>
         <table id="expired-shipments">
             <thead>
                 <tr>
-                    <th>Shipment ID</th>
-                    <th>Storage</th>
-                    <th>Supplier</th>
-                    <th>Expired Date</th>
+                    <th>Mã lô hàng</th>
+                    <th>Kho</th>
+                    <th>Nhà cung cấp</th>
+                    <th>Ngày hết hạn</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,12 +129,12 @@ $_SESSION['csrf_token'] = $csrfToken;
             </tbody>
         </table>
 
-        <h2 class="section-title">📦 Top-Selling Products</h2>
+        <h2 class="section-title">📦 Các sản phẩm bán chạy</h2>
         <table id="top-products">
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Total Sold</th>
+                    <th>Sản phẩm</th>
+                    <th>Tổng số bán</th>
                 </tr>
             </thead>
             <tbody>
@@ -142,12 +142,12 @@ $_SESSION['csrf_token'] = $csrfToken;
             </tbody>
         </table>
 
-        <h2 class="section-title">📥 Most Imported Products</h2>
+        <h2 class="section-title">📥 Các sản phẩm nhập nhiều</h2>
         <table id="most-imported">
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Total Imported</th>
+                    <th>Sản phẩm</th>
+                    <th>Tổng só nhập</th>
                 </tr>
             </thead>
             <tbody>
@@ -159,6 +159,7 @@ $_SESSION['csrf_token'] = $csrfToken;
 <script src="../js/dashboard.js"></script>
 <script>
     sessionStorage.setItem("token", "<?= $_SESSION['token'] ?>");
+    
 </script>
 </body>
 </html>

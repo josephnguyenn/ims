@@ -17,7 +17,8 @@ class Product extends Model
         'cost',
         'category',
         'shipment_id',
-        'tax'
+        'tax',
+        'expired_date',
     ]; // ❌ actual_quantity, total_cost, expired_date are NOT fillable
 
     public function shipment()
@@ -29,26 +30,31 @@ class Product extends Model
     protected static function boot()
     {
         parent::boot();
-
+    
         static::creating(function ($product) {
-            $product->actual_quantity = $product->original_quantity; // ✅ Set actual_quantity = original_quantity
-            $product->total_cost = $product->original_quantity * $product->cost; // ✅ Auto-calculate total_cost
-
-            // ✅ Set expired_date from linked shipment
-            $shipment = Shipment::find($product->shipment_id);
-            if ($shipment) {
-                $product->expired_date = $shipment->expired_date;
+            $product->actual_quantity = $product->original_quantity;
+            $product->total_cost = $product->original_quantity * $product->cost;
+    
+            // ✅ Only fallback to shipment expiry if not set
+            if (!$product->expired_date) {
+                $shipment = Shipment::find($product->shipment_id);
+                if ($shipment) {
+                    $product->expired_date = $shipment->expired_date;
+                }
             }
         });
-
+    
         static::updating(function ($product) {
-            $product->total_cost = $product->original_quantity * $product->cost; // ✅ Recalculate if quantity or cost changes
-
-            // ✅ Ensure expired_date stays in sync with shipment
-            $shipment = Shipment::find($product->shipment_id);
-            if ($shipment) {
-                $product->expired_date = $shipment->expired_date;
+            $product->total_cost = $product->original_quantity * $product->cost;
+    
+            // ✅ Same here: only fallback if still null
+            if (!$product->expired_date) {
+                $shipment = Shipment::find($product->shipment_id);
+                if ($shipment) {
+                    $product->expired_date = $shipment->expired_date;
+                }
             }
         });
     }
+    
 }

@@ -65,70 +65,70 @@ if (!isset($order['id'])) {
 
 <div class="main-content">
     <div class="main-content-header">
-        <h1>Manage Products for Order #<?= htmlspecialchars($order['id']) ?></h1>
+        <h1>Quản lý sản phẩm cho đơn hàng #<?= htmlspecialchars($order['id']) ?></h1>
         <button class="add-button" id="openAddProductForm">Add Product</button>
     </div>
-    <h3>Customer: <?= htmlspecialchars($order['customer']['name'] ?? 'Unknown') ?></h3>
-    <h3>Total Price: $<?= htmlspecialchars($order['total_price'] ?? '0.00') ?></h3>
-    <button onclick="window.open('generate-invoice.php?order_id=<?= $order['id'] ?>', '_blank')">🧾 Generate Invoice</button>
+    <h3>Khách Hàng: <?= htmlspecialchars($order['customer']['name'] ?? 'Unknown') ?></h3>
+    <h3>Tổng:<?= htmlspecialchars($order['total_price'] ?? '0.00') ?>CZK</h3>
+    <button onclick="window.open('generate-invoice.php?order_id=<?= $order['id'] ?>', '_blank')">🧾 Tạo Hóa Đơn</button>
     <div id="addProductForm" style="display: none; position: relative;">
-        <h2>Add Product to Order</h2>
+        <h2>Thêm sản phẩm</h2>
         <form id="order-product-form" class="form-container">
     <input type="hidden" id="order_id" value="<?= htmlspecialchars($order['id']) ?>">
     <div class="form-group">
-        <label for="shipment_id">Choose Shipment</label>
-        <select id="shipment_id" required>
-            <option value="">Select Shipment</option>
+        <label for="shipment_id">Chọn Lô Hàng</label>
+        <select id="shipment_id">
+            <option value="">Chọn lô hàng</option>
             <?php foreach ($shipments as $shipment): ?>
-                <option value="<?= $shipment['id'] ?>">Shipment #<?= $shipment['id'] ?></option>
+                <option value="<?= $shipment['id'] ?>">Lô Hàng #<?= $shipment['id'] ?></option>
             <?php endforeach; ?>
         </select>
     </div>
 
     <div class="form-group">
-        <label for="product_search">Search Product (by code)</label>
+        <label for="product_search">Tìm sản phẩm (theo mã)</label>
         <input type="text" id="product_search" placeholder="Enter product code...">
         <div id="product_suggestions" class="autocomplete-suggestions"></div>
     </div>
 
     <div class="form-group">
-        <label for="product_id">Select Product</label>
+        <label for="product_id">Tìm sản phẩm</label>
         <select id="product_id" required disabled>
-            <option value="">Select Shipment First</option>
+            <option value="">Hãy chọn lô hàng</option>
         </select>
     </div>
 
     <div class="form-group-inline">
         <div class="form-field">
-            <label for="product_code">Product Code</label>
+            <label for="product_code">Mã sản phẩm</label>
             <input type="text" id="product_code" readonly>
         </div>
         <div class="form-field">
-            <label for="product_name">Product Name</label>
+            <label for="product_name">Tên sản phẩm</label>
             <input type="text" id="product_name" readonly>
         </div>
     </div>
 
     <div class="form-group-inline">
         <div class="form-field">
-            <label for="stock">Stock</label>
+            <label for="stock">Kho</label>
             <input type="text" id="stock" readonly>
         </div>
         <div class="form-field">
-            <label for="price">Price</label>
+            <label for="price">Giá</label>
             <input type="text" id="price" readonly>
         </div>
     </div>
 
     <div class="form-group">
-        <label for="quantity">Quantity</label>
+        <label for="quantity">Số lượng</label>
         <input type="number" id="quantity" placeholder="Enter quantity" required>
-        <p>Total: <span id="calculated_total">$0.00</span></p>
+        <p>Tổng: <span id="calculated_total">0.00CZK</span></p>
     </div>
 
     <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Add Product</button>
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addProductForm').style.display='none'">Cancel</button>
+        <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addProductForm').style.display='none'">Hủy</button>
     </div>
 </form>
 
@@ -188,15 +188,15 @@ if (!isset($order['id'])) {
     <table border="1">
         <thead>
             <tr>
-                <th>Product Name</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th>Shipment</th>
-                <th>Actions</th>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Tổng</th>
+                <th>Lô hàng</th>
+                <th>Hành động</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="order-product-table">
             <?php if (!empty($orderProducts)): ?>
                 <?php foreach ($orderProducts as $item): ?>
                 <?php
@@ -205,12 +205,12 @@ if (!isset($order['id'])) {
                 <tr>
                     <td><?= $product ? htmlspecialchars($product['name']) : 'N/A' ?></td>
                     <td><?= htmlspecialchars($item['quantity']) ?></td>
-                    <td>$<?= $product ? htmlspecialchars($product['price']) : '0.00' ?></td>
-                    <td>$<?= $product ? number_format($product['price'] * $item['quantity'], 2) : '0.00' ?></td>
+                    <td><?= $product ? htmlspecialchars($product['price']) : '0.00' ?>CZK</td>
+                    <td><?= $product ? number_format($product['price'] * $item['quantity'], 2) : '0.00' ?>CZK</td>
                     <td><?= $product ? 'Shipment #' . htmlspecialchars($product['shipment_id']) : 'N/A' ?></td>
                     <td>
-                        <button onclick="openEditOrderProductForm(<?= $item['id'] ?>, <?= $item['quantity'] ?>)">Edit</button>
-                        <button onclick="deleteOrderProduct(<?= $item['id'] ?>, <?= $order['id'] ?>)">Delete</button>
+                        <button onclick="openEditOrderProductForm(<?= $item['id'] ?>, <?= $item['quantity'] ?>)">Chỉnh sửa</button>
+                        <button onclick="deleteOrderProduct(<?= $item['id'] ?>, <?= $order['id'] ?>)">Xóa</button>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -266,7 +266,7 @@ if (!isset($order['id'])) {
             filtered.forEach(p => {
                 const div = document.createElement("div");
                 div.classList.add("autocomplete-suggestion");
-                div.textContent = `${p.code} - ${p.name} | Stock: ${p.actual_quantity} | Shipment: ${p.shipment_id} | Price: $${p.price}`;
+                div.textContent = `${p.code} - ${p.name} | Stock: ${p.actual_quantity} | Shipment: ${p.shipment_id} | Price: ${p.price} CZK`;
                 div.addEventListener("click", () => {
                     document.getElementById("product_id").innerHTML = `<option value="${p.id}" selected>${p.name} (${p.code})</option>`;
                     document.getElementById("product_id").disabled = false;
@@ -292,9 +292,9 @@ if (!isset($order['id'])) {
             }
 
             if (!isNaN(quantity) && !isNaN(price)) {
-                totalDisplay.textContent = "$" + (quantity * price).toFixed(2);
+                totalDisplay.textContent = (quantity * price).toFixed(2) + " CZK";
             } else {
-                totalDisplay.textContent = "$0.00";
+                totalDisplay.textContent = "0.00 CZK";
             }
         });
 
@@ -334,7 +334,6 @@ if (!isset($order['id'])) {
             }
         });
     });
-
 </script>
 </body>
 </html>

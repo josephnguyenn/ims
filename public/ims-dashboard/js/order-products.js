@@ -46,20 +46,26 @@ function loadOrderProducts() {
             return;
         }
 
-        orderProducts.forEach(product => {
-            let row = document.createElement("tr");
+        orderProducts.forEach(item => {
+            const product = item.product ?? null;
+            const outOfStock = product?.actual_quantity === 0;
+        
+            const row = document.createElement("tr");
             row.innerHTML = `
-                <td>${product.product.name}</td>
-                <td>${product.quantity}</td>
-                <td>$${product.price}</td>
-                <td>$${(product.quantity * product.price).toFixed(2)}</td>
+                <td>${product ? product.name : 'N/A'}</td>
+                <td>${item.quantity}</td>
+                <td>${product ? product.price : '0.00'}CZK</td>
+                <td>${product ? (product.price * item.quantity).toFixed(2) : '0.00'}CZK</td>
+                <td>${product ? 'Shipment #' + product.shipment_id : 'N/A'}</td>
                 <td>
-                    <button onclick="openEditOrderProductForm(${product.id}, ${product.quantity})">Edit</button>
-                    <button onclick="deleteOrderProduct(${product.id}, ${orderId})">Delete</button>
+                    <button ${outOfStock ? "disabled title='Out of Stock'" : `onclick="openEditOrderProductForm(${item.id}, ${item.quantity})"`}>
+                        Chỉnh sửa
+                    </button>
+                    <button onclick="deleteOrderProduct(${item.id}, ${orderId})">Xóa</button>
                 </td>
             `;
             productTable.appendChild(row);
-        });
+        });        
     })
     .catch(error => console.error("Error loading order products:", error));
 }
@@ -97,7 +103,9 @@ function addProductToOrder() {
     .then(() => {
         alert("Product added!");
         document.getElementById("addProductForm").style.display = "none";
-        loadOrderProducts();
+        // loadOrderProducts();
+        window.location.reload(); // ✅ full page reload
+        //load the table
     });
 }
 
@@ -116,31 +124,42 @@ function openEditOrderProductForm(orderProductId, quantity) {
 }
 
 // ✅ Function to Edit Product in Order
-function editProductInOrder() {
-    let orderProductId = document.getElementById("edit_order_product_id").value;
-    let quantity = document.getElementById("edit_quantity").value;
-
-    if (!quantity) {
-        alert("Please enter a quantity.");
+function openEditOrderProductForm(orderProductId, quantity) {
+    const editForm = document.getElementById("editProductForm");
+    if (!editForm) {
+        console.error("❌ Edit Product Form Not Found!");
         return;
     }
 
+    const orderProduct = allProducts.find(p => p.id === orderProductId); // optional fallback if needed
+
+    // If you're not already tracking actual stock, fetch it via API (or pass it directly)
     fetch(`http://localhost/ims/public/api/order-products/${orderProductId}`, {
-        method: "PUT",
         headers: {
-            "Content-Type": "application/json",
             "Authorization": "Bearer " + sessionStorage.getItem("token")
-        },
-        body: JSON.stringify({ quantity: quantity })
+        }
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
-        alert("Product updated!");
-        document.getElementById("editProductForm").style.display = "none";
-        loadOrderProducts();
-    })
-    .catch(error => console.error("❌ Error updating product:", error));
+        const product = data.product ?? null;
+
+        if (!product) {
+            alert("❌ Cannot edit this product. Data not found.");
+            return;
+        }
+
+        if (product.actual_quantity === 0) {
+            alert("⚠️ This product is out of stock and cannot be edited.");
+            return;
+        }
+
+        document.getElementById("edit_order_product_id").value = orderProductId;
+        document.getElementById("edit_quantity").value = quantity;
+
+        editForm.style.display = "block";
+    });
 }
+
 
 // ✅ Function to Delete Product from Order
 function deleteOrderProduct(orderProductId, orderId) {
@@ -153,7 +172,9 @@ function deleteOrderProduct(orderProductId, orderId) {
     .then(response => response.json())
     .then(() => {
         alert("Product removed!");
-        loadOrderProducts();
+        // loadOrderProducts();
+        window.location.reload(); // ✅ full page reload
+
     })
     .catch(error => console.error("❌ Error deleting product:", error));
 }
@@ -165,9 +186,9 @@ function updateTotalPrice() {
     let totalPrice = document.getElementById("total_price");
 
     if (quantity && price) {
-        totalPrice.textContent = `$${(quantity * price).toFixed(2)}`;
+        totalPrice.textContent = `${(quantity * price).toFixed(2)}CZK`;
     } else {
-        totalPrice.textContent = "$0.00";
+        totalPrice.textContent = "0.00CZK";
     }
 }
 
@@ -178,8 +199,8 @@ function updateEditTotalPrice() {
     let totalPrice = document.getElementById("edit_total_price");
 
     if (quantity && price) {
-        totalPrice.textContent = `$${(quantity * price).toFixed(2)}`;
+        totalPrice.textContent = `${(quantity * price).toFixed(2)}CZK`;
     } else {
-        totalPrice.textContent = "$0.00";
+        totalPrice.textContent = "0.00CZK";
     }
 }
