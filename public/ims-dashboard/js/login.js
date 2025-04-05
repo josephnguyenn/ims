@@ -13,21 +13,26 @@ document.getElementById("login-form").addEventListener("submit", function(event)
     })
     .then(response => response.json())
     .then(data => {
-        if (data.token) {
+        console.log("Response from /public/api/login:", data); // Make sure you see the role here
+        if (data.token && data.user && data.user.role) { // Check if user and role are present
             sessionStorage.setItem("token", data.token);
 
-            // ✅ Send token to PHP session
             fetch("session_store.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ token: data.token })
+                body: JSON.stringify({ token: data.token, role: data.user.role }) // Send both token and role
             })
-            .then(() => {
-                window.location.href = "templates/dashboard.php";
+            .then(response => response.json()) // Expect JSON response from session_store.php
+            .then(sessionData => {
+                console.log("Response from session_store.php:", sessionData); // Check the response
+                if (sessionData.status === "success") {
+                    window.location.href = "templates/dashboard.php";
+                } else {
+                    document.getElementById("error-message").innerText = sessionData.message || "Session Error!";
+                }
             });
-
         } else {
             document.getElementById("error-message").innerText = data.message || "Lỗi Đăng nhập!";
         }

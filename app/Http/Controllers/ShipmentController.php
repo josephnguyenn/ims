@@ -75,7 +75,7 @@ class ShipmentController extends Controller
     // ✅ DELETE SHIPMENT (Fixing BadMethodCallException)
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'manager') {
             return response()->json(['message' => 'Access denied'], 403);
         }
 

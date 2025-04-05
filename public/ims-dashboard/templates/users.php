@@ -5,7 +5,7 @@ if (!isset($_SESSION['token'])) {
     exit();
 }
 
-// Fetch users
+// Lấy danh sách người dùng
 function fetchData($apiUrl) {
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -31,36 +31,37 @@ $users = fetchData("http://localhost/ims/public/api/users");
 <?php include "../includes/sidebar.php"; ?>
 
 <div class="main-content">
-    <h1>User Management</h1>
+    <h1>Quản lý Người dùng</h1>
 
-    <!-- Create User Form -->
+    <!-- Form Tạo Người dùng -->
     <div class="user-form">
-        <h2>Create New User</h2>
+        <h2>Tạo Người dùng mới</h2>
         <form id="createUserForm">
-            <input type="text" id="name" placeholder="Name" required><br>
+            <input type="text" id="name" placeholder="Tên" required><br>
             <input type="email" id="email" placeholder="Email" required><br>
-            <input type="password" id="password" placeholder="Password" required><br>
+            <input type="password" id="password" placeholder="Mật khẩu" required><br>
             <select id="role" required>
-                <option value="">Select Role</option>
-                <option value="admin">Admin</option>
-                <option value="staff">Staff</option>
+                <option value="">Chọn Vai trò</option>
+                <option value="admin">Quản trị viên</option>
+                <option value="staff">Nhân viên</option>
+                <option value="manager">Quản lý</option>
             </select><br>
-            <button type="submit">Create User</button>
+            <button type="submit">Tạo Người dùng</button>
         </form>
         <div id="formMessage"></div>
     </div>
 
-    <!-- User Table -->
+    <!-- Bảng Người dùng -->
     <div class="user-list">
-        <h2>All Users</h2>
+        <h2>Tất cả Người dùng</h2>
         <table border="1" cellpadding="8">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Name</th>
+                    <th>Tên</th>
                     <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
+                    <th>Vai trò</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody id="userTableBody">
@@ -70,16 +71,22 @@ $users = fetchData("http://localhost/ims/public/api/users");
                     <td><?= htmlspecialchars($user['name']) ?></td>
                     <td><?= htmlspecialchars($user['email']) ?></td>
                     <td><?= htmlspecialchars($user['role']) ?></td>
-                    <td><button onclick="deleteUser(<?= $user['id'] ?>)">Delete</button></td>
+                    <td><button onclick="deleteUser(<?= $user['id'] ?>)">Xóa</button></td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
+
     </div>
+
+
+
+    
 </div>
 
+<script src="../js/users.js"></script>
 <script>
-const token = "<?= $_SESSION['token'] ?>"; // Inject PHP token into JS
+const token = "<?= $_SESSION['token'] ?>"; // Chèn token PHP vào JS
 
 document.getElementById("createUserForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -104,14 +111,14 @@ document.getElementById("createUserForm").addEventListener("submit", async (e) =
     if (res.status === 201) {
         msg.innerText = result.message;
         document.getElementById("createUserForm").reset();
-        location.reload(); // Refresh to show new user
+        location.reload(); // Làm mới để hiển thị người dùng mới
     } else {
-        msg.innerText = result.message || 'Error creating user';
+        msg.innerText = result.message || 'Lỗi khi tạo người dùng';
     }
 });
 
 async function deleteUser(id) {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa người dùng này không?")) return;
 
     const res = await fetch(`http://localhost/ims/public/api/users/${id}`, {
         method: "DELETE",
@@ -125,4 +132,24 @@ async function deleteUser(id) {
     document.querySelector(`tr[data-id="${id}"]`).remove();
 }
 </script>
+
+<style>
+    form#createUserForm{
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .user-form input[type="text"],
+.user-form input[type="email"],
+.user-form input[type="password"],
+.user-form select {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+    gap: 20px;
+}
+</style>
+    
 </body>

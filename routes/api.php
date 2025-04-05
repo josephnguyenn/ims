@@ -48,9 +48,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/storages', [StorageController::class, 'index']); // ✅ View all storage locations
     Route::get('/storages/{id}', [StorageController::class, 'show']); // ✅ View a single storage location
-    Route::post('/storages', [StorageController::class, 'store']); // ❌ Only Admin can add storage
-    Route::put('/storages/{id}', [StorageController::class, 'update']); // ❌ Only Admin can update
-    Route::delete('/storages/{id}', [StorageController::class, 'destroy']); // ❌ Only Admin can delete
+    Route::post('/storages', [StorageController::class, 'store']); // ❌ Only Admi and staff can add storage
+    Route::put('/storages/{id}', [StorageController::class, 'update']); // ❌ Only Admi and staff can add storage
+    Route::delete('/storages/{id}', [StorageController::class, 'destroy']); // ❌ Only Admi and staff can add storage
 });
 
 

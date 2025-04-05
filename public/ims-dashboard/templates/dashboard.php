@@ -78,6 +78,9 @@ $_SESSION['csrf_token'] = $csrfToken;
         }
     </style>
 </head>
+<script>
+    const BASE_URL = window.location.origin + '/ims/public';
+</script>
 <body>
 <?php include "../includes/header.php"; ?>
 <div class="main">
@@ -95,6 +98,7 @@ $_SESSION['csrf_token'] = $csrfToken;
             </div>
         </div>
 
+        <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager')): ?>
         <div class="dashboard-grid">
             <div class="dashboard-card">
                 <h2>Tổng doanh thu</h2>
@@ -113,6 +117,12 @@ $_SESSION['csrf_token'] = $csrfToken;
                 <p id="dashboard-actual">0Kč</p>
             </div>
         </div>
+    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'staff'): ?>
+        <p>Chào mừng nhân viên!</p>
+        <?php else: ?>
+        <p>Bạn không có quyền truy cập vào nội dung này.</p>
+    <?php endif; ?>
+
 
         <h2 class="section-title">🧯 Sản phẩm sắp hết hạn (Trong 30 ngày)</h2>
         <table id="expired-products">

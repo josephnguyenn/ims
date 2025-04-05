@@ -111,7 +111,7 @@ function downloadPDF() {
         <p><strong>Adresa:</strong> 123 Tappo Market Street</p>
         <p><strong>Město:</strong> Ho Či Minovo Město</p>
         <p><strong>PSČ:</strong> 700000</p>
-        <p><strong>Identifikace:</strong> SUP-001</p>
+        <p><strong>IČO:</strong> SUP-001</p>
         <p><strong>DIČ:</strong> 123456789</p>
         <p><strong>Banka:</strong> TCB Banka</p>
         <p><strong>Číslo účtu:</strong> 123456789</p>
@@ -128,7 +128,7 @@ function downloadPDF() {
         <p><strong>Telefon:</strong> <?= htmlspecialchars($customer['phone']) ?></p>
         <p><strong>ID zákazníka:</strong> <?= htmlspecialchars($customer['id']) ?></p>
         <p><strong>DIČ:</strong> <?= htmlspecialchars($customer['tax_code']) ?></p>
-        <p><strong>IČ:</strong> <?= htmlspecialchars($customer['vat_code']) ?></p>
+        <p><strong>IČO:</strong> <?= htmlspecialchars($customer['vat_code']) ?></p>
         <p><strong>Splatnost:</strong> <?= date('d.m.Y', strtotime('+5 days')) ?></p>
     </div>
 </div>

@@ -110,55 +110,85 @@ function addProductToOrder() {
 }
 
 // ✅ Function to Open Edit Order Product Form
-function openEditOrderProductForm(orderProductId, quantity) {
-    let editForm = document.getElementById("editProductForm");
-    if (!editForm) {
-        console.error("❌ Edit Product Form Not Found!");
-        return;
-    }
-
-    document.getElementById("edit_order_product_id").value = orderProductId;
-    document.getElementById("edit_quantity").value = quantity;
-
-    editForm.style.display = "block";
-}
-
-// ✅ Function to Edit Product in Order
-function openEditOrderProductForm(orderProductId, quantity) {
+// ✅ Unified Function to Open and Optionally Fetch Edit Order Product Form
+function openEditOrderProductForm(orderProductId, quantity, fetchDetails = false) {
     const editForm = document.getElementById("editProductForm");
     if (!editForm) {
         console.error("❌ Edit Product Form Not Found!");
         return;
     }
 
-    const orderProduct = allProducts.find(p => p.id === orderProductId); // optional fallback if needed
+    // Fetch product details if required
+    if (fetchDetails) {
+        fetch(`http://localhost/ims/public/api/order-products/${orderProductId}`, {
+            headers: {
+                "Authorization": "Bearer " + sessionStorage.getItem("token")
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const product = data.product ?? null;
+            if (!product) {
+                alert("❌ Cannot edit this product. Data not found.");
+                return;
+            }
+            if (product.actual_quantity === 0) {
+                alert("⚠️ This product is out of stock and cannot be edited.");
+                return;
+            }
+            setupEditForm(orderProductId, quantity, product);
+        })
+        .catch(error => console.error("Error fetching product details:", error));
+    } else {
+        // Directly setup the form
+        setupEditForm(orderProductId, quantity);
+    }
+}
 
-    // If you're not already tracking actual stock, fetch it via API (or pass it directly)
+function setupEditForm(orderProductId, quantity, product = null) {
+    document.getElementById("edit_order_product_id").value = orderProductId;
+    document.getElementById("edit_quantity").value = quantity;
+    document.getElementById("editProductForm").style.display = "block";
+
+    // Additional setup if product data is fetched
+    if (product) {
+        // Populate form fields if needed
+    }
+}
+
+// ✅ Function to Edit Product in Order
+function editProductInOrder() {
+    const orderId = document.getElementById("edit_order_id").value;
+    const orderProductId = document.getElementById("edit_order_product_id").value;
+    const quantity = document.getElementById("edit_quantity").value;
+    
+    // Assuming you have inputs for price or other attributes you wish to update
+    // const price = document.getElementById("edit_price").value; 
+
     fetch(`http://localhost/ims/public/api/order-products/${orderProductId}`, {
+        method: "PUT", // or "PATCH" depending on how your API is setup
         headers: {
+            "Content-Type": "application/json",
             "Authorization": "Bearer " + sessionStorage.getItem("token")
-        }
+        },
+        body: JSON.stringify({
+            order_id: orderId,
+            quantity: quantity
+            // price: price // include this if you're updating price or any other details
+        })
     })
-    .then(res => res.json())
+    .then(response => response.json())
     .then(data => {
-        const product = data.product ?? null;
-
-        if (!product) {
-            alert("❌ Cannot edit this product. Data not found.");
-            return;
-        }
-
-        if (product.actual_quantity === 0) {
-            alert("⚠️ This product is out of stock and cannot be edited.");
-            return;
-        }
-
-        document.getElementById("edit_order_product_id").value = orderProductId;
-        document.getElementById("edit_quantity").value = quantity;
-
-        editForm.style.display = "block";
+        alert("Product updated successfully!");
+        window.location.reload(); // Reload the page to reflect the changes
+    })
+    .catch(error => {
+        console.error("Error updating product:", error);
+        alert("Failed to update product.");
     });
 }
+
+
 
 
 // ✅ Function to Delete Product from Order
