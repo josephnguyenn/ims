@@ -19,6 +19,8 @@ return new class extends Migration {
             $table->integer('total_orders')->default(0); // ✅ Auto-count from orders
             $table->decimal('total_debt', 10, 2)->default(0); // ✅ Total Price - Paid Amount from orders
             $table->string('vat_code')->nullable(); // VAT Code
+            $table->string('postal_code')->nullable(); // Postal Code
+            $table->string('city')->nullable(); // City
             $table->timestamps();
         });
     }

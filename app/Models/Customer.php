@@ -11,7 +11,7 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'address', 'phone', 'vat_code']; // ❌ No 'total_orders' column
+    protected $fillable = ['name', 'email', 'address', 'phone', 'vat_code', 'tax_code', 'postal_code', 'city']; // ❌ No 'total_orders' column
 
     protected $appends = ['total_orders', 'total_debt']; // ✅ Ensure these attributes are included in JSON response
 

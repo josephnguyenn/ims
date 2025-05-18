@@ -1,15 +1,30 @@
+<?php
+if (!defined('BASE_URL')) {
+    $baseUrl = getenv('APP_URL') ?: 'http://localhost/tappomarket/public/ims-dashboard';
+    define('BASE_URL', $baseUrl . '/ims-dashboard');
+}
+?>
 <div class="sidebar">
-    <h2>IMS Dashboard</h2>
+    <h2>Bảng Điều Khiển</h2>
     <ul>
-        <li><a href="dashboard.php">Dashboard</a></li>
-        <li><a href="storage.php">Storage</a></li>
-        <li><a href="shipments.php">Shipments</a></li>
-        <li><a href="shipment-suppliers.php">Shipment Suppliers</a></li>
-        <li><a href="products.php">Products</a></li>
-        <li><a href="customers.php">Customers</a></li>
-        <li><a href="delivery-suppliers.php">Delivery Suppliers</a></li>
-        <li><a href="orders.php">Orders</a></li>
-        <li><a href="users.php">Users</a></li>
-        <li><a href="../logout.php">Logout</a></li>
+        <li><a href="dashboard.php">Bảng Điều Khiển</a></li>
+
+        <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager')): ?>
+            <li><a href="storage.php">Kho Hàng</a></li>
+            <li><a href="shipment-suppliers.php">Nhà Cung Cấp Lô Hàng</a></li>
+            <li><a href="revenue.php">Doanh Thu</a></li>
+            <li><a href="delivery-suppliers.php">Nhà Cung Cấp Giao Hàng</a></li>
+        <?php endif; ?>
+
+        <li><a href="shipments.php">Lô Hàng</a></li>
+        <li><a href="products.php">Sản Phẩm</a></li>
+        <li><a href="customers.php">Khách Hàng</a></li>
+        <li><a href="orders.php">Đơn Hàng</a></li>
+
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+            <li><a href="users.php">Người Dùng</a></li>
+        <?php endif; ?>
+
+        <li><a href="../logout.php">Đăng Xuất</a></li>
     </ul>
 </div>

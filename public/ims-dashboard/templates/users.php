@@ -4,8 +4,8 @@ if (!isset($_SESSION['token'])) {
     header("Location: ../login.php");
     exit();
 }
-
-// Fetch users data
+include "../define.php";
+// Lấy danh sách người dùng
 function fetchData($apiUrl) {
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -18,70 +18,152 @@ function fetchData($apiUrl) {
     return json_decode($response, true);
 }
 
-$users = fetchData("http://localhost/ims/public/api/users");
+$users = fetchData(BASE_URL . '/api/users');
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
-    <?php include "../includes/sidebar.php"; ?>
+<?php include "../includes/header.php"; ?>
+<div class="main">
+<?php include "../includes/sidebar.php"; ?>
 
-    <div class="main-content">
-        <h1>User Management</h1>
-        <button id="openAddUserForm">Add User</button>
+<div class="main-content">
+    <h1>Quản lý Người dùng</h1>
 
-        <table border="1">
+    <!-- Form Tạo Người dùng -->
+    <div class="user-form">
+        <h2>Tạo Người dùng mới</h2>
+        <form id="createUserForm">
+            <input type="text" id="name" placeholder="Tên" required><br>
+            <input type="email" id="email" placeholder="Email" required><br>
+            <input type="password" id="password" placeholder="Mật khẩu" required><br>
+            <select id="role" required>
+                <option value="">Chọn Vai trò</option>
+                <option value="admin">Quản trị viên</option>
+                <option value="staff">Nhân viên</option>
+                <option value="manager">Quản lý</option>
+            </select><br>
+            <button type="submit">Tạo Người dùng</button>
+        </form>
+        <div id="formMessage"></div>
+    </div>
+
+    <!-- Bảng Người dùng -->
+    <div class="user-list">
+        <h2>Tất cả Người dùng</h2>
+        <table border="1" cellpadding="8">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Name</th>
+                    <th>Tên</th>
                     <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
+                    <th>Vai trò</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
-            <tbody id="user-table"></tbody>
+            <tbody id="userTableBody">
+            <?php foreach ($users as $user): ?>
+                <tr data-id="<?= $user['id'] ?>">
+                    <td><?= $user['id'] ?></td>
+                    <td><?= htmlspecialchars($user['name']) ?></td>
+                    <td><?= htmlspecialchars($user['email']) ?></td>
+                    <td><?= htmlspecialchars($user['role']) ?></td>
+                    <td><button onclick="deleteUser(<?= $user['id'] ?>)">Xóa</button></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
         </table>
 
-        <!-- Add User Form -->
-        <div id="addUserForm" style="display: none;">
-            <h2>Add User</h2>
-            <form id="user-form">
-                <input type="text" id="name" placeholder="Name" required>
-                <input type="email" id="email" placeholder="Email" required>
-                <select id="role" required>
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                </select>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit">Save</button>
-                <button type="button" onclick="document.getElementById('addUserForm').style.display='none'">Cancel</button>
-            </form>
-        </div>
-
-        <!-- Edit User Form -->
-        <div id="editUserForm" style="display: none;">
-            <h2>Edit User</h2>
-            <form id="edit-user-form">
-                <input type="hidden" id="edit_user_id">
-                <input type="text" id="edit_name" placeholder="Name" required>
-                <input type="email" id="edit_email" placeholder="Email" required>
-                <select id="edit_role" required>
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                </select>
-                <button type="submit">Update</button>
-                <button type="button" onclick="document.getElementById('editUserForm').style.display='none'">Cancel</button>
-            </form>
-        </div>
     </div>
 
-    <script src="../js/users.js"></script>
+
+
+    
+</div>
+
+<script>
+    // Define BASE_URL and token from your PHP variables.
+    const BASE_URL = '<?= BASE_URL ?>'; 
+    const token = '<?= $_SESSION['token'] ?>'; 
+</script>
+<script src="../js/users.js"></script>
+<script>
+// Attach the event listener to the createUserForm
+document.addEventListener("DOMContentLoaded", function () {
+    const createUserForm = document.getElementById("createUserForm");
+    
+    if (createUserForm) {
+        createUserForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const role = document.getElementById("role").value;
+
+            const res = await fetch(`${BASE_URL}/api/users`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ name, email, password, role })
+            });
+
+            const result = await res.json();
+            const msg = document.getElementById("formMessage");
+
+            if (res.status === 201) {
+                msg.innerText = result.message;
+                createUserForm.reset(); // Reset form fields
+                alert("User added successfully!");
+                location.reload(); // Reload the page to update the user list
+            } else {
+                msg.innerText = result.message || 'Error creating user';
+            }
+        });
+    } else {
+        console.error("Create User Form not found!");
+    }
+});
+
+async function deleteUser(id) {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+
+    const res = await fetch(`${BASE_URL}/api/users/${id}`, {
+        method: "DELETE",
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    });
+
+    const result = await res.json();
+    alert(result.message);
+    document.querySelector(`tr[data-id="${id}"]`).remove();
+}
+</script>
+
+
+<style>
+    form#createUserForm{
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .user-form input[type="text"],
+.user-form input[type="email"],
+.user-form input[type="password"],
+.user-form select {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+    gap: 20px;
+}
+</style>
+    
 </body>
-</html>

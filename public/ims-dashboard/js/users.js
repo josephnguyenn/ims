@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ✅ Function to Load Users
 function loadUsers() {
-    fetch("http://localhost/ims/public/api/users", {
+    fetch(`${BASE_URL}/api/users`, {
         headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
     })
     .then(response => response.json())
@@ -51,7 +51,7 @@ function addUser() {
     let role = document.getElementById("role").value;
     let password = document.getElementById("password").value;
 
-    fetch("http://localhost/ims/public/api/users", {
+    fetch(`${BASE_URL}/api/users`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -59,13 +59,22 @@ function addUser() {
         },
         body: JSON.stringify({ name, email, role, password })
     })
+    .then(async response => {
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Error response:", error);
+            throw new Error("Failed to add user: " + response.status);
+        }
+        return response.json();
+    })
     .then(() => {
         alert("User added!");
         document.getElementById("addUserForm").style.display = "none";
         loadUsers();
     })
-    .catch(error => console.error("Error adding user:", error));
+    .catch(error => alert("Error adding user: " + error));
 }
+
 
 // ✅ Function to Open Edit User Form
 function openEditUserForm(userId, name, email, role) {
@@ -84,7 +93,7 @@ function editUser() {
     let email = document.getElementById("edit_email").value;
     let role = document.getElementById("edit_role").value;
 
-    fetch(`http://localhost/ims/public/api/users/${userId}`, {
+    fetch(`${BASE_URL}/api/users/${userId}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -104,7 +113,7 @@ function editUser() {
 function deleteUser(userId) {
     if (!confirm("Are you sure you want to delete this user?")) return;
 
-    fetch(`http://localhost/ims/public/api/users/${userId}`, {
+    fetch(`${BASE_URL}/api/users/${userId}`, {
         method: "DELETE",
         headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
     })
@@ -114,3 +123,5 @@ function deleteUser(userId) {
     })
     .catch(error => console.error("Error deleting user:", error));
 }
+
+

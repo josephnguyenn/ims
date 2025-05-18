@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function loadOrderProducts() {
     let orderId = document.getElementById("order_id").value;
 
-    fetch(`http://localhost/ims/public/api/order-products/${orderId}`, {
+    fetch(`${BASE_URL}/api/order-products/${orderId}`, {
         headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
     })
     .then(response => response.json())
@@ -46,20 +46,26 @@ function loadOrderProducts() {
             return;
         }
 
-        orderProducts.forEach(product => {
-            let row = document.createElement("tr");
+        orderProducts.forEach(item => {
+            const product = item.product ?? null;
+            const outOfStock = product?.actual_quantity === 0;
+        
+            const row = document.createElement("tr");
             row.innerHTML = `
-                <td>${product.product.name}</td>
-                <td>${product.quantity}</td>
-                <td>$${product.price}</td>
-                <td>$${(product.quantity * product.price).toFixed(2)}</td>
+                <td>${product ? product.name : 'N/A'}</td>
+                <td>${item.quantity}</td>
+                <td>${product ? product.price : '0.00'}CZK</td>
+                <td>${product ? (product.price * item.quantity).toFixed(2) : '0.00'}CZK</td>
+                <td>${product ? 'Shipment #' + product.shipment_id : 'N/A'}</td>
                 <td>
-                    <button onclick="openEditOrderProductForm(${product.id}, ${product.quantity})">Edit</button>
-                    <button onclick="deleteOrderProduct(${product.id}, ${orderId})">Delete</button>
+                    <button ${outOfStock ? "disabled title='Out of Stock'" : `onclick="openEditOrderProductForm(${item.id}, ${item.quantity})"`}>
+                        Chỉnh sửa
+                    </button>
+                    <button onclick="deleteOrderProduct(${item.id}, ${orderId})">Xóa</button>
                 </td>
             `;
             productTable.appendChild(row);
-        });
+        });        
     })
     .catch(error => console.error("Error loading order products:", error));
 }
@@ -86,7 +92,7 @@ function addProductToOrder() {
         return;
     }
 
-    fetch("http://localhost/ims/public/api/order-products", {
+    fetch(`${BASE_URL}/api/order-products`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -97,63 +103,134 @@ function addProductToOrder() {
     .then(() => {
         alert("Product added!");
         document.getElementById("addProductForm").style.display = "none";
-        loadOrderProducts();
+        // loadOrderProducts();
+        window.location.reload(); // ✅ full page reload
+        //load the table
     });
 }
 
 // ✅ Function to Open Edit Order Product Form
-function openEditOrderProductForm(orderProductId, quantity) {
-    let editForm = document.getElementById("editProductForm");
+// ✅ Unified Function to Open and Optionally Fetch Edit Order Product Form
+function openEditOrderProductForm(orderProductId, quantity, fetchDetails = false) {
+    const editForm = document.getElementById("editProductForm");
     if (!editForm) {
         console.error("❌ Edit Product Form Not Found!");
         return;
     }
 
+    // Fetch product details if required
+    if (fetchDetails) {
+        fetch(`${BASE_URL}/api/order-products/${orderProductId}`, {
+            headers: {
+                "Authorization": "Bearer " + sessionStorage.getItem("token")
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const product = data.product ?? null;
+            if (!product) {
+                alert("❌ Cannot edit this product. Data not found.");
+                return;
+            }
+            if (product.actual_quantity === 0) {
+                alert("⚠️ This product is out of stock and cannot be edited.");
+                return;
+            }
+            setupEditForm(orderProductId, quantity, product);
+        })
+        .catch(error => console.error("Error fetching product details:", error));
+    } else {
+        // Directly setup the form
+        setupEditForm(orderProductId, quantity);
+    }
+}
+
+function setupEditForm(orderProductId, quantity, product = null) {
     document.getElementById("edit_order_product_id").value = orderProductId;
     document.getElementById("edit_quantity").value = quantity;
+    document.getElementById("editProductForm").style.display = "block";
 
-    editForm.style.display = "block";
+    // Additional setup if product data is fetched
+    if (product) {
+        // Populate form fields if needed
+    }
 }
 
 // ✅ Function to Edit Product in Order
 function editProductInOrder() {
-    let orderProductId = document.getElementById("edit_order_product_id").value;
-    let quantity = document.getElementById("edit_quantity").value;
+    const orderId = document.getElementById("edit_order_id").value;
+    const orderProductId = document.getElementById("edit_order_product_id").value;
+    const quantity = document.getElementById("edit_quantity").value;
+    
+    // Assuming you have inputs for price or other attributes you wish to update
+    // const price = document.getElementById("edit_price").value; 
 
-    if (!quantity) {
-        alert("Please enter a quantity.");
-        return;
-    }
-
-    fetch(`http://localhost/ims/public/api/order-products/${orderProductId}`, {
-        method: "PUT",
+    fetch(`${BASE_URL}/api/order-products/${orderProductId}`, {
+        method: "PUT", // or "PATCH" depending on how your API is setup
         headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         },
-        body: JSON.stringify({ quantity: quantity })
+        body: JSON.stringify({
+            order_id: orderId,
+            quantity: quantity
+            // price: price // include this if you're updating price or any other details
+        })
     })
     .then(response => response.json())
     .then(data => {
-        alert("Product updated!");
-        document.getElementById("editProductForm").style.display = "none";
-        loadOrderProducts();
+        alert("Product updated successfully!");
+        window.location.reload(); // Reload the page to reflect the changes
     })
-    .catch(error => console.error("❌ Error updating product:", error));
+    .catch(error => {
+        console.error("Error updating product:", error);
+        alert("Failed to update product.");
+    });
 }
+
+
+
 
 // ✅ Function to Delete Product from Order
 function deleteOrderProduct(orderProductId, orderId) {
     if (!confirm("Are you sure you want to remove this product from the order?")) return;
 
-    fetch(`http://localhost/ims/public/api/order-products/${orderProductId}`, {
+    fetch(`${BASE_URL}/api/order-products/${orderProductId}`, {
         method: "DELETE",
         headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
     })
     .then(response => response.json())
     .then(() => {
         alert("Product removed!");
-        loadOrderProducts();
+        // loadOrderProducts();
+        window.location.reload(); // ✅ full page reload
+
     })
     .catch(error => console.error("❌ Error deleting product:", error));
+}
+
+// ✅ Function to Update Total Price Dynamically
+function updateTotalPrice() {
+    let quantity = document.getElementById("quantity").value;
+    let price = document.getElementById("price").value;
+    let totalPrice = document.getElementById("total_price");
+
+    if (quantity && price) {
+        totalPrice.textContent = `${(quantity * price).toFixed(2)}CZK`;
+    } else {
+        totalPrice.textContent = "0.00CZK";
+    }
+}
+
+// ✅ Function to Update Edit Total Price Dynamically
+function updateEditTotalPrice() {
+    let quantity = document.getElementById("edit_quantity").value;
+    let price = document.getElementById("edit_price").value;
+    let totalPrice = document.getElementById("edit_total_price");
+
+    if (quantity && price) {
+        totalPrice.textContent = `${(quantity * price).toFixed(2)}CZK`;
+    } else {
+        totalPrice.textContent = "0.00CZK";
+    }
 }

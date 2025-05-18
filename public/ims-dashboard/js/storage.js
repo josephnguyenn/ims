@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    loadStorageData(); // ✅ Load storage data when page loads
+    loadStorageData(); // ✅ Tải dữ liệu kho khi trang được tải
 
     const storageForm = document.getElementById("storage-form");
 
@@ -11,9 +11,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// ✅ Function to Load Storage Data
+// ✅ Hàm tải dữ liệu kho
 function loadStorageData() {
-    fetch("http://localhost/ims/public/api/storages", {
+    fetch(`${BASE_URL}/api/storages`, {
         headers: {
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         }
@@ -21,10 +21,10 @@ function loadStorageData() {
     .then(response => response.json())
     .then(storages => {
         let storageTable = document.getElementById("storage-table");
-        storageTable.innerHTML = ""; // ✅ Clear previous data
+        storageTable.innerHTML = ""; // ✅ Xóa dữ liệu cũ
 
-        if (storages.length === 0) {
-            storageTable.innerHTML = "<tr><td colspan='4'>No storage locations found.</td></tr>";
+        if (storages.length === 0) {    
+            storageTable.innerHTML = "<tr><td colspan='4'>Không tìm thấy kho</td></tr>";
             return;
         }
 
@@ -35,23 +35,23 @@ function loadStorageData() {
                 <td>${storage.name}</td>
                 <td>${storage.location}</td>
                 <td>
-                    <button onclick="editStorage(${storage.id}, '${storage.name}', '${storage.location}')">Edit</button>
-                    <button onclick="deleteStorage(${storage.id})">Delete</button>
+                    <button onclick="openEditForm(${storage.id}, '${storage.name}', '${storage.location}')">Sửa</button>
+                    <button onclick="deleteStorage(${storage.id})">Xóa</button>
                 </td>
             `;
             storageTable.appendChild(row);
         });
     })
-    .catch(error => console.error("Error loading storage data:", error));
+    .catch(error => console.error("❌ Lỗi khi tải dữ liệu kho:", error));
 }
 
-// ✅ Function to Add Storage
+// ✅ Hàm thêm kho
 function addStorage() {
     let name = document.getElementById("storage-name").value;
     let location = document.getElementById("storage-location").value;
     let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    fetch("http://localhost/ims/public/api/storages", {
+    fetch(`${BASE_URL}/api/storages`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -63,23 +63,23 @@ function addStorage() {
     .then(response => response.json())
     .then(data => {
         if (data.message === "Storage created successfully") {
-            alert("Storage added!");
+            alert("Thêm kho thành công!");
             document.getElementById("storage-form").reset(); // ✅ Reset form
             document.getElementById("addStorageForm").style.display = "none";
-            loadStorageData(); // ✅ Refresh table dynamically
+            loadStorageData(); // ✅ Làm mới bảng dữ liệu
         } else {
-            alert("Error adding storage.");
+            alert("❌ Lỗi khi thêm kho.");
         }
     });
 }
 
-// ✅ Function to Delete Storage
+// ✅ Hàm xóa kho
 function deleteStorage(id) {
-    if (!confirm("Are you sure you want to delete this storage?")) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa kho này không?")) return;
 
     let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    fetch(`http://localhost/ims/public/api/storages/${id}`, {
+    fetch(`${BASE_URL}/api/storages/${id}`, {
         method: "DELETE",
         headers: {
             "Authorization": "Bearer " + sessionStorage.getItem("token"),
@@ -89,39 +89,53 @@ function deleteStorage(id) {
     .then(response => response.json())
     .then(data => {
         if (data.message === "Storage deleted successfully") {
-            alert("Storage deleted!");
-            loadStorageData(); // ✅ Refresh table dynamically
+            alert("Xóa kho thành công!");
+            loadStorageData(); // ✅ Làm mới bảng dữ liệu
         } else {
-            alert("Error deleting storage.");
+            alert("❌ Lỗi khi xóa kho.");
         }
     });
 }
 
-// ✅ Function to Edit Storage
-function editStorage(id, name, location) {
-    let newName = prompt("Edit Storage Name:", name);
-    let newLocation = prompt("Edit Storage Location:", location);
+// Mở form sửa kho
+function openEditForm(id, name, location) {
+    document.getElementById("edit-storage-id").value = id;
+    document.getElementById("edit-storage-name").value = name;
+    document.getElementById("edit-storage-location").value = location;
+    document.getElementById("editStorageForm").style.display = 'block';
+}
 
-    if (newName !== null && newLocation !== null) {
-        let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        fetch(`http://localhost/ims/public/api/storages/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + sessionStorage.getItem("token"),
-                "X-CSRF-TOKEN": csrfToken
-            },
-            body: JSON.stringify({ name: newName, location: newLocation })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message === "Storage updated successfully") {
-                alert("Storage updated!");
-                loadStorageData(); // ✅ Refresh table dynamically
-            } else {
-                alert("Error updating storage.");
-            }
+// Xử lý cập nhật kho
+document.addEventListener("DOMContentLoaded", function () {
+    const editForm = document.getElementById("edit-storage-form");
+    if (editForm) {
+        editForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            updateStorage();
         });
     }
+});
+
+function updateStorage() {
+    const id = document.getElementById("edit-storage-id").value;
+    const name = document.getElementById("edit-storage-name").value;
+    const location = document.getElementById("edit-storage-location").value;
+
+    fetch(`${BASE_URL}/api/storages/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        },
+        body: JSON.stringify({ name, location })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("Cập nhật kho thành công!");
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error("❌ Lỗi khi cập nhật kho:", error);
+        alert("❌ Không thể cập nhật kho.");
+    });
 }

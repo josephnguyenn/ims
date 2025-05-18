@@ -11,17 +11,17 @@ use Illuminate\Support\Facades\DB;
 
 class OrderProductController extends Controller
 {
-    // ✅ View all order products (Admin & Staff)
+    // ✅ View all order products 
     public function index()
     {
         return response()->json(OrderProduct::with('order', 'product')->get(), 200);
     }
 
-    // ✅ Only Admins can add products to an order
+    // ✅ add products to an order
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Access denied'], 403);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $request->validate([
@@ -64,18 +64,14 @@ class OrderProductController extends Controller
     {
         $orderProducts = OrderProduct::where('order_id', $order_id)->with('product')->get();
 
-        if ($orderProducts->isEmpty()) {
-            return response()->json(['message' => 'No products found for this order'], 404);
-        }
-
         return response()->json($orderProducts, 200);
     }
 
-    // ✅ Update order product quantity (Only Admin)
+    // ✅ Update order product quantity 
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Access denied'], 403);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $orderProduct = OrderProduct::find($id);
@@ -123,7 +119,7 @@ class OrderProductController extends Controller
     // ✅ Only Admins can remove a product from an order
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'manager') {
             return response()->json(['message' => 'Access denied'], 403);
         }
 

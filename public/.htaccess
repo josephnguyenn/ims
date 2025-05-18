@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # ✅ Redirect root URL to ims-dashboard dashboard
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/(\s|\?) [NC]
+    RewriteRule ^$ ims-dashboard/templates/dashboard.php [R=302,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

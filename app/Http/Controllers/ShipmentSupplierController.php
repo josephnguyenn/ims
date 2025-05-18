@@ -17,7 +17,7 @@ class ShipmentSupplierController extends Controller
     // ✅ Only Admins can create a shipment supplier
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'manager') {
             return response()->json(['message' => 'Access denied'], 403);
         }
 
@@ -45,7 +45,7 @@ class ShipmentSupplierController extends Controller
     // ✅ Only Admins can update supplier details
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'manager') {
             return response()->json(['message' => 'Access denied'], 403);
         }
 

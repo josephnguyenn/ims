@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    loadProductData();
 
     const productForm = document.getElementById("product-form");
     if (productForm) {
@@ -8,21 +7,43 @@ document.addEventListener("DOMContentLoaded", function () {
             addProduct();
         });
     }
+
+    const editForm = document.getElementById("edit-product-form");
+    if (editForm) {
+        editForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            updateProduct();
+        });
+    }    
 });
 
-// ✅ Load Products into Table
+
+function getShipmentIdFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('shipment_id');
+}
+
 function loadProductData() {
-    fetch("http://localhost/ims/public/api/products", {
-        headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
-        }
+    const shipmentId = getShipmentIdFromURL();
+    const productTable = document.getElementById("product-table");
+
+    if (!productTable) {
+        console.error("❌ Product table element not found.");
+        return;
+    }
+
+    const url = shipmentId
+        ? `${BASE_URL}/api/products?shipment_id=${shipmentId}`
+        : `${BASE_URL}/api/products`;
+
+    fetch(url, {
+        headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
     })
     .then(response => response.json())
     .then(products => {
-        let productTable = document.getElementById("product-table");
         productTable.innerHTML = "";
 
-        if (products.length === 0) {
+        if (!products || products.length === 0) {
             productTable.innerHTML = "<tr><td colspan='10'>No products found.</td></tr>";
             return;
         }
@@ -41,34 +62,35 @@ function loadProductData() {
                 <td>Shipment #${product.shipment_id}</td>
                 <td>${product.expired_date || "N/A"}</td>
                 <td>
-                    <button onclick="openEditProductModal(${product.id}, '${product.name}', '${product.code}', ${product.original_quantity}, ${product.price}, ${product.cost}, '${product.category}', ${product.shipment_id})">Edit</button>
+                    <button onclick="openEditModal(${product.id})">Edit</button>
                     <button onclick="deleteProduct(${product.id})">Delete</button>
                 </td>
             `;
             productTable.appendChild(row);
         });
     })
-    .catch(error => console.error("Error loading product data:", error));
+    .catch(error => console.error("❌ Error loading product data:", error));
 }
 
-
-// ✅ Function to Add Product
 function addProduct() {
-    let name = document.getElementById("product_name")?.value;
-    let code = document.getElementById("product_code")?.value;
-    let originalQuantity = document.getElementById("original_quantity")?.value;
-    let price = document.getElementById("price")?.value;
-    let cost = document.getElementById("cost")?.value;
-    let category = document.getElementById("category")?.value;
-    let shipmentId = document.getElementById("shipment_id")?.value;
+    let name = document.getElementById("product_name").value;
+    let code = document.getElementById("product_code").value;
+    let originalQuantity = document.getElementById("original_quantity").value;
+    let price = document.getElementById("price").value;
+    let cost = document.getElementById("cost").value;
+    let expiredDate = document.getElementById("expired_date").value;
+    let expiryMode = document.getElementById("expiry_mode").value;
+    let taxInput = document.getElementById("tax").value.trim();
+    let tax = taxInput === "" ? null : parseFloat(taxInput);
+    let category = document.getElementById("category").value;
+    let shipmentId = document.getElementById("shipment_id").value;
 
-    // ✅ Check if any field is missing
     if (!name || !code || !originalQuantity || !price || !cost || !category || !shipmentId) {
         alert("Please fill in all required fields.");
         return;
     }
 
-    fetch("http://localhost/ims/public/api/products", {
+    fetch(`${BASE_URL}/api/products`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -80,6 +102,9 @@ function addProduct() {
             original_quantity: originalQuantity, 
             price, 
             cost, 
+            tax,
+            expired_date: expiredDate || null,
+            expiry_mode: expiryMode,
             category, 
             shipment_id: shipmentId 
         })
@@ -87,9 +112,8 @@ function addProduct() {
     .then(response => response.json())
     .then(data => {
         if (data.message === "Product created successfully") {
-            alert("Product added!");
-            document.getElementById("addProductForm").style.display = "none";
-            loadProductData();
+            alert("Product added successfully!");
+            window.location.reload();
         } else {
             alert("Error adding product: " + (data.message || "Unknown error"));
         }
@@ -97,21 +121,87 @@ function addProduct() {
     .catch(error => console.error("Error:", error));
 }
 
+function openEditModal(productId) {
+    console.log("edit_product_id", document.getElementById("edit_product_id")); // should not be null
+    fetch(`${BASE_URL}/api/products/${productId}`, {
+        headers: {
+            "Authorization": "Bearer " + sessionStorage.getItem("token")
+        }
+    })
+    .then(res => res.json())
+    .then(product => {
+        document.getElementById("edit_product_id").value = product.id;
+        document.getElementById("edit_product_name").value = product.name;
+        document.getElementById("edit_product_code").value = product.code;
+        document.getElementById("edit_original_quantity").value = product.original_quantity;
+        document.getElementById("edit_price").value = product.price;
+        document.getElementById("edit_cost").value = product.cost;
+        document.getElementById("edit_tax").value = product.tax || 0;
+        document.getElementById("edit_category").value = product.category;
+        document.getElementById("edit_shipment_id").value = product.shipment_id;
+
+        // Handle expiry mode
+        const expiredDate = product.expired_date;
+        const shipmentDate = product.shipment?.expired_date || null;
+
+        if (!expiredDate) {
+            document.getElementById("edit_expiry_mode").value = "none";
+            handleExpiryModeChangeEdit("none");
+        } else if (expiredDate === shipmentDate) {
+            document.getElementById("edit_expiry_mode").value = "inherit";
+            handleExpiryModeChangeEdit("inherit");
+        } else {
+            document.getElementById("edit_expiry_mode").value = "custom";
+            document.getElementById("edit_expired_date").value = expiredDate;
+            handleExpiryModeChangeEdit("custom");
+        }
+
+        openModal("editProductForm");
+    })
+    .catch(err => {
+        console.error("❌ Failed to load product for edit", err);
+        alert("Failed to load product for editing.");
+    });
+}
+
+
 function updateProduct() {
     let id = document.getElementById("edit_product_id").value;
+    console.log("Updating product with ID:", id); // ✅ Add here to debug
+    
     let name = document.getElementById("edit_product_name").value;
     let code = document.getElementById("edit_product_code").value;
     let originalQuantity = document.getElementById("edit_original_quantity").value;
     let price = document.getElementById("edit_price").value;
     let cost = document.getElementById("edit_cost").value;
+    let taxInput = document.getElementById("edit_tax").value.trim();
+    let expiredDate = document.getElementById("edit_expired_date").value;
+    let expiryMode = document.getElementById("edit_expiry_mode").value;
+    let tax = taxInput === "" ? null : parseFloat(taxInput)
     let category = document.getElementById("edit_category").value;
     let shipmentId = document.getElementById("edit_shipment_id").value;
 
-    fetch(`http://localhost/ims/public/api/products/${id}`, {
+        // ✅ DEBUG: Check the data before sending
+        console.log("Updating product with ID:", id);
+        console.log({
+            name,
+            code,
+            original_quantity: originalQuantity,
+            price,
+            cost,
+            expired_date: expiredDate,
+            tax,
+            category,
+            shipment_id: shipmentId
+        });
+
+    fetch(`${BASE_URL}/api/products/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Accept": "application/json", // <-- ✅ Fixes redirect to HTML
+
         },
         body: JSON.stringify({ 
             name, 
@@ -119,16 +209,18 @@ function updateProduct() {
             original_quantity: originalQuantity, 
             price, 
             cost, 
+            tax,
             category, 
+            expired_date: expiredDate || null,
+            expiry_mode: expiryMode,
             shipment_id: shipmentId 
-        })
+        })               
     })
     .then(response => response.json())
     .then(data => {
         if (data.message === "Product updated successfully") {
-            alert("Product updated!");
-            document.getElementById("editProductForm").style.display = "none";
-            loadProductData(); // ✅ Reload Product List
+            alert("Product updated successfully!");
+            window.location.reload();
         } else {
             alert("Error updating product: " + (data.message || "Unknown error"));
         }
@@ -136,35 +228,118 @@ function updateProduct() {
     .catch(error => console.error("Error updating product:", error));
 }
 
-
-// ✅ Function to Open Edit Modal with Data
-function openEditProductModal(id, name, code, originalQuantity, price, cost, category, shipmentId) {
-    document.getElementById("edit_product_id").value = id;
-    document.getElementById("edit_product_name").value = name;
-    document.getElementById("edit_product_code").value = code;
-    document.getElementById("edit_original_quantity").value = originalQuantity;
-    document.getElementById("edit_price").value = price;
-    document.getElementById("edit_cost").value = cost;
-    document.getElementById("edit_category").value = category;
-    document.getElementById("edit_shipment_id").value = shipmentId;
-    
-    document.getElementById("editProductForm").style.display = "block";
-}
-
-// ✅ Function to Delete a Product
 function deleteProduct(id) {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
-    fetch(`http://localhost/ims/public/api/products/${id}`, {
+    fetch(`${BASE_URL}/api/products/${id}`, {
         method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Accept": "application/json"
+        }
+    })
+    .then(async response => {
+        const contentType = response.headers.get("content-type");
+
+        if (!response.ok) {
+            let message = "Something went wrong.";
+
+            if (contentType && contentType.includes("application/json")) {
+                const errorData = await response.json();
+                message = errorData.message || message;
+            } else {
+                const errorText = await response.text();
+                console.error("Server error:", errorText);
+            }
+
+            alert(message);
+            return;
+        }
+
+        const data = await response.json();
+        alert(data.message || "Product deleted successfully");
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error("Error deleting product:", error);
+        alert("Error deleting product: " + error.message);
+    });
+}
+
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+        console.error(`❌ Modal with ID '${modalId}' not found.`);
+        return;
+    }
+    modal.style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+        console.error(`❌ Modal with ID '${modalId}' not found.`);
+        return;
+    }
+    modal.style.display = 'none';
+}
+
+function suggestProductCode() {
+    const input = document.getElementById("product_code").value;
+    const suggestionBox = document.getElementById("suggestions");
+    if (input.length < 2) {
+        suggestionBox.innerHTML = '';
+        return;
+    }
+
+    fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(input)}`, {
         headers: {
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        alert("Product deleted successfully");
-        loadProductData();
+    .then(res => res.json())
+    .then(products => {
+        suggestionBox.innerHTML = '';
+        if (!Array.isArray(products)) return;
+    
+        products.forEach(p => {
+            const div = document.createElement("div");
+            div.classList.add("suggestion-item");
+            div.innerHTML = `${p.code} | ${p.name} | ${p.price}Kč | ${p.cost}Kč | Tax: ${p.tax}%`;
+            div.onclick = () => {
+                document.getElementById("product_name").value = p.name;
+                document.getElementById("product_code").value = p.code;
+                document.getElementById("price").value = p.price;
+                document.getElementById("cost").value = p.cost;
+                document.getElementById("tax").value = p.tax;
+                document.getElementById("category").value = p.category;
+                suggestionBox.innerHTML = '';
+            };
+            suggestionBox.appendChild(div);
+        });
     })
-    .catch(error => console.error("Error deleting product:", error));
+    
+}
+
+function handleExpiryModeChange(mode) {
+    const dateField = document.getElementById("expired_date");
+
+    if (mode === "custom") {
+        dateField.style.display = "block";
+    } else {
+        dateField.style.display = "none";
+        dateField.value = ""; // clear it if mode is inherit or none
+    }
+}
+
+function handleExpiryModeChangeEdit(mode) {
+    const dateField = document.getElementById("edit_expired_date");
+
+    if (mode === "custom") {
+        dateField.style.display = "block";
+    } else {
+        dateField.style.display = "none";
+        dateField.value = ""; // clear it if mode is inherit or none
+    }
 }

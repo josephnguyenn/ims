@@ -10,9 +10,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// ✅ Load Shipment Suppliers into Table
+// ✅ Tải danh sách Nhà cung cấp lô hàng vào bảng
 function loadShipmentSuppliers() {
-    fetch("http://localhost/ims/public/api/shipment-suppliers", {
+    fetch(`${BASE_URL}/api/shipment-suppliers`, {
         headers: {
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         }
@@ -23,7 +23,7 @@ function loadShipmentSuppliers() {
         supplierTable.innerHTML = "";
 
         if (suppliers.length === 0) {
-            supplierTable.innerHTML = "<tr><td colspan='3'>No suppliers found.</td></tr>";
+            supplierTable.innerHTML = "<tr><td colspan='3'>Không tìm thấy Nhà cung cấp nào.</td></tr>";
             return;
         }
 
@@ -33,21 +33,21 @@ function loadShipmentSuppliers() {
                 <td>${supplier.id}</td>
                 <td>${supplier.name}</td>
                 <td>
-                    <button onclick="openEditSupplierModal(${supplier.id}, '${supplier.name}')">Edit</button>
-                    <button onclick="deleteShipmentSupplier(${supplier.id})">Delete</button>
+                    <button onclick="openEditSupplierModal(${supplier.id}, '${supplier.name}')">Sửa</button>
+                    <button onclick="deleteShipmentSupplier(${supplier.id})">Xóa</button>
                 </td>
             `;
             supplierTable.appendChild(row);
         });
     })
-    .catch(error => console.error("Error loading shipment suppliers:", error));
+    .catch(error => console.error("❌ Lỗi khi tải danh sách Nhà cung cấp lô hàng:", error));
 }
 
-// ✅ Function to Add Shipment Supplier
+// ✅ Hàm thêm Nhà cung cấp lô hàng
 function addShipmentSupplier() {
     let name = document.getElementById("supplier_name").value;
 
-    fetch("http://localhost/ims/public/api/shipment-suppliers", {
+    fetch(`${BASE_URL}/api/shipment-suppliers`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -57,13 +57,13 @@ function addShipmentSupplier() {
     })
     .then(response => response.json())
     .then(() => {
-        alert("Supplier added!");
+        alert("Thêm Nhà cung cấp thành công!");
         document.getElementById("addShipmentSupplierForm").style.display = "none";
         loadShipmentSuppliers();
     });
 }
 
-// ✅ Function to Open Edit Shipment Supplier Modal
+// ✅ Hàm mở modal chỉnh sửa Nhà cung cấp lô hàng
 function openEditSupplierModal(id, name) {
     document.getElementById("edit_supplier_id").value = id;
     document.getElementById("edit_supplier_name").value = name;
@@ -71,12 +71,12 @@ function openEditSupplierModal(id, name) {
     document.getElementById("editShipmentSupplierForm").style.display = "block";
 }
 
-// ✅ Function to Update Shipment Supplier
+// ✅ Hàm cập nhật Nhà cung cấp lô hàng
 function updateShipmentSupplier() {
     let id = document.getElementById("edit_supplier_id").value;
     let name = document.getElementById("edit_supplier_name").value;
 
-    fetch(`http://localhost/ims/public/api/shipment-suppliers/${id}`, {
+    fetch(`${BASE_URL}/api/shipment-suppliers/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -85,17 +85,17 @@ function updateShipmentSupplier() {
         body: JSON.stringify({ name })
     })
     .then(() => {
-        alert("Supplier updated!");
+        alert("Cập nhật Nhà cung cấp thành công!");
         document.getElementById("editShipmentSupplierForm").style.display = "none";
         loadShipmentSuppliers();
     });
 }
 
-// ✅ Function to Delete Shipment Supplier
+// ✅ Hàm xóa Nhà cung cấp lô hàng
 function deleteShipmentSupplier(id) {
-    if (!confirm("Are you sure you want to delete this supplier?")) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa Nhà cung cấp này không?")) return;
 
-    fetch(`http://localhost/ims/public/api/shipment-suppliers/${id}`, {
+    fetch(`${BASE_URL}/api/shipment-suppliers/${id}`, {
         method: "DELETE",
         headers: {
             "Authorization": "Bearer " + sessionStorage.getItem("token")
@@ -104,11 +104,11 @@ function deleteShipmentSupplier(id) {
     .then(response => response.json())
     .then(data => {
         if (data.message === "Shipment Supplier deleted successfully") {
-            alert("Supplier deleted!");
+            alert("Xóa Nhà cung cấp thành công!");
             loadShipmentSuppliers();
         } else {
-            alert("Error deleting supplier: " + (data.message || "Unknown error"));
+            alert("❌ Lỗi khi xóa Nhà cung cấp: " + (data.message || "Lỗi không xác định"));
         }
     })
-    .catch(error => console.error("Error deleting supplier:", error));
+    .catch(error => console.error("❌ Lỗi khi xóa Nhà cung cấp:", error));
 }

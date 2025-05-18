@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ✅ Load Delivery Suppliers into Table
 function loadDeliverySuppliers() {
-    fetch("http://localhost/ims/public/api/delivery-suppliers", {
+    fetch(`${BASE_URL}/api/delivery-suppliers`, {
         headers: {
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         }
@@ -33,8 +33,8 @@ function loadDeliverySuppliers() {
                 <td>${supplier.id}</td>
                 <td>${supplier.name}</td>
                 <td>
-                    <button onclick="openEditDeliverySupplierModal(${supplier.id}, '${supplier.name}')">Edit</button>
-                    <button onclick="deleteDeliverySupplier(${supplier.id})">Delete</button>
+                    <button onclick="openEditDeliverySupplierModal(${supplier.id}, '${supplier.name}')">Sửa</button>
+                    <button onclick="deleteDeliverySupplier(${supplier.id})">Xóa</button>
                 </td>
             `;
             supplierTable.appendChild(row);
@@ -47,7 +47,7 @@ function loadDeliverySuppliers() {
 function addDeliverySupplier() {
     let name = document.getElementById("delivery_supplier_name").value;
 
-    fetch("http://localhost/ims/public/api/delivery-suppliers", {
+    fetch(`${BASE_URL}/api/delivery-suppliers`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -75,7 +75,7 @@ function updateDeliverySupplier() {
     let id = document.getElementById("edit_delivery_supplier_id").value;
     let name = document.getElementById("edit_delivery_supplier_name").value;
 
-    fetch(`http://localhost/ims/public/api/delivery-suppliers/${id}`, {
+    fetch(`${BASE_URL}/api/delivery-suppliers/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -94,7 +94,7 @@ function updateDeliverySupplier() {
 function deleteDeliverySupplier(id) {
     if (!confirm("Are you sure you want to delete this supplier?")) return;
 
-    fetch(`http://localhost/ims/public/api/delivery-suppliers/${id}`, {
+    fetch(`${BASE_URL}/api/delivery-suppliers/${id}`, {
         method: "DELETE",
         headers: {
             "Authorization": "Bearer " + sessionStorage.getItem("token")

@@ -17,10 +17,6 @@ class ShipmentController extends Controller
     // ✅ Create a new shipment
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Access denied'], 403);
-        }
-
         $request->validate([
             'shipment_supplier_id' => 'required|exists:shipment_suppliers,id',
             'storage_id' => 'required|exists:storages,id',
@@ -49,15 +45,15 @@ class ShipmentController extends Controller
     // ✅ UPDATE SHIPMENT (Fixing BadMethodCallException)
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Access denied'], 403);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-
+    
         $shipment = Shipment::find($id);
-
+    
         if (!$shipment) {
             return response()->json(['message' => 'Shipment not found'], 404);
-        }
+        }    
 
         $request->validate([
             'shipment_supplier_id' => 'sometimes|exists:shipment_suppliers,id',
@@ -75,7 +71,7 @@ class ShipmentController extends Controller
     // ✅ DELETE SHIPMENT (Fixing BadMethodCallException)
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'manager') {
             return response()->json(['message' => 'Access denied'], 403);
         }
 

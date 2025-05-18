@@ -24,16 +24,20 @@ class CustomerController extends Controller
     // ✅ Only Admins can create customers
     public function store(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Access denied'], 403);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
+
 
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|email|unique:customers',
             'address' => 'nullable|string',
             'phone' => 'nullable|string',
-            'vat_code' => 'nullable|string'
+            'vat_code' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+            'city' => 'nullable|string',
+            'tax_code' => 'nullable|string'
         ]);
 
         $customer = Customer::create($request->all());
@@ -59,9 +63,10 @@ class CustomerController extends Controller
     // ✅ Only Admins can update customers
     public function update(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin') {
-            return response()->json(['message' => 'Access denied'], 403);
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
+
 
         $customer = Customer::find($id);
 
@@ -74,7 +79,10 @@ class CustomerController extends Controller
             'email' => 'sometimes|string|email|unique:customers,email,' . $customer->id,
             'address' => 'sometimes|string',
             'phone' => 'sometimes|string',
-            'vat_code' => 'sometimes|string'
+            'vat_code' => 'sometimes|string',
+            'postal_code' => 'sometimes|string',
+            'city' => 'sometimes|string',
+            'tax_code' => 'sometimes|string' // ✅ No need to validate tax_code if not provided
         ]);
 
         $customer->update($request->all());
@@ -85,7 +93,7 @@ class CustomerController extends Controller
     // ✅ Only Admins can delete a customer
     public function destroy($id)
     {
-        if (Auth::user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin' && Auth::user()->role !== 'manager') {
             return response()->json(['message' => 'Access denied'], 403);
         }
 
