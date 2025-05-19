@@ -2,8 +2,7 @@
 if (!isset($_SESSION)) {
     session_start();
 }
-?>  
-
+?>
 
 <div class="header-bar">
     <a href="../templates/dashboard.php" class="header-logo-link">
@@ -13,6 +12,23 @@ if (!isset($_SESSION)) {
         <span class="user-greeting">
             Xin chào, <strong><?= htmlspecialchars($_SESSION['name'] ?? 'Admin') ?></strong>
         </span>
+        
+        <!-- POS/IMS Switch -->
+        <button onclick="window.location.href='../pos/index.php'" 
+                class="switch-btn">POS</button>
+        <button onclick="window.location.href='../templates/dashboard.php'" 
+            class="switch-btn">IMS</button>
+
+        <?php
+        $current_page = basename($_SERVER['PHP_SELF']);
+        if ($current_page === 'index.php') { // Assuming POS main page is index.php
+        ?>
+            <button onclick="window.location.href='settings.php'" 
+                    class="gear-btn" title="Cài đặt">
+                ⚙️
+            </button>
+        <?php } ?>
+
         <div class="header-dropdown">
             <button class="dropdown-btn">Tùy chọn</button>
             <div class="dropdown-content">
@@ -21,7 +37,6 @@ if (!isset($_SESSION)) {
         </div>
     </div>
 </div>
-
 
 <style>
 .header-bar {
@@ -35,18 +50,49 @@ if (!isset($_SESSION)) {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.header-logo{
-width: 200px;
+.header-logo {
+    width: 200px;
     height: 80px;
     object-fit: cover;
 }
 
-.header-bar .header-actions {
+.header-actions {
     display: flex;
     gap: 20px;
     align-items: center;
     font-size: 16px;
 }
+
+.switch-btn {
+    background-color: #1a4ba8;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.switch-btn:hover {
+    background-color: #163d87;
+}
+
+.gear-btn {
+    background-color: transparent;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+
+
+.gear-btn:hover {
+    background-color: #163d87;
+}
+
 
 .header-dropdown {
     position: relative;
@@ -89,4 +135,3 @@ width: 200px;
     font-size: 16px;
 }
 </style>
-

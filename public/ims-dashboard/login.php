@@ -31,6 +31,13 @@ include "define.php";
                 <button type="submit">Đăng nhập</button>
             </form>
 
+            <div style="margin-top: 20px;">
+                <button onclick="window.location.href='<?= BASE_URL ?>/ims-dashboard/pos/login.php'" 
+                        style="padding: 10px 20px; background: #94B9F1; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+                    Đăng nhập POS
+                </button>
+            </div>
+
             <p id="error-message" class="error"></p>
     </div>
     <script>
