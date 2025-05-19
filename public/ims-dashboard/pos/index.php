@@ -55,7 +55,7 @@ if ($defaultCategory) {
             <?php foreach ($products as $p): ?>
                 <div class="product-card" data-id="<?= $p['id'] ?>" data-name="<?= htmlspecialchars($p['name']) ?>" data-price="<?= $p['price'] ?>">
                     <div class="product-name"><?= htmlspecialchars($p['name']) ?></div>
-                    <div class="product-price"><?= number_format($p['price']) ?> CZK</div>
+                    <div class="product-price"><?= number_format($p['price'], 2) ?> CZK</div>
                 </div>
             <?php endforeach; ?>
         </div>

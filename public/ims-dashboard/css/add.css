@@ -13,13 +13,13 @@
 
 
 .suggestion-box {
+    display: none; /* Initially hide the suggestion box */
+    position: absolute; /* Make sure it’s positioned below the input */
     border: 1px solid #ccc;
-    max-height: 200px;
-    overflow-y: auto;
-    background: #fff;
-    position: absolute;
-    z-index: 100;
-    width: 100%;
+    background-color: #fff;
+    max-height: 200px; /* Add a max height to avoid overflow */
+    overflow-y: auto; /* Enable scroll if suggestions overflow */
+    z-index: 1000;
 }
 
 .suggestion-item {
@@ -30,5 +30,3 @@
 .suggestion-item:hover {
     background-color: #f0f0f0;
 }
-
-    
