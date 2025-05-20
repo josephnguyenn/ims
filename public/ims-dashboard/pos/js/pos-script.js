@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let   EUR_RATE       = 25;
 
   // 1) Load exchange rate
-  fetch(`${BASE_URL}/api/get_exchange_rate.php`)
+  fetch(`${BASE_URL}pos/api/get_exchange_rate.php`)
     .then(r => r.json())
     .then(data => { EUR_RATE = parseFloat(data.rate); updateCart(); })
     .catch(console.error);
@@ -119,27 +119,48 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('page-down').addEventListener('click', () => adjustLastQty(-1));
 
   // Barcode scanning
-  document.getElementById('barcode-input').addEventListener('keypress', e => {
-    if (e.key === 'Enter') {
-      const code = e.target.value.trim();
-      fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
-        headers:{
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
-          'Accept':        'application/json'
+  // Barcode scanning: lookup via product code
+    document.getElementById('barcode-input')
+    .addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+        const code = e.target.value.trim();
+        if (!code) return;
+
+        fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
+            headers: {
+            'Authorization': `Bearer ${AUTH_TOKEN}`,
+            'Accept':        'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(products => {
+            if (Array.isArray(products) && products.length > 0) {
+            // take the first matching product
+            const p = products[0];
+            const id    = p.id;
+            const name  = p.name;
+            const price = parseFloat(p.price);
+
+            if (cart[id]) cart[id].qty++;
+            else          cart[id] = { name, price, qty: 1 };
+
+            updateCart();
+            } else {
+            alert('Không tìm thấy sản phẩm với mã: ' + code);
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching product by code:', err);
+            alert('Lỗi khi tìm sản phẩm.');
+        })
+        .finally(() => {
+            e.target.value = '';
+            e.target.focus();
+        });
         }
-      })
-      .then(r => r.json())
-      .then(prod => {
-        if (prod.id) {
-          if (cart[prod.id]) cart[prod.id].qty++;
-          else                cart[prod.id] = { name: prod.name, price: +prod.price, qty: 1 };
-          updateCart();
-        }
-      })
-      .catch(console.error)
-      .finally(() => e.target.value = '');
-    }
-  });
+    });
+
+
 
   // Numpad
   document.querySelectorAll('.num-button').forEach(btn => {
@@ -166,3 +187,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'PageDown') { e.preventDefault(); adjustLastQty(-1); }
   });
 });
+
+

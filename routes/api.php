@@ -75,7 +75,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/products/search', [ProductController::class, 'searchByCode']); // ← Put this BEFORE the resource route
+    Route::get('products/search',         [ProductController::class, 'searchByCode']);
     Route::apiResource('products', ProductController::class);
 });
 
@@ -129,4 +129,3 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('categories', CategoryController::class);
 });
 
-Route::get('products/search-barcode', [ProductController::class, 'searchByBarcode']);

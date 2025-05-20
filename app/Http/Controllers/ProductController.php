@@ -25,19 +25,21 @@ class ProductController extends Controller
         return response()->json($products, 200);
     }
 
-    public function searchByBarcode(Request $r)
+
+    public function searchByBarcode(Request $request)
     {
-        $code = $r->query('barcode');
-        if (!$code) {
+        $barcode = $request->query('barcode');
+        if (! $barcode) {
             return response()->json(null, 200);
         }
-        $product = Product::where('code', $code)
-            ->orWhere('barcode', $code)      // if you have a separate barcode column
-            ->select('id','name','price')
-            ->first();
+
+        $product = Product::where('code', $barcode)
+                        ->with('category')
+                        ->first();
 
         return response()->json($product, 200);
     }
+
 
     
 
@@ -174,22 +176,19 @@ class ProductController extends Controller
         
 
 
-    public function searchByCode(Request $request)
-        {
-            $code = $request->query('code');
-        
-            if (!$code) {
-                return response()->json([], 200); // Return empty list if no code
-            }
-        
-        $products = Product::with('category:id,name')      // eager-load only the id & name
+   public function searchByCode(Request $request)
+    {
+        $code = $request->query('code');
+        if (!$code) {
+            return response()->json([], 200);
+        }
+        $products = Product::with('category:id,name')
             ->where('code', 'like', "%{$code}%")
             ->select('id','name','code','price','cost','tax','category_id')
             ->limit(10)
             ->get();
-                
-            return response()->json($products, 200);
-        }
+        return response()->json($products, 200);
+    }
 
     public function destroy($id)
     {

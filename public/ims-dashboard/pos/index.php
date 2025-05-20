@@ -53,8 +53,12 @@ while ($row = $res->fetch_assoc()) {
   <!-- RIGHT: Cart & Payment -->
   <div class="pos-right">
     <div class="barcode-scan">
-      <input type="text" id="barcode-input"
-             placeholder="Scan barcode or type...">
+    <input 
+        type="text" 
+        id="barcode-input" 
+        placeholder="Scan barcode or type..." 
+        autofocus
+    >
     </div>
 
     <div class="controls">
