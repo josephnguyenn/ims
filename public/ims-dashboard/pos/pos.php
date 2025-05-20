@@ -30,35 +30,40 @@ while ($row = $res->fetch_assoc()) {
 
 <?php include '../includes/header.php'; ?>
 
+<!-- Main Tabs (optional global tabs if you want) -->
+<!-- <div class="tab-bar">…</div> -->
+
 <div class="pos-wrapper">
 
-  <!-- LEFT: Category Tabs & Product List -->
+  <!-- LEFT: product / payment-detail panels -->
   <div class="pos-left">
-
-    <div class="category-tabs">
-      <?php foreach ($categories as $cat): ?>
-        <button class="category-tab"
-                data-category-id="<?= $cat['id'] ?>">
-          <?= htmlspecialchars($cat['name']) ?>
-        </button>
-      <?php endforeach; ?>
+    <div class="inner-tabs">
+      <button class="inner-tab-button active" data-target="panel-product">
+        Product
+      </button>
+      <button class="inner-tab-button" data-target="panel-payment">
+        Payment Detail
+      </button>
     </div>
 
-    <div class="product-list" id="product-list">
-      <div class="loading">Chọn danh mục để xem sản phẩm…</div>
+    <div id="panel-product" class="inner-panel">
+      <?php include __DIR__ . '/views/product-panel.php'; ?>
     </div>
 
+    <div id="panel-payment" class="inner-panel" style="display:none">
+      <?php include __DIR__ . '/views/payment-panel.php'; ?>
+    </div>
   </div>
 
-  <!-- RIGHT: Cart & Payment -->
+  <!-- RIGHT: Payment Summary (cart, totals, numpad, controls) -->
   <div class="pos-right">
     <div class="barcode-scan">
-    <input 
+      <input 
         type="text" 
         id="barcode-input" 
         placeholder="Scan barcode or type..." 
         autofocus
-    >
+      >
     </div>
 
     <div class="controls">
@@ -69,6 +74,7 @@ while ($row = $res->fetch_assoc()) {
         Auto Print: <span id="print-status">OFF</span>
       </button>
       <button id="print-invoice">Print (F11)</button>
+      <button id="open-payment">Payment</button>
     </div>
 
     <div class="numpad">
@@ -103,5 +109,20 @@ while ($row = $res->fetch_assoc()) {
   const AUTH_TOKEN = "<?=$_SESSION['token']?>";
 </script>
 <script src="js/pos-script.js"></script>
+<script src="js/pos-payment.js"></script>
+<script>
+  // Inner‐tab switching
+  document.querySelectorAll('.inner-tab-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.inner-tab-button')
+              .forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.inner-panel')
+              .forEach(p=>p.style.display='none');
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.target)
+              .style.display='block';
+    });
+  });
+</script>
 </body>
 </html>

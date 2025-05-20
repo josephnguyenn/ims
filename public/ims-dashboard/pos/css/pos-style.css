@@ -1,3 +1,4 @@
+/* ========== Base Styles (your existing CSS) ========== */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -19,24 +20,46 @@ body {
     overflow-y: auto;
 }
 
+/* ====== Inner Tabs ====== */
+.inner-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ccc;
+}
+.inner-tab-button {
+    flex: 1;
+    padding: 10px;
+    background: #94B9F1;
+    color: white;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    text-align: center;
+}
+.inner-tab-button.active {
+    background: #fff;
+    color: #409eff;
+    border-color: #409eff;
+}
+.inner-tab-button:hover {
+    background: #7da9ee;
+}
+
+/* Panels inside left */
+
+.inner-panel.active {
+    display: block;
+}
+
+/* Category Tabs & Product List (unchanged) */
 .category-tabs {
     display: flex;
-    flex-wrap: wrap;    /* Allow multiple rows */
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
-    overflow-x: unset;  /* Remove horizontal scroll */
     white-space: normal;
 }
-
-.category-tabs::-webkit-scrollbar {
-    height: 8px;
-}
-
-.category-tabs::-webkit-scrollbar-thumb {
-    background-color: #94B9F1;
-    border-radius: 4px;
-}
-
 .category-tab {
     background-color: #94B9F1;
     border: none;
@@ -44,18 +67,16 @@ body {
     color: white;
     border-radius: 5px;
     cursor: pointer;
+    transition: background 0.2s;
 }
-
 .category-tab:hover {
     background-color: #7da9ee;
 }
-
 .product-list {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
 }
-
 .product-card {
     width: 150px;
     background-color: #ffffff;
@@ -64,23 +85,110 @@ body {
     padding: 10px;
     text-align: center;
     cursor: pointer;
+    transition: background 0.2s;
 }
-
 .product-card:hover {
     background-color: #E8F1FF;
 }
-
 .product-name {
     font-size: 16px;
     margin-bottom: 8px;
 }
-
 .product-price {
     color: #94B9F1;
     font-weight: bold;
 }
 
-/* RIGHT SIDE */
+/* Payment-Detail Panel */
+.payment-panel {
+    background: #ffffff;
+    border: 2px solid #94B9F1;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+.payment-panel h2 {
+    margin-bottom: 16px;
+    font-size: 20px;
+    color: #409eff;
+}
+.payment-panel .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+.payment-panel .info-row.total {
+    font-weight: bold;
+    border-top: 1px solid #ddd;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+.payment-panel .section {
+    margin-bottom: 16px;
+}
+.payment-panel .section label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+.payment-panel .section input,
+.payment-panel .section select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 2px solid #94B9F1;
+    border-radius: 5px;
+}
+.payment-panel .toggle-group {
+    display: flex;
+    gap: 10px;
+}
+.payment-panel .toggle {
+    flex: 1;
+    padding: 10px;
+    background: #eef2f7;
+    border-radius: 5px;
+    text-align: center;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+.payment-panel .toggle.on {
+    background: #94B9F1;
+    color: white;
+}
+.payment-panel .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.payment-panel .btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+}
+.payment-panel .btn.primary {
+    background: #94B9F1;
+    color: white;
+}
+.payment-panel .btn.primary:hover {
+    background: #94B9F1;
+}
+.payment-panel .btn.outline {
+    background: white;
+    border: 2px solid #94B9F1;
+    color: #409eff;
+}
+.payment-panel .btn.outline:hover {
+    background: #409eff;
+    color: white;
+}
+
+/* RIGHT SIDE (unchanged) */
 .pos-right {
     width: 40%;
     padding: 20px;
@@ -90,7 +198,6 @@ body {
     flex-direction: column;
     gap: 15px;
 }
-
 .barcode-scan input {
     width: 100%;
     padding: 12px;
@@ -98,65 +205,52 @@ body {
     border: 2px solid #94B9F1;
     border-radius: 5px;
 }
-
-.cart-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.cart-table th, .cart-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-.total-area {
-    font-size: 18px;
-    font-weight: bold;
-    text-align: right;
-}
-
 .controls {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
 }
-
 .controls button {
     flex: 1;
     padding: 10px;
-    border: none;
     background-color: #94B9F1;
     color: white;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background 0.2s;
 }
-
 .controls button:hover {
     background-color: #7da9ee;
 }
-
 .numpad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
-
 .num-button {
     padding: 20px;
     font-size: 18px;
-    border: none;
     background-color: #94B9F1;
     color: white;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background 0.2s;
 }
-
 .num-button:hover {
     background-color: #7da9ee;
 }
-
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.cart-table th, .cart-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
 .remove-item {
     background-color: #ff4d4d;
     color: white;
@@ -171,7 +265,11 @@ body {
     padding: 0;
     transition: background-color 0.3s;
 }
-
 .remove-item:hover {
     background-color: #e60000;
+}
+.total-area {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: right;
 }
