@@ -13,6 +13,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderProductController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Api\CategoryController;
 
 
 
@@ -124,3 +125,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reports/monthly-sales', [ReportController::class, 'monthlySalesReport']); // ✅ Monthly Sales Report
 });
 
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('categories', CategoryController::class);
+});
+
+Route::get('products/search-barcode', [ProductController::class, 'searchByBarcode']);

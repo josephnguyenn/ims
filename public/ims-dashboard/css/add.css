@@ -13,7 +13,6 @@
 
 
 .suggestion-box {
-    display: none; /* Initially hide the suggestion box */
     position: absolute; /* Make sure it’s positioned below the input */
     border: 1px solid #ccc;
     background-color: #fff;

@@ -14,6 +14,8 @@ if (!defined('BASE_URL')) {
             <li><a href="shipment-suppliers.php">Nhà Cung Cấp Lô Hàng</a></li>
             <li><a href="revenue.php">Doanh Thu</a></li>
             <li><a href="delivery-suppliers.php">Nhà Cung Cấp Giao Hàng</a></li>
+            <li><a href="category.php">Danh Mục Sản Phẩm</a></li>
+
         <?php endif; ?>
 
         <li><a href="shipments.php">Lô Hàng</a></li>

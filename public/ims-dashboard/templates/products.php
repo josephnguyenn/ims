@@ -280,8 +280,11 @@ $_SESSION['csrf_token'] = $csrfToken;
 
 
                     <div class="add-row">
-                        <label for="category">Danh mục:</label>
-                        <input type="text" id="category" placeholder="Nhập danh mục" required>
+                    <label for="category_id">Danh mục:</label>
+                    <select id="category_id" required>
+                        <option value="">-- Chọn danh mục --</option>
+                        <!-- options will be injected here -->
+                    </select>
                     </div>
 
                     <div class="add-row">
@@ -351,8 +354,11 @@ $_SESSION['csrf_token'] = $csrfToken;
 
 
         <div class="add-row">
-            <label for="edit_category">Danh mục:</label>
-            <input type="text" id="edit_category" required>
+        <label for="edit_category_id">Danh mục:</label>
+        <select id="edit_category_id" required>
+            <option value="">-- Chọn danh mục --</option>
+            <!-- options will be injected here -->
+        </select>
         </div>
 
         <div class="add-row">

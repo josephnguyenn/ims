@@ -17,7 +17,7 @@ class Product extends Model
         'original_quantity',
         'price',
         'cost',
-        'category',
+        'category_id',
         'shipment_id',
         'tax',
         'expired_date',
@@ -26,6 +26,11 @@ class Product extends Model
     public function shipment()
     {
         return $this->belongsTo(Shipment::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
     // ✅ Automatically set actual_quantity, total_cost, and expired_date before saving

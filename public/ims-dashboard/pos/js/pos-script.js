@@ -1,161 +1,168 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const productList = document.getElementById('product-list');
-    const cartTableBody = document.querySelector('#cart-table tbody');
-    const totalCZK = document.getElementById('total-czk');
-    const totalEUR = document.getElementById('total-eur');
-    const printStatus = document.getElementById('print-status');
+document.addEventListener('DOMContentLoaded', () => {
+  const productList    = document.getElementById('product-list');
+  const cartTableBody  = document.querySelector('#cart-table tbody');
+  const totalCZK       = document.getElementById('total-czk');
+  const totalEUR       = document.getElementById('total-eur');
+  const printStatus    = document.getElementById('print-status');
+  let   cart           = {};
+  let   autoPrint      = false;
+  let   EUR_RATE       = 25;
 
-    let cart = {};
-    let autoPrint = false;
-    let EUR_RATE = 25; // Will be loaded dynamically
+  // 1) Load exchange rate
+  fetch(`${BASE_URL}/api/get_exchange_rate.php`)
+    .then(r => r.json())
+    .then(data => { EUR_RATE = parseFloat(data.rate); updateCart(); })
+    .catch(console.error);
 
-    // Load exchange rate dynamically
-    fetch('api/get_exchange_rate.php')
-        .then(res => res.json())
-        .then(data => {
-            EUR_RATE = parseFloat(data.rate);
-            updateCart();
-        });
-
-    // Category Switching
-    document.querySelectorAll('.category-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            const category = this.dataset.category;
-            fetch(`api/fetch_products.php?category=${encodeURIComponent(category)}`)
-                .then(response => response.text())
-                .then(html => {
-                    productList.innerHTML = html;
-                    attachProductEvents();
-                });
-        });
+  // 2) Wire up category tabs (click first on load)
+  const tabs = document.querySelectorAll('.category-tab');
+  tabs.forEach((btn, idx) => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(t=>t.classList.remove('active'));
+      btn.classList.add('active');
+      loadProducts(btn.dataset.categoryId);
     });
+    if (idx === 0) btn.click();
+  });
 
-    function attachProductEvents() {
-        document.querySelectorAll('.product-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const name = this.dataset.name;
-                const price = parseFloat(this.dataset.price);
-
-                if (cart[id]) {
-                    cart[id].qty += 1;
-                } else {
-                    cart[id] = { name, price, qty: 1 };
-                }
-                updateCart();
-            });
-        });
-    }
-
-    attachProductEvents();
-
-    function updateCart() {
-        cartTableBody.innerHTML = '';
-        let total = 0;
-
-        for (let id in cart) {
-            const item = cart[id];
-            const row = `<tr>
-                <td>${item.name}</td>
-                <td>${item.qty}</td>
-                <td>${item.price} CZK</td>
-                <td>${(item.qty * item.price).toFixed(2)} CZK</td>
-                <td><button class="remove-item" data-id="${id}">✖</button></td>
-            </tr>`;
-            cartTableBody.innerHTML += row;
-            total += item.qty * item.price;
-        }
-
-        totalCZK.innerText = `${total.toFixed(2)} CZK`;
-        totalEUR.innerText = `${(total / EUR_RATE).toFixed(2)} EUR`;
-
-        // Handle Remove Buttons
-        document.querySelectorAll('.remove-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                delete cart[id];
-                updateCart();
-            });
-        });
-    }
-
-    document.getElementById('page-up').addEventListener('click', function() {
-        adjustLastQty(1);
+  // Fetch + render products
+  function loadProducts(categoryId) {
+    productList.innerHTML = '<div class="loading">Đang tải sản phẩm…</div>';
+    fetch(`${BASE_URL}/api/products?category_id=${categoryId}`, {
+      headers: {
+        'Authorization': `Bearer ${AUTH_TOKEN}`,
+        'Accept':        'application/json'
+      }
+    })
+    .then(r => r.json())
+    .then(list => {
+      renderProductList(list);
+      attachProductEvents();
+    })
+    .catch(err => {
+      console.error(err);
+      productList.innerHTML = '<div class="error">Không tải được sản phẩm.</div>';
     });
+  }
 
-    document.getElementById('page-down').addEventListener('click', function() {
-        adjustLastQty(-1);
+  // Build the cards
+  function renderProductList(list) {
+    productList.innerHTML = '';
+    list.forEach(p => {
+      const card = document.createElement('div');
+      card.className      = 'product-card';
+      card.dataset.id     = p.id;
+      card.dataset.name   = p.name;
+      card.dataset.price  = p.price;
+      card.innerHTML = `
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">
+          ${parseFloat(p.price).toFixed(2)} CZK
+        </div>`;
+      productList.appendChild(card);
     });
+  }
 
-    // Barcode Handling
-    document.getElementById('barcode-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const barcode = this.value.trim();
-            fetch(`api/fetch_products.php?barcode=${encodeURIComponent(barcode)}`)
-                .then(response => response.json())
-                .then(product => {
-                    if (product) {
-                        const id = product.id;
-                        if (cart[id]) {
-                            cart[id].qty += 1;
-                        } else {
-                            cart[id] = { name: product.name, price: parseFloat(product.price), qty: 1 };
-                        }
-                        updateCart();
-                        this.value = '';
-                    }
-                });
-        }
-    });
-
-    // Numpad Interaction
-    document.querySelectorAll('.num-button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const number = this.innerText;
-            const barcodeInput = document.getElementById('barcode-input');
-            barcodeInput.value += number;
-        });
-    });
-
-    // Auto Print Toggle
-    document.getElementById('toggle-print').addEventListener('click', function() {
-        autoPrint = !autoPrint;
-        printStatus.innerText = autoPrint ? 'ON' : 'OFF';
-    });
-
-    // Print Invoice
-    document.getElementById('print-invoice').addEventListener('click', printInvoice);
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F11') {
-            e.preventDefault();
-            printInvoice();
-        }
-    if (e.key === 'PageUp') {
-        e.preventDefault();  // Prevent page scroll
-        adjustLastQty(1);
-    }
-    if (e.key === 'PageDown') {
-        e.preventDefault();  // Prevent page scroll
-        adjustLastQty(-1);
-    }
-    });
-
-    function printInvoice() {
-        if (Object.keys(cart).length === 0) {
-            alert('Cart is empty!');
-            return;
-        }
-        console.log("Printing Invoice...", cart);
-        if (autoPrint) window.print();
-        cart = {};
+  // “Add to cart” on click
+  function attachProductEvents() {
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id    = card.dataset.id;
+        const name  = card.dataset.name;
+        const price = parseFloat(card.dataset.price);
+        if (cart[id]) cart[id].qty++;
+        else          cart[id] = { name, price, qty: 1 };
         updateCart();
-    }
+      });
+    });
+  }
 
-    function adjustLastQty(change) {
-        const keys = Object.keys(cart);
-        if (keys.length === 0) return;
-        const lastKey = keys[keys.length - 1];
-        cart[lastKey].qty = Math.max(1, cart[lastKey].qty + change);
-        updateCart();
+  // Rebuild cart table & totals
+  function updateCart() {
+    cartTableBody.innerHTML = '';
+    let total = 0;
+    for (let id in cart) {
+      const { name, price, qty } = cart[id];
+      const lineTotal = price * qty;
+      total += lineTotal;
+      cartTableBody.innerHTML += `
+        <tr>
+          <td>${name}</td>
+          <td>${qty}</td>
+          <td>${price.toFixed(2)} CZK</td>
+          <td>${lineTotal.toFixed(2)} CZK</td>
+          <td>
+            <button class="remove-item" data-id="${id}">✖</button>
+          </td>
+        </tr>`;
     }
+    totalCZK.innerText = `${total.toFixed(2)} CZK`;
+    totalEUR.innerText = `${(total / EUR_RATE).toFixed(2)} EUR`;
+
+    document.querySelectorAll('.remove-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        delete cart[btn.dataset.id];
+        updateCart();
+      });
+    });
+  }
+
+  // Quantity adjustments
+  function adjustLastQty(delta) {
+    const keys = Object.keys(cart);
+    if (!keys.length) return;
+    const last = keys[keys.length-1];
+    cart[last].qty = Math.max(1, cart[last].qty + delta);
+    updateCart();
+  }
+  document.getElementById('page-up').addEventListener('click', () => adjustLastQty(1));
+  document.getElementById('page-down').addEventListener('click', () => adjustLastQty(-1));
+
+  // Barcode scanning
+  document.getElementById('barcode-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      const code = e.target.value.trim();
+      fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
+        headers:{
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          'Accept':        'application/json'
+        }
+      })
+      .then(r => r.json())
+      .then(prod => {
+        if (prod.id) {
+          if (cart[prod.id]) cart[prod.id].qty++;
+          else                cart[prod.id] = { name: prod.name, price: +prod.price, qty: 1 };
+          updateCart();
+        }
+      })
+      .catch(console.error)
+      .finally(() => e.target.value = '');
+    }
+  });
+
+  // Numpad
+  document.querySelectorAll('.num-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('barcode-input').value += btn.innerText;
+    });
+  });
+
+  // Print controls
+  document.getElementById('toggle-print').addEventListener('click', () => {
+    autoPrint = !autoPrint;
+    printStatus.innerText = autoPrint ? 'ON' : 'OFF';
+  });
+  function printInvoice() {
+    if (!Object.keys(cart).length) return alert('Cart is empty!');
+    if (autoPrint) window.print();
+    cart = {};
+    updateCart();
+  }
+  document.getElementById('print-invoice').addEventListener('click', printInvoice);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F11')   { e.preventDefault(); printInvoice(); }
+    if (e.key === 'PageUp')   { e.preventDefault(); adjustLastQty(1); }
+    if (e.key === 'PageDown') { e.preventDefault(); adjustLastQty(-1); }
+  });
 });

@@ -10,14 +10,40 @@ use Illuminate\Support\Facades\Auth;
 class ProductController extends Controller
 {
     // ✅ View all products
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Product::with('shipment')->get(), 200);
+        // Start with the base query, eager‐loading shipment & category
+        $query = Product::with(['shipment','category']);
+
+        // If a category_id is provided, filter by it
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->query('category_id'));
+        }
+
+        // Execute and return as JSON
+        $products = $query->get();
+        return response()->json($products, 200);
     }
+
+    public function searchByBarcode(Request $r)
+    {
+        $code = $r->query('barcode');
+        if (!$code) {
+            return response()->json(null, 200);
+        }
+        $product = Product::where('code', $code)
+            ->orWhere('barcode', $code)      // if you have a separate barcode column
+            ->select('id','name','price')
+            ->first();
+
+        return response()->json($product, 200);
+    }
+
+    
 
     // ✅ Only Admins can create products
     public function store(Request $request)
-{
+    {
     if (!Auth::check()) {
         return response()->json(['message' => 'Unauthorized'], 401);
     }
@@ -28,7 +54,7 @@ class ProductController extends Controller
         'original_quantity' => 'required|integer|min:0',
         'price' => 'required|numeric|min:0',
         'cost' => 'required|numeric|min:0',
-        'category' => 'required|string',
+        'category_id'   => 'required|exists:product_categories,id',
         'shipment_id' => 'required|exists:shipments,id',
         'tax' => 'nullable|numeric|min:0',
         'expired_date' => 'nullable|date',
@@ -59,7 +85,7 @@ class ProductController extends Controller
     $product->price = $request->price;
     $product->cost = $request->cost;
     $product->total_cost = $request->original_quantity * $request->cost;
-    $product->category = $request->category;
+    $product->category_id = $request->category_id;
     $product->shipment_id = $request->shipment_id;
     $product->tax = $request->tax;
     $product->expired_date = $expiredDate;
@@ -108,7 +134,7 @@ class ProductController extends Controller
                 'cost' => 'sometimes|numeric|min:0',
                 'expired_date' => 'nullable|date',
                 'expiry_mode' => 'required|in:custom,inherit,none',
-                'category' => 'sometimes|string',
+                'category_id' => 'required|exists:product_categories,id',
                 'shipment_id' => 'sometimes|exists:shipments,id',
                 'tax' => 'sometimes|numeric|min:0',
             ]);
@@ -117,7 +143,7 @@ class ProductController extends Controller
         
             // ✅ Fill all other fields *except* expired_date
             $product->fill($request->only([
-                'name', 'code', 'original_quantity', 'price', 'cost', 'category', 'shipment_id', 'tax'
+                'name', 'code', 'original_quantity', 'price', 'cost', 'category_id', 'shipment_id', 'tax'
             ]));
         
             // ✅ Now handle expired_date *last* based on mode
@@ -156,11 +182,12 @@ class ProductController extends Controller
                 return response()->json([], 200); // Return empty list if no code
             }
         
-            $products = Product::where('code', 'like', "%$code%")
-                ->select('id', 'name', 'code', 'price', 'cost', 'tax', 'category')
-                ->limit(10)
-                ->get();
-        
+        $products = Product::with('category:id,name')      // eager-load only the id & name
+            ->where('code', 'like', "%{$code}%")
+            ->select('id','name','code','price','cost','tax','category_id')
+            ->limit(10)
+            ->get();
+                
             return response()->json($products, 200);
         }
 
