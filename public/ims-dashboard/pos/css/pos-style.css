@@ -12,7 +12,7 @@ body {
 
 /* LEFT SIDE */
 .pos-left {
-    width: 70%;
+    width: 60%;
     padding: 20px;
     background-color: #E8F1FF;
     box-sizing: border-box;
@@ -82,7 +82,7 @@ body {
 
 /* RIGHT SIDE */
 .pos-right {
-    width: 30%;
+    width: 40%;
     padding: 20px;
     background-color: #ffffff;
     box-sizing: border-box;

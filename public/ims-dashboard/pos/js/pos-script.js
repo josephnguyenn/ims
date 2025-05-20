@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let   EUR_RATE       = 25;
 
   // 1) Load exchange rate
-  fetch(`${BASE_URL}pos/api/get_exchange_rate.php`)
+  fetch(`${BASE_URL}/ims-dashboard/pos/api/get_exchange_rate.php`)
     .then(r => r.json())
     .then(data => { EUR_RATE = parseFloat(data.rate); updateCart(); })
     .catch(console.error);
