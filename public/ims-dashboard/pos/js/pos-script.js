@@ -4,9 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalCZK       = document.getElementById('total-czk');
   const totalEUR       = document.getElementById('total-eur');
   const printStatus    = document.getElementById('print-status');
-  let   cart           = {};
-  let   autoPrint      = false;
-  let   EUR_RATE       = 25;
+  window.cart      = {};
+  window.autoPrint = false;
+  window.EUR_RATE  = 25;
+  
 
   // 1) Load exchange rate
   fetch(`${BASE_URL}/ims-dashboard/pos/api/get_exchange_rate.php`)
@@ -104,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
         delete cart[btn.dataset.id];
         updateCart();
       });
+    if (typeof updatePaymentDisplay === 'function') {
+    updatePaymentDisplay();
+  }
     });
   }
 

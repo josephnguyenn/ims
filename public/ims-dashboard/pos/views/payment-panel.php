@@ -42,9 +42,19 @@
   <div class="section">
     <label>Payment Method</label>
     <div class="toggle-group">
-      <button id="pm-method-cash" class="toggle on">Cash</button>
-      <button id="pm-method-card" class="toggle">Card</button>
+      <button id="pm-method-cash"     class="toggle on">Cash</button>
+      <button id="pm-method-transfer" class="toggle">Transfer</button>
+      <button id="pm-method-card"     class="toggle">Card</button>
     </div>
+  </div>
+
+  <!-- QR Code for Transfer -->
+  <div id="pm-qr-code-container" style="display:none; text-align:center; margin-bottom:16px;">
+    <img id="pm-qr-code" 
+         src="./uploads/qe.jpg" 
+         alt="Scan to Pay" 
+         style="width: 300px; height: 300px; object-fit: cover;"/>
+    <div>Scan QR to transfer</div>
   </div>
 
   <div class="action-buttons">

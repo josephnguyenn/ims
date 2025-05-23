@@ -50,8 +50,8 @@ while ($row = $res->fetch_assoc()) {
       <?php include __DIR__ . '/views/product-panel.php'; ?>
     </div>
 
-    <div id="panel-payment" class="inner-panel" style="display:none">
-      <?php include __DIR__ . '/views/payment-panel.php'; ?>
+    <div id="panel-payment" class="inner-panel" hidden>
+        <?php include __DIR__ . '/views/payment-panel.php'; ?>
     </div>
   </div>
 
@@ -105,8 +105,9 @@ while ($row = $res->fetch_assoc()) {
 </div>
 
 <script>
-  const BASE_URL   = "<?= BASE_URL ?>";
-  const AUTH_TOKEN = "<?=$_SESSION['token']?>";
+  const BASE_URL        = "<?= BASE_URL ?>";
+  const AUTH_TOKEN      = "<?=$_SESSION['token']?>";
+  const CURRENT_USER_ID = <?= json_encode($_SESSION['user_id'] ?? null) ?>;
 </script>
 <script src="js/pos-script.js"></script>
 <script src="js/pos-payment.js"></script>

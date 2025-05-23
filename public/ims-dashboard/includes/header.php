@@ -14,14 +14,14 @@ if (!isset($_SESSION)) {
         </span>
         
         <!-- POS/IMS Switch -->
-        <button onclick="window.location.href='../pos/index.php'" 
+        <button onclick="window.location.href='../pos/pos.php'" 
                 class="switch-btn">POS</button>
         <button onclick="window.location.href='../templates/dashboard.php'" 
             class="switch-btn">IMS</button>
 
         <?php
         $current_page = basename($_SERVER['PHP_SELF']);
-        if ($current_page === 'index.php') { // Assuming POS main page is index.php
+        if ($current_page === 'pos.php') { // Assuming POS main page is index.php
         ?>
             <button onclick="window.location.href='settings.php'" 
                     class="gear-btn" title="Cài đặt">
