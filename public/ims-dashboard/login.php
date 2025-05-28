@@ -1,4 +1,12 @@
 <?php
+session_set_cookie_params([
+  'lifetime' => 0,
+  'path'     => '/',             // <— make it valid site-wide
+  'domain'   => $_SERVER['HTTP_HOST'],
+  'secure'   => isset($_SERVER['HTTPS']),
+  'httponly' => true,
+  'samesite' => 'Lax'
+]);
 session_start();
 if (isset($_SESSION['token'])) {
     header("Location: templates/dashboard.php");

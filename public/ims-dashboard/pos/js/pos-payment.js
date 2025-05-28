@@ -17,12 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const printBtn        = document.getElementById('pm-print');
   let cart      = window.cart;
   let autoPrint = window.autoPrint;
-  let EUR_RATE  = window.EUR_RATE;
 
   // State
   let currency = 'CZK';
   let method   = 'cash';
-  // `cart`, `EUR_RATE`, `autoPrint`, `BASE_URL`, `AUTH_TOKEN` come from pos-script.js / pos.php
 
   function computeSubtotal() {
     return Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -40,18 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
     subtotalEl.textContent = `${sub.toFixed(2)} CZK`;
     grandEl.textContent    = `${grand.toFixed(2)} CZK`;
     roundedEl.textContent  = `${rounded.toFixed(2)} CZK`;
-    const rate = window.EUR_RATE;
+
     const tender = parseFloat(tenderInput.value) || 0;
-    let change;
-    if (currency === 'CZK') {
-      change = tender - rounded;
-    } else {
-      change = tender - (rounded / rate);
-    }
+    const rate   = window.EUR_RATE;
+    const change = currency === 'CZK'
+      ? tender - rounded
+      : tender - (rounded / rate);
     changeEl.textContent = `${change.toFixed(2)} ${currency}`;
   }
   window.updatePaymentDisplay = updatePaymentDisplay;
-
 
   // Currency toggles
   curCzkBtn.addEventListener('click', () => {
@@ -69,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePaymentDisplay();
   });
 
-  // Method toggles + QR code handling
+  // Method toggles + QR handling
   methodCashBtn.addEventListener('click', () => {
     method = 'cash';
     methodCashBtn.classList.add('on');
@@ -92,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     qrContainer.style.display = 'none';
   });
 
-  // Recompute whenever tip or tender changes
+  // Recompute on tip/tender change
   [tipInput, tenderInput].forEach(el =>
     el.addEventListener('input', updatePaymentDisplay)
   );
@@ -104,10 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const grand   = sub + tip;
     const rounded = roundHalf(grand);
     const tender  = parseFloat(tenderInput.value) || 0;
-    const rate = window.EUR_RATE;
-    const change = currency === 'CZK'
-      ? tender - rounded
-      : tender - (rounded / rate);
+    const rate    = window.EUR_RATE;
+    const change  = currency === 'CZK'
+                    ? tender - rounded
+                    : tender - (rounded / rate);
+
     // Build items payload
     const items = Object.entries(cart).map(([id, i]) => ({
       product_id: parseInt(id),
@@ -119,6 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const payload = {
       source:               'pos',
       cashier_id:           CURRENT_USER_ID,
+      customer_id:          null,           // guest
+      delivery_supplier_id: null,
+      paid_amount:          rounded,        // must match SQL paid_amount
       subtotal_czk:         sub,
       tip_czk:              tip,
       grand_total_czk:      grand,
@@ -132,33 +131,47 @@ document.addEventListener('DOMContentLoaded', () => {
       items
     };
 
-    fetch(`${BASE_URL}/api/pos-orders.php`, {
+    fetch('api/pos-orders.php', {
+      credentials: 'same-origin',
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${AUTH_TOKEN}`,
+        'Accept':        'application/json',
         'Content-Type':  'application/json'
       },
       body: JSON.stringify(payload)
     })
-    .then(r => r.json().then(b=>({ status: r.status, body: b })))
-    .then(({ status, body }) => {
-      if (status === 201) {
-        alert('Payment successful! Order #'+ body.id);
-        if (autoPrint) window.print();
-        // Clear cart and reset
-        cart = {};
-        updatePaymentDisplay();
-        document.getElementById('panel-product')
-                .querySelector('.category-tab.active')
-                .click();
-      } else {
-        alert('Error: ' + (body.message||JSON.stringify(body)));
+    .then(async res => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || res.statusText);
       }
+      return res.json();
     })
-    .catch(err => {
-      console.error(err);
-      alert('Network or server error.');
-    });
+    .then(data => {
+      alert(`Thanh toán thành công! Mã đơn #${data.id}`);
+
+      // — Clear both panels —
+      window.cart = {};
+      cart = window.cart;
+      window.updateCart();
+
+      tipInput.value    = '0';
+      tenderInput.value = '';
+      currency = 'CZK';
+      method   = 'cash';
+
+      curCzkBtn.classList.add('on');
+      curEurBtn.classList.remove('on');
+      tenderInput.placeholder = '0.00 CZK';
+      methodCashBtn.classList.add('on');
+      methodTransferBtn.classList.remove('on');
+      methodCardBtn.classList.remove('on');
+      qrContainer.style.display = 'none';
+
+      updatePaymentDisplay();
+      document.getElementById('open-payment').click();
+    })
   });
 
   // Print only
@@ -166,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (autoPrint) window.print();
   });
 
-  // Initial display
+  // Initial
   updatePaymentDisplay();
-  
 });

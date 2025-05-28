@@ -38,33 +38,45 @@ function loadOrders(page = 1) {
 
 
 function renderOrders(page) {
-    const orderTable = document.getElementById("order-table");
-    orderTable.innerHTML = "";
+  const orderTable = document.getElementById("order-table");
+  orderTable.innerHTML = "";
 
-    const start = (page - 1) * ORDERS_PER_PAGE;
-    const paginated = allOrders.slice(start, start + ORDERS_PER_PAGE);
+  const start = (page - 1) * ORDERS_PER_PAGE;
+  const paginated = allOrders.slice(start, start + ORDERS_PER_PAGE);
 
-    if (paginated.length === 0) {
-        orderTable.innerHTML = "<tr><td colspan='6'>No orders found.</td></tr>";
-        return;
-    }
+  if (paginated.length === 0) {
+    orderTable.innerHTML = "<tr><td colspan='6'>No orders found.</td></tr>";
+    return;
+  }
 
-    paginated.forEach(order => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${order.id}</td>
-            <td>${order.customer.name}</td>
-            <td>${order.delivery_supplier.name}</td>
-            <td>${order.total_price}Kč</td>
-            <td>${order.paid_amount}Kč</td>
-            <td>
-                <button onclick="window.location.href='order-products.php?order_id=${order.id}'">Quản lý sản phẩm</button>
-                <button onclick="openEditOrderForm(${order.id}, ${order.delivery_supplier.id}, ${order.paid_amount})">Sửa</button>
-                <button onclick="deleteOrder(${order.id})">Xóa</button>
-            </td>
-        `;
-        orderTable.appendChild(row);
-    });
+  paginated.forEach(order => {
+    // Safely get customer and supplier names (with fallbacks)
+    const custName = order.customer?.name ?? "Khách vãng lai";
+    const suppName = order.delivery_supplier?.name ?? "N/A";
+    // If you need the supplier ID (for edit), default to empty or 0
+    const suppId   = order.delivery_supplier?.id ?? "";
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${order.id}</td>
+      <td>${custName}</td>
+      <td>${suppName}</td>
+      <td>${order.total_price} Kč</td>
+      <td>${order.paid_amount} Kč</td>
+      <td>
+        <button onclick="window.location.href='order-products.php?order_id=${order.id}'">
+          Quản lý sản phẩm
+        </button>
+        <button onclick="openEditOrderForm(
+          ${order.id},
+          ${suppId},
+          ${order.paid_amount}
+        )">Sửa</button>
+        <button onclick="deleteOrder(${order.id})">Xóa</button>
+      </td>
+    `;
+    orderTable.appendChild(row);
+  });
 }
 
 function renderPagination(currentPage) {
@@ -100,6 +112,7 @@ function addOrder() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Accept":        "application/json",        // ← tell Laravel you want JSON 
             "Authorization": "Bearer " + sessionStorage.getItem("token")
         },
         body: JSON.stringify({ customer_id: customerId, delivery_supplier_id: deliverySupplierId })

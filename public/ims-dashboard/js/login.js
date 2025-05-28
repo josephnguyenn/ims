@@ -26,6 +26,7 @@ document.getElementById("login-form").addEventListener("submit", function(event)
                 body: JSON.stringify({ 
                     token: data.token, 
                     role: data.user.role,
+                    user_id: data.user.id,
                     name: data.user.name // ✅ Add this line!
                 }) // Send both token and role
             })

@@ -104,11 +104,18 @@ while ($row = $res->fetch_assoc()) {
 
 </div>
 
+<!-- Define your globals first -->
 <script>
   const BASE_URL        = "<?= BASE_URL ?>";
-  const AUTH_TOKEN      = "<?=$_SESSION['token']?>";
+  const AUTH_TOKEN      = "<?php echo $_SESSION['token']; ?>";
   const CURRENT_USER_ID = <?= json_encode($_SESSION['user_id'] ?? null) ?>;
+
+  // Now it’s safe to log them:
+  console.log('BASE_URL is', BASE_URL);
+  console.log('AUTH_TOKEN is', AUTH_TOKEN);
+  console.log('CURRENT_USER_ID is', CURRENT_USER_ID);
 </script>
+<!-- Then load your JS files -->
 <script src="js/pos-script.js"></script>
 <script src="js/pos-payment.js"></script>
 <script>

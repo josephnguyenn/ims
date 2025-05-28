@@ -1,10 +1,18 @@
 <?php
+session_set_cookie_params([
+  'lifetime' => 0,
+  'path'     => '/',             // <— make it valid site-wide
+  'domain'   => $_SERVER['HTTP_HOST'],
+  'secure'   => isset($_SERVER['HTTPS']),
+  'httponly' => true,
+  'samesite' => 'Lax'
+]);
 session_start();
 include "../define.php";
 
 // Redirect to POS if already logged in
 if (isset($_SESSION['token']) && isset($_SESSION['role'])) {
-    header("Location: index.php");
+    header("Location: pos.php");
     exit;
 }
 
@@ -68,7 +76,7 @@ $base_url = BASE_URL; // Ensure this is correctly set in define.php
                 .then(response => response.json())
                 .then(sessionData => {
                     if (sessionData.status === "success") {
-                        window.location.href = "index.php";
+                        window.location.href = "pos.php";
                     } else {
                         document.getElementById("error-message").innerText = "Session Error!";
                     }

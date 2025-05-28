@@ -68,8 +68,19 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                 <?php foreach ($orders as $order): ?>
                     <tr>
                         <td><?= htmlspecialchars($order['id']) ?></td>
-                        <td><?= htmlspecialchars($order['customer']['name']) ?></td>
-                        <td><?= htmlspecialchars($order['delivery_supplier']['name']) ?></td>
+                        <?php
+                        // If there's no customer object, show “Khách vãng lai”
+                        $custName = isset($order['customer']['name'])
+                                    ? $order['customer']['name']
+                                    : 'Khách vãng lai';
+                        ?>
+                        <td><?= htmlspecialchars($custName) ?></td>
+                        <td>
+                        <?= htmlspecialchars(
+                                $order['delivery_supplier']['name'] 
+                                ?? '—'      // or “N/A” / “Khách vãng lai” / whatever makes sense
+                            ) ?>
+                        </td>
                         <td>$<?= htmlspecialchars($order['total_price']) ?></td>
                         <td>$<?= htmlspecialchars($order['paid_amount']) ?></td>
                         <td>

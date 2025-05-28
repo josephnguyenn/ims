@@ -1,3 +1,8 @@
+const broadcast = new BroadcastChannel('pos-cart');
+
+window.currentPaymentMethod = 'cash';
+window.currentQrUrl        = null; 
+
 document.addEventListener('DOMContentLoaded', () => {
   const productList    = document.getElementById('product-list');
   const cartTableBody  = document.querySelector('#cart-table tbody');
@@ -48,21 +53,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Build the cards
   function renderProductList(list) {
-    productList.innerHTML = '';
-    list.forEach(p => {
-      const card = document.createElement('div');
-      card.className      = 'product-card';
-      card.dataset.id     = p.id;
-      card.dataset.name   = p.name;
-      card.dataset.price  = p.price;
-      card.innerHTML = `
-        <div class="product-name">${p.name}</div>
-        <div class="product-price">
-          ${parseFloat(p.price).toFixed(2)} CZK
-        </div>`;
-      productList.appendChild(card);
-    });
-  }
+      productList.innerHTML = '';
+      list.forEach(p => {
+        // 👉 Skip items with no stock
+        if ((p.actual_quantity ?? 0) <= 0) return;
+
+        const card = document.createElement('div');
+        card.className     = 'product-card';
+        card.dataset.id    = p.id;
+        card.dataset.name  = p.name;
+        card.dataset.price = p.price;
+        const shipmentText = p.shipment_id
+          ? `Shipment #${p.shipment_id}`
+          : '';
+
+        card.innerHTML = `
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">${parseFloat(p.price).toFixed(2)} CZK</div>
+          <div class="product-stock">
+            <strong>In stock:</strong> ${p.actual_quantity}
+          </div>
+          <div class="product-shipment"><em>${shipmentText}</em></div>
+        `;
+        productList.appendChild(card);
+      });
+    }
+
+
+
 
   // “Add to cart” on click
   function attachProductEvents() {
@@ -79,37 +97,55 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Rebuild cart table & totals
-  function updateCart() {
-    cartTableBody.innerHTML = '';
-    let total = 0;
-    for (let id in cart) {
-      const { name, price, qty } = cart[id];
-      const lineTotal = price * qty;
-      total += lineTotal;
-      cartTableBody.innerHTML += `
-        <tr>
-          <td>${name}</td>
-          <td>${qty}</td>
-          <td>${price.toFixed(2)} CZK</td>
-          <td>${lineTotal.toFixed(2)} CZK</td>
-          <td>
-            <button class="remove-item" data-id="${id}">✖</button>
-          </td>
-        </tr>`;
-    }
-    totalCZK.innerText = `${total.toFixed(2)} CZK`;
-    totalEUR.innerText = `${(total / EUR_RATE).toFixed(2)} EUR`;
+function updateCart() {
+  cartTableBody.innerHTML = '';
+  let total = 0;
 
-    document.querySelectorAll('.remove-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        delete cart[btn.dataset.id];
-        updateCart();
-      });
-    if (typeof updatePaymentDisplay === 'function') {
+  for (let id in cart) {
+    const { name, price, qty } = cart[id];
+    const lineTotal = price * qty;
+    total += lineTotal;
+    cartTableBody.innerHTML += `
+      <tr>
+        <td>${name}</td>
+        <td>${qty}</td>
+        <td>${price.toFixed(2)} CZK</td>
+        <td>${lineTotal.toFixed(2)} CZK</td>
+        <td>
+          <button class="remove-item" data-id="${id}">✖</button>
+        </td>
+      </tr>`;
+  }
+
+  totalCZK.innerText = `${total.toFixed(2)} CZK`;
+  totalEUR.innerText = `${(total / EUR_RATE).toFixed(2)} EUR`;
+
+  // attach removal handlers
+  document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      delete cart[btn.dataset.id];
+      updateCart();     // recursively re-render & broadcast
+    });
+  });
+
+  // update tied payment panel
+  if (typeof updatePaymentDisplay === 'function') {
     updatePaymentDisplay();
   }
-    });
-  }
+
+  // **broadcast to customer display**
+  broadcast.postMessage({
+    cart:      window.cart,
+    subtotal:  total,
+    grand:     total,   // or include tip/rounded if desired
+    payment_method: window.currentPaymentMethod,
+    qr_url:         window.currentQrUrl,
+  });
+}
+
+window.updateCart = updateCart;
+
+
 
   // Quantity adjustments
   function adjustLastQty(delta) {
@@ -163,6 +199,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         }
     });
+
+
+  document.getElementById('open-payment').addEventListener('click', () => {
+  // deactivate product tab
+  document.querySelectorAll('.inner-tab-button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.inner-panel').forEach(p => p.style.display = 'none');
+
+  // activate payment tab
+  const btn = document.querySelector('.inner-tab-button[data-target="panel-payment"]');
+  btn.classList.add('active');
+  document.getElementById('panel-payment').style.display = 'block';
+});
 
 
 
