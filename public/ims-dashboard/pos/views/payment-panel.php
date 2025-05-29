@@ -58,7 +58,7 @@
   </div>
 
   <div class="action-buttons">
-    <button id="pm-complete" class="btn primary">COMPLETE PAYMENT</button>
-    <button id="pm-print"    class="btn outline">PRINT RECEIPT</button>
+    <button id="pm-complete" class="btn primary">Hoàn tất</button>
+    <button id="pm-print"    class="btn outline">In hóa đơn (F11)</button>
   </div>
 </div>

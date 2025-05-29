@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>POS Receipt</title>
+  <style>
+    @media print {
+      .receipt { width: 78mm; font-family: monospace; font-size: 12px; }
+      .receipt, .receipt * { margin: 0; padding: 0; }
+      .header, .footer { text-align: center; margin: 8px 0; }
+      .info, .totals { margin: 4px 0; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 4px 0; }
+      th { border-bottom: 1px dashed #000; }
+      .items td:nth-child(1) { width: 12%; }  /* SL */
+      .items td:nth-child(2) { width: 52%; }  /* Tên mặt hàng */
+      .items td:nth-child(3),
+      .items td:nth-child(4) { width: 18%; text-align: right; }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <strong>{{STORE_NAME}}</strong><br>
+      {{STORE_ADDRESS}}
+    </div>
+    <div class="info">
+      <div>Ngày: {{DATE}} Giờ: {{TIME}}</div>
+      <div>Thu ngân: {{CASHIER}}</div>
+    </div>
+    <table class="items">
+      <thead>
+        <tr>
+          <th>SL</th><th>Sản phẩm</th><th>Giá</th><th>Thành tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Lặp qua từng mặt hàng -->
+        <tr>
+          <td>{{QTY}}</td>
+          <td>{{NAME}}</td>
+          <td>{{PRICE}}</td>
+          <td>{{LINE_TOTAL}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="totals">
+      <div><strong>Tổng CZK:</strong> {{TOTAL_CZK}}</div>
+      <div><strong>Tổng EUR:</strong> {{TOTAL_EUR}}</div>
+    </div>
+    <div class="footer">
+      Cảm ơn quý khách!<br>Hẹn gặp lại.
+    </div>
+  </div>
+</body>
+</html>

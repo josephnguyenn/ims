@@ -221,11 +221,15 @@ window.updateCart = updateCart;
     });
   });
 
-  // Print controls
-  document.getElementById('toggle-print').addEventListener('click', () => {
-    autoPrint = !autoPrint;
-    printStatus.innerText = autoPrint ? 'ON' : 'OFF';
-  });
+const togglePrintBtn   = document.getElementById('toggle-print');
+const printStatusElem  = document.getElementById('print-status');
+
+togglePrintBtn.addEventListener('click', () => {
+  window.autoPrint = !window.autoPrint;
+  printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
+});
+
+
   function printInvoice() {
     if (!Object.keys(cart).length) return alert('Cart is empty!');
     if (autoPrint) window.print();

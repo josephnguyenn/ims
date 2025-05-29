@@ -73,7 +73,6 @@ while ($row = $res->fetch_assoc()) {
       <button id="toggle-print">
         Auto Print: <span id="print-status">OFF</span>
       </button>
-      <button id="print-invoice">Print (F11)</button>
       <button id="open-payment">Payment</button>
     </div>
 
@@ -116,8 +115,10 @@ while ($row = $res->fetch_assoc()) {
   console.log('CURRENT_USER_ID is', CURRENT_USER_ID);
 </script>
 <!-- Then load your JS files -->
-<script src="js/pos-script.js"></script>
+ <script src="js/pos-script.js"></script>
+<script src="js/pos-invoice.js"></script>
 <script src="js/pos-payment.js"></script>
+
 <script>
   // Inner‐tab switching
   document.querySelectorAll('.inner-tab-button').forEach(btn => {

@@ -165,7 +165,7 @@ $_SESSION['csrf_token'] = $csrfToken;
 </div>
 <script>
     const BASE_URL = "<?= BASE_URL ?>";
-</script>
+</script>   
 <script src="../js/dashboard.js"></script>
 </body>
 </html>

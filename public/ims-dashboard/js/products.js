@@ -25,54 +25,54 @@ function getShipmentIdFromURL() {
     return params.get('shipment_id');
 }
 
-function loadProductData() {
-    const shipmentId = getShipmentIdFromURL();
-    const productTable = document.getElementById("product-table");
+    function loadProductData() {
+        const shipmentId = getShipmentIdFromURL();
+        const productTable = document.getElementById("product-table");
 
-    if (!productTable) {
-        console.error("❌ Product table element not found.");
-        return;
-    }
-
-    const url = shipmentId
-        ? `${BASE_URL}/api/products?shipment_id=${shipmentId}`
-        : `${BASE_URL}/api/products`;
-
-    fetch(url, {
-        headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
-    })
-    .then(response => response.json())
-    .then(products => {
-        productTable.innerHTML = "";
-
-        if (!products || products.length === 0) {
-            productTable.innerHTML = "<tr><td colspan='10'>No products found.</td></tr>";
+        if (!productTable) {
+            console.error("❌ Product table element not found.");
             return;
         }
 
-        products.forEach(product => {
-            let row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${product.id}</td>
-                <td>${product.name}</td>
-                <td>${product.code}</td>
-                <td>${product.original_quantity}</td>
-                <td>${product.actual_quantity}</td>
-                <td>${product.price}</td>
-                <td>${product.cost}</td>
-                <td>${product.total_cost}</td>
-                <td>Shipment #${product.shipment_id}</td>
-                <td>${product.expired_date || "N/A"}</td>
-                <td>
-                    <button onclick="openEditModal(${product.id})">Edit</button>
-                    <button onclick="deleteProduct(${product.id})">Delete</button>
-                </td>
-            `;
-            productTable.appendChild(row);
-        });
-    })
-    .catch(error => console.error("❌ Error loading product data:", error));
-}
+        const url = shipmentId
+            ? `${BASE_URL}/api/products?shipment_id=${shipmentId}`
+            : `${BASE_URL}/api/products`;
+
+        fetch(url, {
+            headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+        })
+        .then(response => response.json())
+        .then(products => {
+            productTable.innerHTML = "";
+
+            if (!products || products.length === 0) {
+                productTable.innerHTML = "<tr><td colspan='10'>No products found.</td></tr>";
+                return;
+            }
+
+            products.forEach(product => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>${product.code}</td>
+                    <td>${product.original_quantity}</td>
+                    <td>${product.actual_quantity}</td>
+                    <td>${product.price}</td>
+                    <td>${product.cost}</td>
+                    <td>${product.total_cost}</td>
+                    <td>Shipment #${product.shipment_id}</td>
+                    <td>${product.expired_date || "N/A"}</td>
+                    <td>
+                        <button onclick="openEditModal(${product.id})">Edit</button>
+                        <button onclick="deleteProduct(${product.id})">Delete</button>
+                    </td>
+                `;
+                productTable.appendChild(row);
+            });
+        })
+        .catch(error => console.error("❌ Error loading product data:", error));
+    }
 
 
 function loadCategoryOptions(selectId) {
