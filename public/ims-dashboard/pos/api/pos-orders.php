@@ -42,38 +42,37 @@ $mysqli->begin_transaction();
 
 try {
     // 1) Insert order
+    // 1) Insert order
     $stmt = $mysqli->prepare("
-    INSERT INTO orders (
-        source, cashier_id, customer_id, delivery_supplier_id, paid_amount,
-        subtotal_czk, tip_czk, tip_eur, grand_total_czk, rounded_total_czk,
-        payment_currency, amount_tendered_czk, amount_tendered_eur,
-        change_due_czk, change_due_eur, payment_method,
-        created_at, updated_at
-    ) VALUES (
-        ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW()
-    )
+        INSERT INTO orders (
+            source, cashier_id, customer_id, delivery_supplier_id, paid_amount,
+            subtotal_czk, tip_czk, tip_eur, grand_total_czk, rounded_total_czk,
+            payment_currency, amount_tendered_czk, amount_tendered_eur,
+            change_due_czk, change_due_eur, payment_method,
+            created_at, updated_at
+        ) VALUES (
+            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW()
+        )
     ");
-    
     $stmt->bind_param(
-    'siiiddddddsdddds',
-    $source,               // s
-    $cashierId,            // i
-    $customerId,           // i
-    $deliverySupplierId,   // i
-    $paid_amount,          // d
-    $subtotal_czk,         // d
-    $tip_czk,              // d
-    $tip_eur,              // d
-    $grand_total_czk,      // d
-    $rounded_total_czk,    // d
-    $payment_currency,     // s
-    $amount_tendered_czk,  // d
-    $amount_tendered_eur,  // d
-    $change_due_czk,       // d
-    $change_due_eur,       // d
-    $payment_method        // s
+        'siiiddddddsdddds',
+        $source,               // s
+        $cashierId,            // i
+        $customerId,           // i
+        $deliverySupplierId,   // i
+        $paid_amount,          // d
+        $subtotal_czk,         // d
+        $tip_czk,              // d
+        $tip_eur,              // d
+        $grand_total_czk,      // d
+        $rounded_total_czk,    // d
+        $payment_currency,     // s
+        $amount_tendered_czk,  // d
+        $amount_tendered_eur,  // d
+        $change_due_czk,       // d
+        $change_due_eur,       // d
+        $payment_method        // s
     );
-
     $stmt->execute();
     $orderId = $mysqli->insert_id;
     $stmt->close();
