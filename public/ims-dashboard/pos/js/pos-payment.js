@@ -25,21 +25,38 @@ document.addEventListener('DOMContentLoaded', () => {
     return Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
   }
   function roundHalf(x) { return Math.ceil(x * 2) / 2; }
-  function updatePaymentDisplay() {
-    const sub     = computeSubtotal();
-    const tip     = parseFloat(tipInput.value) || 0;
-    const grand   = sub + tip;
-    const rounded = roundHalf(grand);
+  // Cập nhật hiển thị thanh toán
+function updatePaymentDisplay() {
+  const sub     = computeSubtotal();              // subtotal hàng hóa
+  const tip     = parseFloat(tipInput.value) || 0;
+  const rate    = window.EUR_RATE;
+  let grand, rounded, tender, change, unit;
+
+  if (currency === 'CZK') {
+    grand   = sub; // KHÔNG cộng tip!
+    rounded = roundHalf(grand);
+    tender  = parseFloat(tenderInput.value) || 0;
+    change  = tender - rounded;
+    unit    = 'CZK';
+
     subtotalEl.textContent = `${sub.toFixed(2)} CZK`;
     grandEl.textContent    = `${grand.toFixed(2)} CZK`;
     roundedEl.textContent  = `${rounded.toFixed(2)} CZK`;
-    const tender = parseFloat(tenderInput.value) || 0;
-    const rate   = window.EUR_RATE;
-    const change = currency === 'CZK'
-      ? tender - rounded
-      : tender - (rounded / rate);
-    changeEl.textContent = `${change.toFixed(2)} ${currency}`;
+    changeEl.textContent   = `${change.toFixed(2)} CZK`;
+  } else {
+    grand   = sub / rate; // KHÔNG cộng tip!
+    rounded = roundHalf(grand);
+    tender  = parseFloat(tenderInput.value) || 0;
+    change  = tender - rounded;
+    unit    = 'EUR';
+
+    subtotalEl.textContent = `${(sub / rate).toFixed(2)} EUR`;
+    grandEl.textContent    = `${grand.toFixed(2)} EUR`;
+    roundedEl.textContent  = `${rounded.toFixed(2)} EUR`;
+    changeEl.textContent   = `${change.toFixed(2)} EUR`;
   }
+}
+
   window.updatePaymentDisplay = updatePaymentDisplay;
 
   // Toast không block UI
@@ -106,26 +123,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Chuẩn bị payload
-    const sub     = computeSubtotal();
-    const tip     = parseFloat(tipInput.value) || 0;
-    const grand   = sub + tip;
-    const rounded = roundHalf(grand);
-    const tender  = parseFloat(tenderInput.value) || 0;
+    // Chuẩn bị payload
+    const sub     = computeSubtotal();                       // Tổng tiền hàng
+    const tip     = parseFloat(tipInput.value) || 0;         // Tip nhập từ người dùng
+    const rate    = window.EUR_RATE;
+    let grand, rounded, tender;
+
+    if (currency === 'CZK') {
+      grand   = sub;                                         // KHÔNG cộng tip!
+      rounded = roundHalf(grand);
+      tender  = parseFloat(tenderInput.value) || 0;
+    } else {
+      grand   = sub / rate;                                  // KHÔNG cộng tip!
+      rounded = roundHalf(grand);
+      tender  = parseFloat(tenderInput.value) || 0;
+    }
+
     const payload = {
       source: 'pos',
       cashier_id: CURRENT_USER_ID,
       customer_id: null,
       paid_amount: rounded,
-      subtotal_czk: sub,
+      subtotal_czk: sub,                   // Chỉ tổng hàng hóa (CZK)
       tip_czk: currency === 'CZK' ? tip : null,
       tip_eur: currency === 'EUR' ? tip : null,
-      grand_total_czk: grand,
-      rounded_total_czk: rounded,
+      grand_total_czk: sub,                // KHÔNG cộng tip!
+      rounded_total_czk: rounded,          // KHÔNG cộng tip!
       payment_currency: currency,
       amount_tendered_czk: currency === 'CZK' ? tender : null,
       amount_tendered_eur: currency === 'EUR' ? tender : null,
       change_due_czk: currency === 'CZK' ? (tender - rounded) : null,
-      change_due_eur: currency === 'EUR' ? (tender - rounded / window.EUR_RATE) : null,
+      change_due_eur: currency === 'EUR' ? (tender - rounded / rate) : null,
       payment_method: method,
       items: Object.entries(cart).map(([id, i]) => ({
         product_id: +id,
@@ -133,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         unit_price: i.price
       }))
     };
+
 
     fetch('api/pos-orders.php', {
       credentials: 'same-origin',

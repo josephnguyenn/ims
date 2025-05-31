@@ -2,22 +2,22 @@
   <h2>Payment Detail</h2>
 
   <div class="info-row">
-    <span>Subtotal</span>
+    <span id="pm-subtotal-label">Subtotal (CZK)</span>
     <span id="pm-subtotal">0.00 CZK</span>
   </div>
 
   <div class="info-row">
-    <span>Tip (CZK)</span>
+    <span id="pm-tip-label">Tip (CZK)</span>
     <input type="number" id="pm-tip" step="0.01" value="0">
   </div>
 
   <div class="info-row total">
-    <span>Grand Total (CZK)</span>
+    <span id="pm-grand-label">Grand Total (CZK)</span>
     <span id="pm-grand">0.00 CZK</span>
   </div>
 
   <div class="info-row">
-    <span>Rounded (0.5 CZK)</span>
+    <span id="pm-rounded-label">Rounded (0.5 CZK)</span>
     <span id="pm-rounded">0.00 CZK</span>
   </div>
 
@@ -35,18 +35,18 @@
   </div>
 
   <div class="info-row">
-    <span>Change Due</span>
-    <span id="pm-change">0.00</span>
+    <span id="pm-change-label">Change Due</span>
+    <span id="pm-change">0.00 CZK</span>
   </div>
 
-  <div class="section">
-    <label>Payment Method</label>
-    <div class="toggle-group">
-      <button id="pm-method-cash"     class="toggle on">Cash</button>
-      <button id="pm-method-transfer" class="toggle">Transfer</button>
-      <button id="pm-method-card"     class="toggle">Card</button>
-    </div>
+<div class="section">
+  <label>Payment Method</label>
+  <div class="toggle-group">
+    <button id="pm-method-cash"     class="toggle on">Cash</button>
+    <button id="pm-method-transfer" class="toggle">Transfer</button>
+    <button id="pm-method-card"     class="toggle">Card</button>
   </div>
+</div>
 
   <!-- QR Code for Transfer -->
   <div id="pm-qr-code-container" style="display:none; text-align:center; margin-bottom:16px;">
