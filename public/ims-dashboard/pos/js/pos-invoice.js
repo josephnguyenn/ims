@@ -55,14 +55,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Hàm in hoá đơn
   async function printInvoice() {
-    if (!window.cart || !Object.keys(window.cart).length) {
-      return alert('Giỏ hàng trống!');
+    // Nếu cart trống, nhưng có lastReceipt thì in lại hóa đơn cuối
+    let printData;
+    if (window.cart && Object.keys(window.cart).length) {
+      // In hóa đơn hiện tại
+      printData = {
+        cart: window.cart,
+        eurRate: window.EUR_RATE,
+        cashierId: CURRENT_USER_ID,
+        shiftName: window.lastReceipt?.shiftName || "",
+        tip: window.lastReceipt?.tip || 0,
+        currency: window.lastReceipt?.currency || "CZK",
+        rounded: window.lastReceipt?.rounded || 0,
+        grand: window.lastReceipt?.grand || 0,
+        tender: window.lastReceipt?.tender || 0,
+        payment_method: window.lastReceipt?.payment_method || "cash",
+      };
+    } else if (window.lastReceipt) {
+      // In lại hóa đơn gần nhất
+      printData = window.lastReceipt;
+    } else {
+      alert('Không có hóa đơn nào để in lại!');
+      return;
     }
+
     try {
-      const receiptHtml = await generateReceiptHtml(
-        window.cart,
-        window.EUR_RATE,
-        CURRENT_USER_ID
+      const receiptHtml = await window.generateReceiptHtml(
+        printData.cart,
+        printData.eurRate,
+        printData.cashierId,
+        printData.shiftName,
+        printData.tip,
+        printData.currency,
+        printData.rounded,
+        printData.grand,
+        printData.tender,
+        printData.payment_method
       );
 
       const printWindow = window.open('', '_blank');
@@ -71,9 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
       printWindow.focus();
       printWindow.print();
 
-      // Clear cart sau khi in
-      window.cart = {};
-      if (typeof window.updateCart === 'function') window.updateCart();
+      // KHÔNG reset lastReceipt ở đây! Để user có thể in lại nhiều lần cho đến khi có hóa đơn mới.
+      // (nếu muốn clear lastReceipt sau mỗi checkout mới thì cập nhật bên payment.js)
     } catch (err) {
       console.error(err);
       alert('Lỗi khi tải template hoá đơn.');

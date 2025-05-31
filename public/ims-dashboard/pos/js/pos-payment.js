@@ -153,6 +153,21 @@ document.addEventListener('DOMContentLoaded', () => {
       // Giữ snapshot của cart trước khi clear
       const cartSnapshot = { ...window.cart };
 
+      // Lưu lại snapshot cho hóa đơn cuối cùng (đầy đủ thông tin cần thiết)
+      window.lastReceipt = {
+        cart: { ...cartSnapshot },
+        eurRate: window.EUR_RATE,
+        cashierId: CURRENT_USER_ID,
+        shiftName: shiftName,
+        tip: parseFloat(tipInput.value) || 0,
+        currency: currency,
+        rounded: rounded,
+        grand: grand,
+        tender: tender,
+        payment_method: method,
+        // có thể bổ sung các field khác nếu cần
+      };
+
       // Reset inputs và UI
       tipInput.value    = '';
       tenderInput.value = '';
