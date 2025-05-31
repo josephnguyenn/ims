@@ -109,11 +109,10 @@ if ($res = $mysqli->query("SELECT id, name FROM shifts ORDER BY sort_order ASC")
       <th>Ca</th>
       <th>Thu ngân</th>
       <th>PTTT</th>
-      <th>CZK</th>
-      <th>EUR</th>
+      <th>Thanh toán CZK</th>
+      <th>Thanh toán EUR</th>
       <th>Tip CZK</th>
       <th>Tip EUR</th>
-      <!-- <th>Hóa đơn</th> -->
     </tr>
   </thead>
   <tbody></tbody>
@@ -156,10 +155,10 @@ document.getElementById('btn-load-report').addEventListener('click', () => {
         <td>${inv.shift_name || '-'}</td>
         <td>${inv.cashier_name || inv.cashier_id || '-'}</td>
         <td>${inv.payment_method}</td>
-        <td>${parseFloat(inv.rounded_total_czk).toFixed(2)}</td>
-        <td>${parseFloat(inv.rounded_total_eur).toFixed(2)}</td>
-        <td>${parseFloat(inv.tip_czk).toFixed(2)}</td>
-        <td>${parseFloat(inv.tip_eur).toFixed(2)}</td>
+        <td>${parseFloat(inv.amount_tendered_czk || 0).toFixed(2)}</td>
+        <td>${parseFloat(inv.amount_tendered_eur || 0).toFixed(2)}</td>
+        <td>${parseFloat(inv.tip_czk || 0).toFixed(2)}</td>
+        <td>${parseFloat(inv.tip_eur || 0).toFixed(2)}</td>
         <td><button class="btn-view-receipt" data-order-id="${inv.id}">Xem hóa đơn</button></td>
       `;
       tbody.appendChild(tr);
