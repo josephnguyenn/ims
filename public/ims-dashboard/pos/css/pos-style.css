@@ -13,7 +13,7 @@ body {
 
 /* LEFT SIDE */
 .pos-left {
-    width: 60%;
+    width: 70%;
     padding: 20px;
     background-color: #E8F1FF;
     box-sizing: border-box;
@@ -190,7 +190,7 @@ body {
 
 /* RIGHT SIDE (unchanged) */
 .pos-right {
-    width: 40%;
+    width: 30%;
     padding: 20px;
     background-color: #ffffff;
     box-sizing: border-box;
@@ -200,7 +200,7 @@ body {
 }
 .barcode-scan input {
     width: 100%;
-    padding: 12px;
+    padding: 12px 0;
     font-size: 16px;
     border: 2px solid #94B9F1;
     border-radius: 5px;

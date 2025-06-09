@@ -20,7 +20,16 @@ if (isset($_GET['category'])) {
 
 if (isset($_GET['barcode'])) {
     $barcode = $_GET['barcode'];
-    $stmt = $mysqli->prepare("SELECT * FROM products WHERE code = ?");
+    // JOIN với shipments để lấy received_date, chọn lô hàng cũ nhất còn tồn
+    $stmt = $mysqli->prepare("
+        SELECT p.*, s.received_date
+        FROM products p
+        JOIN shipments s ON p.shipment_id = s.id
+        WHERE p.code = ?
+          AND p.actual_quantity > 0
+        ORDER BY s.received_date ASC
+        LIMIT 1
+    ");
     $stmt->bind_param("s", $barcode);
     $stmt->execute();
     $product = $stmt->get_result()->fetch_assoc();

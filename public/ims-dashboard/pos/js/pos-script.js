@@ -83,18 +83,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // “Add to cart” on click
-  function attachProductEvents() {
-    document.querySelectorAll('.product-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id    = card.dataset.id;
-        const name  = card.dataset.name;
-        const price = parseFloat(card.dataset.price);
-        if (cart[id]) cart[id].qty++;
-        else          cart[id] = { name, price, qty: 1 };
-        updateCart();
-      });
+function attachProductEvents() {
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id    = card.dataset.id;
+      const name  = card.dataset.name;
+      const price = parseFloat(card.dataset.price);
+      const maxQty = parseInt(card.dataset.maxQty || '999', 10); // Đảm bảo có actual_quantity
+
+      if (cart[id]) {
+        if (cart[id].qty < maxQty) {
+          cart[id].qty++;
+        } else {
+          alert('Đã đạt giới hạn tồn kho.');
+        }
+      } else {
+        cart[id] = { name, price, qty: 1, maxQty };
+      }
+      updateCart();
     });
-  }
+  });
+}
+
 
   // Rebuild cart table & totals
 function updateCart() {
