@@ -54,27 +54,39 @@
   </style>
 </head>
 <body>
-  <div class="panel left">
-    <div>
-      <h1>Thank you for shopping at Tappo!</h1>
-      <div class="summary">
-        <div class="row">
-          <span>Subtotal</span>
-          <span id="cust-sub">0.00 CZK</span>
-        </div>
-        <div class="row" style="font-weight: bold;">
-          <span>Total</span>
-          <span id="cust-grand">0.00 CZK</span>
-        </div>
+<div class="panel left">
+  <div>
+    <h1>Thank you for shopping at Tappo!</h1>
+    <div class="summary">
+      <!-- Subtotals -->
+      <div class="row">
+        <span>Subtotal (CZK):</span>
+        <span id="cust-sub-czk">0 CZK</span>
       </div>
-    </div>
-    <div class="qr-container">
-      <img id="cust-qr" src="./uploads/qe.jpg" alt="Scan to Pay">
-      <div id="cust-pay-label" style="margin-top:.5rem;">
-        Please select “Transfer” on the cashier screen
+      <div class="row">
+        <span>Subtotal (EUR):</span>
+        <span id="cust-sub-eur">0.00 EUR</span>
+      </div>
+      <!-- Totals (same as subtotals if no additional fees) -->
+      <div class="row" style="font-weight: bold;">
+        <span>Total (CZK):</span>
+        <span id="cust-grand-czk">0 CZK</span>
+      </div>
+      <div class="row" style="font-weight: bold;">
+        <span>Total (EUR):</span>
+        <span id="cust-grand-eur">0.00 EUR</span>
       </div>
     </div>
   </div>
+
+  <div class="qr-container">
+    <img id="cust-qr" src="./uploads/qe.jpg" alt="Scan to Pay">
+    <div id="cust-pay-label" style="margin-top:.5rem;">
+      Please select “Transfer” on the cashier screen
+    </div>
+  </div>
+</div>
+
 
   <div class="panel right">
     <h1>Your Items</h1>
@@ -86,42 +98,47 @@
     </table>
   </div>
 
-  <script>
-    const ch = new BroadcastChannel('pos-cart');
-    const tbody = document.querySelector('#cust-cart tbody');
-    const subEl = document.getElementById('cust-sub');
-    const grandEl = document.getElementById('cust-grand');
-    const qrImg = document.getElementById('cust-qr');
-    const payLabel = document.getElementById('cust-pay-label');
+<script>
+  const ch = new BroadcastChannel('pos-cart');
+  const tbody         = document.querySelector('#cust-cart tbody');
+  const subCzkEl      = document.getElementById('cust-sub-czk');
+  const subEurEl      = document.getElementById('cust-sub-eur');
+  const grandCzkEl    = document.getElementById('cust-grand-czk');
+  const grandEurEl    = document.getElementById('cust-grand-eur');
+  const qrImg         = document.getElementById('cust-qr');
+  const payLabel      = document.getElementById('cust-pay-label');
 
-    ch.onmessage = ({ data }) => {
-      const { cart, subtotal, grand, payment_method, qr_url } = data;
+  ch.onmessage = ({ data }) => {
+    const { cart, subtotal_czk, subtotal_eur, payment_method, qr_url } = data;
 
-      // rebuild rows
-      tbody.innerHTML = '';
-      Object.values(cart).forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${item.name}</td>
-          <td>${item.qty}</td>
-          <td>${(item.price * item.qty).toFixed(2)} CZK</td>
-        `;
-        tbody.appendChild(tr);
-      });
+    // rebuild cart rows
+    tbody.innerHTML = '';
+    Object.values(cart).forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${(item.price * item.qty).toFixed(2)} CZK</td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-      // update totals
-      subEl.textContent = subtotal.toFixed(2) + ' CZK';
-      grandEl.textContent = grand.toFixed(2) + ' CZK';
+    // update CZK & EUR
+    subCzkEl.textContent   = `${subtotal_czk} CZK`;
+    subEurEl.textContent   = `${subtotal_eur} EUR`;
+    grandCzkEl.textContent = `${subtotal_czk} CZK`;
+    grandEurEl.textContent = `${subtotal_eur} EUR`;
 
-      // QR logic
-      if (payment_method === 'transfer' && qr_url) {
-        qrImg.src = qr_url;
-        payLabel.textContent = 'Scan to pay via bank transfer';
-      } else {
-        qrImg.src = './uploads/qe.jpg';
-        payLabel.textContent = 'Please select “Transfer” on the cashier screen';
-      }
-    };
-  </script>
+    // QR / label logic
+    if (payment_method === 'transfer' && qr_url) {
+      qrImg.src       = qr_url;
+      payLabel.textContent = 'Scan to pay via bank transfer';
+    } else {
+      qrImg.src       = './uploads/qe.jpg';
+      payLabel.textContent = 'Please select “Transfer” on the cashier screen';
+    }
+  };
+</script>
+
 </body>
 </html>

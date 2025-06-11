@@ -2,123 +2,126 @@
 // File tách riêng logic in hoá đơn
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Cấu hình cửa hàng và đường dẫn template
-  const STORE_NAME    = 'Tappo Market';
-  const STORE_ADDRESS = 'Đà Nẵng, Vietnam';
-    const TEMPLATE_PATH = 'pos-receipt.html';
+  const TEMPLATE_PATH = 'pos-receipt.html';
 
-  // Hàm sinh HTML hoá đơn từ template
-  async function generateReceiptHtml(cart, eurRate, cashierId) {
+  /**
+   * data = {
+   *   cart,
+   *   eurRate,
+   *   cashierId,
+   *   invoiceNumber,
+   *   settings,
+   *   tip,
+   *   tender
+   * }
+   */
+  async function generateReceiptHtml(data) {
+    const { cart, eurRate, cashierId, invoiceNumber, settings, tip, tender } = data;
+
     // Load template
-    const tpl = await fetch(TEMPLATE_PATH)
+    let tpl = await fetch(TEMPLATE_PATH)
       .then(res => {
-        if (!res.ok) throw new Error(`Không tìm thấy template tại ${TEMPLATE_PATH} (${res.status})`);
+        if (!res.ok) throw new Error(`Không tìm thấy template tại ${TEMPLATE_PATH}`);
         return res.text();
       });
 
-    // Chuẩn bị dữ liệu
-    const now = new Date();
-    const items = Object.entries(cart).map(([id, i]) => ({
-      QTY:        i.qty,
-      NAME:       i.name,
-      PRICE:      i.price.toFixed(2),
-      LINE_TOTAL: (i.price * i.qty).toFixed(2)
-    }));
-    const totalCzk = Object.values(cart)
-      .reduce((sum, i) => sum + i.price * i.qty, 0)
-      .toFixed(2);
-    const totalEur = (totalCzk / eurRate).toFixed(2);
+    // Helper for CZK half-increment rounding
+    const roundHalf = x => Math.ceil(x * 2) / 2;
 
-    // Thay placeholders tĩnh
-    let html = tpl
-      .replace('{{STORE_NAME}}', STORE_NAME)
-      .replace('{{STORE_ADDRESS}}', STORE_ADDRESS)
-      .replace('{{DATE}}', now.toLocaleDateString())
-      .replace('{{TIME}}', now.toLocaleTimeString())
-      .replace('{{CASHIER}}', `#${cashierId}`)
-      .replace('{{TOTAL_CZK}}', totalCzk)
-      .replace('{{TOTAL_EUR}}', totalEur);
+    // Compute totals
+    const rawCzk       = Object.values(cart).reduce((sum,i) => sum + i.price*i.qty, 0);
+    const roundingDiff = (roundHalf(rawCzk) - rawCzk).toFixed(2);
+    const totalCzk     = roundHalf(rawCzk).toFixed(2);
+    const totalEur     = (rawCzk / eurRate).toFixed(2);
+    const totalUnits   = Object.values(cart).reduce((sum,i) => sum + i.qty, 0);
+    const changeCzk    = (tender - roundHalf(rawCzk)).toFixed(2);
 
-    // Tạo rows động cho items
-    const rows = items.map(item =>
-      `<tr>
-         <td>${item.QTY}</td>
-         <td>${item.NAME}</td>
-         <td>${item.PRICE}</td>
-         <td>${item.LINE_TOTAL}</td>
-       </tr>`
-    ).join('');
-    html = html.replace(/<tbody>[\s\S]*<\/tbody>/, `<tbody>${rows}</tbody>`);
+    // Build item rows
+    const rows = Object.values(cart).map(item => {
+      const vat = item.tax != null ? item.tax + '%' : '-';
+      const cleanName = item.name.replace(/\n/g, ' ').trim();  // <-- THÊM DÒNG NÀY
 
-    return html;
+      return `
+        <tr>
+          <td>${cleanName}</td>
+          <td>${item.qty}</td>
+          <td>${item.price.toFixed(2)}</td>
+          <td>${vat}</td>
+          <td>${(item.price*item.qty).toFixed(2)}</td>
+        </tr>`;
+    }).join('');
+
+    // Replace placeholders
+    tpl = tpl
+      .replace('{{STORE_NAME}}',      settings.storeName)
+      .replace('{{ICO}}',             settings.ico)
+      .replace('{{DIC}}',             settings.dic)
+      .replace('{{STORE_ADDRESS}}',   settings.address)
+      .replace('{{INVOICE_NUMBER}}',  invoiceNumber)
+      .replace('{{DATE}}',            new Date().toLocaleDateString())
+      .replace('{{TIME}}',            new Date().toLocaleTimeString())
+      .replace('{{CASHIER}}',         `#${cashierId}`)
+      .replace('{{ITEM_ROWS}}',       rows)
+      .replace('{{ROUNDING_DIFF}}',   roundingDiff)
+      .replace('{{TOTAL_CZK}}',       totalCzk)
+      .replace('{{TOTAL_EUR}}',       totalEur)
+      .replace('{{AMOUNT_TENDERED}}', tender.toFixed(2))
+      .replace('{{CHANGE}}',          changeCzk)
+      .replace('{{TIP}}',             tip.toFixed(2))
+      .replace('{{TOTAL_UNITS}}',     totalUnits)
+      .replace('{{THANK_YOU_LINE1}}', settings.thankYou1)
+      .replace('{{THANK_YOU_LINE2}}', settings.thankYou2);
+
+    return tpl;
   }
 
   // Hàm in hoá đơn
   async function printInvoice() {
-    // Nếu cart trống, nhưng có lastReceipt thì in lại hóa đơn cuối
     let printData;
+
     if (window.cart && Object.keys(window.cart).length) {
-      // In hóa đơn hiện tại
+      // Print right after payment
       printData = {
-        cart: window.cart,
-        eurRate: window.EUR_RATE,
-        cashierId: CURRENT_USER_ID,
-        shiftName: window.lastReceipt?.shiftName || "",
-        tip: window.lastReceipt?.tip || 0,
-        currency: window.lastReceipt?.currency || "CZK",
-        rounded: window.lastReceipt?.rounded || 0,
-        grand: window.lastReceipt?.grand || 0,
-        tender: window.lastReceipt?.tender || 0,
-        payment_method: window.lastReceipt?.payment_method || "cash",
+        cart:          window.cart,
+        eurRate:       window.EUR_RATE,
+        cashierId:     CURRENT_USER_ID,
+        invoiceNumber: window.lastReceipt?.invoiceNumber || '—',
+        settings:      SETTINGS,
+        tip:           window.lastReceipt?.tip || 0,
+        tender:        window.lastReceipt?.tender || 0
       };
     } else if (window.lastReceipt) {
-      // In lại hóa đơn gần nhất
+      // Re-print last invoice
       printData = window.lastReceipt;
     } else {
-      alert('Không có hóa đơn nào để in lại!');
-      return;
+      return alert('Không có hóa đơn nào để in lại!');
     }
 
     try {
-      const receiptHtml = await window.generateReceiptHtml(
-        printData.cart,
-        printData.eurRate,
-        printData.cashierId,
-        printData.shiftName,
-        printData.tip,
-        printData.currency,
-        printData.rounded,
-        printData.grand,
-        printData.tender,
-        printData.payment_method
-      );
-
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(receiptHtml);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-
-      // KHÔNG reset lastReceipt ở đây! Để user có thể in lại nhiều lần cho đến khi có hóa đơn mới.
-      // (nếu muốn clear lastReceipt sau mỗi checkout mới thì cập nhật bên payment.js)
+      // Pass a single data object (not positional args)
+      const receiptHtml = await generateReceiptHtml(printData);
+      const w = window.open('', '_blank');
+      w.document.write(receiptHtml);
+      w.document.close();
+      w.focus();
+      w.print();
     } catch (err) {
-      console.error(err);
-      alert('Lỗi khi tải template hoá đơn.');
+      console.error('Lỗi khi tạo hóa đơn:', err);
+      alert('Lỗi khi tạo hóa đơn.');
     }
   }
 
-  // Bind sự kiện cho nút in và phím F11
-  const btnPaymentPrint = document.getElementById('pm-print');
-  const btnInvoicePrint = document.getElementById('print-invoice');
-  if (btnPaymentPrint) btnPaymentPrint.addEventListener('click', printInvoice);
-  if (btnInvoicePrint) btnInvoicePrint.addEventListener('click', printInvoice);
+  // Bind print buttons
+  document.getElementById('pm-print')?.addEventListener('click', printInvoice);
+  document.getElementById('print-invoice')?.addEventListener('click', printInvoice);
   document.addEventListener('keydown', e => {
     if (e.key === 'F11') {
       e.preventDefault();
       printInvoice();
     }
   });
+
+  // Expose for pos-payment.js
   window.generateReceiptHtml = generateReceiptHtml;
   window.printInvoice        = printInvoice;
 });
-// Đoạn mã này tách riêng logic in hoá đơn từ các phần khác của POS

@@ -172,23 +172,44 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product updated successfully', 'product' => $product], 200);
         }
         
-        
-        
 
+    public function searchByCode(Request $request)
+        {
+            $code = $request->query('code');
+            if (! $code) {
+                return response()->json([], 200);
+            }
 
-   public function searchByCode(Request $request)
-    {
-        $code = $request->query('code');
-        if (!$code) {
-            return response()->json([], 200);
+            // 1) Lấy tất cả product cùng code và còn actual_quantity > 0
+            $items = Product::with('shipment')
+                ->where('code', $code)
+                ->where('actual_quantity', '>', 0)
+                ->get();
+
+            // 2) Sort theo ngày lô (order_date) ASC — lô cũ nhất trước
+            $sorted = $items->sortBy(function($p) {
+                // nếu shipment có order_date, dùng nó; nếu không, fallback created_at của product
+                return optional($p->shipment)->order_date
+                    ?? $p->created_at;
+            })->values();
+
+            // 3) Map sang cấu trúc JS cần dùng
+            $result = $sorted->map(function($p) {
+                return [
+                    'id'               => $p->id,
+                    'name'             => $p->name,
+                    'price'            => $p->price,
+                    'code'             => $p->code,
+                    'shipment_id'      => $p->shipment_id,
+                    'actual_quantity'  => $p->actual_quantity,
+                    // bạn có thể đổi thành $p->shipment->order_date nếu muốn
+                    'created_at'       => optional($p->shipment)->order_date
+                                        ?? $p->created_at->toDateTimeString(),
+                ];
+            });
+
+            return response()->json($result, 200);
         }
-        $products = Product::with('category:id,name')
-            ->where('code', 'like', "%{$code}%")
-            ->select('id','name','code','price','cost','tax','category_id')
-            ->limit(10)
-            ->get();
-        return response()->json($products, 200);
-    }
 
     public function destroy($id)
     {

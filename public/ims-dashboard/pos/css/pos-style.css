@@ -87,6 +87,12 @@ body {
     cursor: pointer;
     transition: background 0.2s;
 }
+
+.product-card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .product-card:hover {
     background-color: #E8F1FF;
 }
@@ -223,6 +229,16 @@ body {
 .controls button:hover {
     background-color: #7da9ee;
 }
+
+#page-up, #page-down{
+    background-color: #94B9F1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px;
+}
+
 .numpad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

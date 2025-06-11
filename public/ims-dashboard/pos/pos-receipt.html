@@ -5,17 +5,57 @@
   <title>POS Receipt</title>
   <style>
     @media print {
-      .receipt { width: 78mm; font-family: monospace; font-size: 12px; }
-      .receipt, .receipt * { margin: 0; padding: 0; }
-      .header, .footer { text-align: center; margin: 8px 0; }
-      .info, .totals { margin: 4px 0; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 4 px 0; }
-      th { border-bottom: 1px dashed #000; }
-      .items td:nth-child(1) { width: 12%; }  /* SL */
-      .items td:nth-child(2) { width: 52%; }  /* Tên mặt hàng */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .receipt {
+        width: 80mm;
+        padding: 0;
+        margin: 0 auto;
+      }
+
+      .header, .footer {
+        text-align: center;
+        margin: 8px 0;
+      }
+
+      .info, .totals {
+        margin: 4px 0;
+        padding: 0 4px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      th, td {
+        padding: 2px 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      th {
+        border-bottom: 1px dashed #000;
+        text-align: left;
+      }
+
+      .items td:nth-child(1) { width: 38%; text-align: left; }
+      .items td:nth-child(2) { width: 10%; text-align: center; }
       .items td:nth-child(3),
-      .items td:nth-child(4) { width: 18%; text-align: right; }
+      .items td:nth-child(4),
+      .items td:nth-child(5) { width: 16%; text-align: right; }
     }
   </style>
 </head>
@@ -23,34 +63,53 @@
   <div class="receipt">
     <div class="header">
       <strong>{{STORE_NAME}}</strong><br>
-      {{STORE_ADDRESS}}
+      IČO: {{ICO}}<br>
+      DIČ: {{DIC}}<br>
+      PRODEJNA: {{STORE_ADDRESS}}
     </div>
+
     <div class="info">
-      <div>Ngày: {{DATE}} Giờ: {{TIME}}</div>
-      <div>Thu ngân: {{CASHIER}}</div>
+      <div>Daň. doklad: {{INVOICE_NUMBER}}</div>
+      <div>Datum: {{DATE}} Čas: {{TIME}}</div>
     </div>
+
+    <hr>
+
     <table class="items">
       <thead>
         <tr>
-          <th>SL</th><th>Sản phẩm</th><th>Giá</th><th>Thành tiền</th>
+          <th>Název</th>
+          <th>Ks</th>
+          <th>Cena</th>
+          <th>DPH</th>
+          <th>Celkem</th>
         </tr>
       </thead>
       <tbody>
-        <!-- Lặp qua từng mặt hàng -->
-        <tr>
-          <td>{{QTY}}</td>
-          <td>{{NAME}}</td>
-          <td>{{PRICE}}</td>
-          <td>{{LINE_TOTAL}}</td>
-        </tr>
+        {{ITEM_ROWS}}
       </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">Zaokrouhleni</td>
+          <td>{{ROUNDING_DIFF}}</td>
+        </tr>
+      </tfoot>
     </table>
+
+    <hr>
+
     <div class="totals">
-      <div><strong>Tổng CZK:</strong> {{TOTAL_CZK}}</div>
-      <div><strong>Tổng EUR:</strong> {{TOTAL_EUR}}</div>
+      <div><strong>Celkem KČ:</strong> {{TOTAL_CZK}}</div>
+      <div><strong>TOTAL EUR:</strong> {{TOTAL_EUR}}</div>
+      <div><strong>Hotově:</strong> {{AMOUNT_TENDERED}}</div>
+      <div><strong>Vráceno:</strong> {{CHANGE}}</div>
+      <div><strong>Tips:</strong> {{TIP}}</div>
+      <div><strong>Počet ks na účtence:</strong> {{TOTAL_UNITS}}</div>
     </div>
+
     <div class="footer">
-      Cảm ơn quý khách!<br>Hẹn gặp lại.
+      {{THANK_YOU_LINE1}}<br>
+      {{THANK_YOU_LINE2}}
     </div>
   </div>
 </body>

@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(r => r.json())
     .then(list => {
       renderProductList(list);
-      attachProductEvents();
     })
     .catch(err => {
       console.error(err);
@@ -52,44 +51,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Build the cards
-  function renderProductList(list) {
-      productList.innerHTML = '';
-      list.forEach(p => {
-        // 👉 Skip items with no stock
-        if ((p.actual_quantity ?? 0) <= 0) return;
+function renderProductList(list) {
+  productList.innerHTML = '';
+  list.forEach(p => {
+    if ((p.actual_quantity ?? 0) <= 0) return;
+    const card = document.createElement('div');
+    card.className     = 'product-card';
+    card.dataset.id    = p.id;
+    card.dataset.name  = p.name;
+    card.dataset.price = p.price;
+    card.dataset.maxQty = p.actual_quantity;    // ← dùng maxQty
 
-        const card = document.createElement('div');
-        card.className     = 'product-card';
-        card.dataset.id    = p.id;
-        card.dataset.name  = p.name;
-        card.dataset.price = p.price;
-        const shipmentText = p.shipment_id
-          ? `Shipment #${p.shipment_id}`
-          : '';
+    card.innerHTML = `
+      <div class="product-name">${p.name}</div>
+      <div class="product-price">${parseFloat(p.price).toFixed(2)} CZK</div>
+      <div class="product-stock">
+        <strong>In stock:</strong> ${p.actual_quantity}
+      </div>
+      <div class="product-shipment"><em>${p.shipment_id ? `Shipment #${p.shipment_id}` : ''}</em></div>
+    `;
+    productList.appendChild(card);
+  });
 
-        card.innerHTML = `
-          <div class="product-name">${p.name}</div>
-          <div class="product-price">${parseFloat(p.price).toFixed(2)} CZK</div>
-          <div class="product-stock">
-            <strong>In stock:</strong> ${p.actual_quantity}
-          </div>
-          <div class="product-shipment"><em>${shipmentText}</em></div>
-        `;
-        productList.appendChild(card);
-      });
-    }
-
-
+  attachProductEvents();
+  updateCardAvailability();
+}
 
 
   // “Add to cart” on click
 function attachProductEvents() {
   document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
-      const id    = card.dataset.id;
-      const name  = card.dataset.name;
-      const price = parseFloat(card.dataset.price);
-      const maxQty = parseInt(card.dataset.maxQty || '999', 10); // Đảm bảo có actual_quantity
+      const id     = card.dataset.id;
+      const name   = card.dataset.name;
+      const price  = parseFloat(card.dataset.price);
+      const maxQty = parseInt(card.dataset.maxQty, 10) || 0;  // ← đọc đúng
 
       if (cart[id]) {
         if (cart[id].qty < maxQty) {
@@ -98,10 +94,27 @@ function attachProductEvents() {
           alert('Đã đạt giới hạn tồn kho.');
         }
       } else {
-        cart[id] = { name, price, qty: 1, maxQty };
+        if (maxQty > 0) {
+          cart[id] = { name, price, qty: 1, maxQty };
+        } else {
+          alert('Sản phẩm đã hết hàng.');
+        }
       }
       updateCart();
     });
+  });
+}
+
+function updateCardAvailability() {
+  document.querySelectorAll('.product-card').forEach(card => {
+    const id        = card.dataset.id;
+    const maxQty    = parseInt(card.dataset.maxQty, 10) || 0;  // <-- đổi here
+    const inCartQty = (cart[id]?.qty) || 0;
+    if (inCartQty >= maxQty) {
+      card.classList.add('disabled');
+    } else {
+      card.classList.remove('disabled');
+    }
   });
 }
 
@@ -127,8 +140,12 @@ function updateCart() {
       </tr>`;
   }
 
-  totalCZK.innerText = `${total.toFixed(2)} CZK`;
-  totalEUR.innerText = `${(total / EUR_RATE).toFixed(2)} EUR`;
+  const czkRounded = Math.round(total);
+  const eurRounded = (total / EUR_RATE).toFixed(2);
+
+  totalCZK.innerText = `${czkRounded} CZK`;
+  totalEUR.innerText = `${eurRounded} EUR`;
+
 
   // attach removal handlers
   document.querySelectorAll('.remove-item').forEach(btn => {
@@ -146,11 +163,12 @@ function updateCart() {
   // **broadcast to customer display**
   broadcast.postMessage({
     cart:      window.cart,
-    subtotal:  total,
-    grand:     total,   // or include tip/rounded if desired
+    subtotal_czk:   czkRounded,
+    subtotal_eur:   eurRounded,
     payment_method: window.currentPaymentMethod,
     qr_url:         window.currentQrUrl,
   });
+  updateCardAvailability();
 }
 
 window.updateCart = updateCart;
@@ -158,57 +176,87 @@ window.updateCart = updateCart;
 
 
   // Quantity adjustments
-  function adjustLastQty(delta) {
-    const keys = Object.keys(cart);
-    if (!keys.length) return;
-    const last = keys[keys.length-1];
-    cart[last].qty = Math.max(1, cart[last].qty + delta);
-    updateCart();
+function adjustLastQty(delta) {
+  const keys = Object.keys(cart);
+  if (!keys.length) return;
+  const lastKey = keys[keys.length - 1];
+  const item    = cart[lastKey];
+  const current = item.qty;
+  const maxQty  = item.maxQty;
+
+  if (delta > 0) {
+    // nếu đã đạt max thì báo và dừng
+    if (current >= maxQty) {
+      alert('Đã đạt giới hạn tồn kho.');
+      return;
+    }
+    item.qty = current + 1;
+  } else {
+    // chỉ giảm xuống tối thiểu 1
+    item.qty = Math.max(1, current - 1);
   }
+
+  updateCart();
+}
+
   document.getElementById('page-up').addEventListener('click', () => adjustLastQty(1));
   document.getElementById('page-down').addEventListener('click', () => adjustLastQty(-1));
 
   // Barcode scanning
   // Barcode scanning: lookup via product code
-    document.getElementById('barcode-input')
+  document.getElementById('barcode-input')
     .addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-        const code = e.target.value.trim();
-        if (!code) return;
+      if (e.key !== 'Enter') return;
+      const code = e.target.value.trim();
+      if (!code) return;
 
-        fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
-            headers: {
-            'Authorization': `Bearer ${AUTH_TOKEN}`,
-            'Accept':        'application/json'
-            }
-        })
-        .then(r => r.json())
-        .then(products => {
-            if (Array.isArray(products) && products.length > 0) {
-            // take the first matching product
-            const p = products[0];
-            const id    = p.id;
-            const name  = p.name;
-            const price = parseFloat(p.price);
-
-            if (cart[id]) cart[id].qty++;
-            else          cart[id] = { name, price, qty: 1 };
-
-            updateCart();
-            } else {
-            alert('Không tìm thấy sản phẩm với mã: ' + code);
-            }
-        })
-        .catch(err => {
-            console.error('Error fetching product by code:', err);
-            alert('Lỗi khi tìm sản phẩm.');
-        })
-        .finally(() => {
-            e.target.value = '';
-            e.target.focus();
-        });
+      fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
+        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Accept': 'application/json' }
+      })
+      .then(r => r.json())
+      .then(products => {
+        if (!Array.isArray(products) || products.length === 0) {
+          return alert('Không tìm thấy sản phẩm với mã: ' + code);
         }
-    });
+
+        const available = products
+          .filter(p => Number(p.actual_quantity) > 0)
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+        const totalStock = available.reduce((sum, lot) => sum + Number(lot.actual_quantity), 0);
+
+        if (totalStock === 0) {
+          return alert('Sản phẩm đã hết hàng.');
+        }
+
+        const p      = available[0];
+        const id     = p.id;
+        const name   = p.name;
+        const price  = parseFloat(p.price);
+        const maxQty = totalStock;
+
+        if (cart[id]) {
+          if (cart[id].qty < maxQty) {
+            cart[id].qty++;
+          } else {
+            alert('Đã đạt giới hạn tồn kho.');
+          }
+        } else {
+          cart[id] = { name, price, qty: 1, maxQty };
+        }
+
+        updateCart();
+      })
+      .catch(err => {
+        console.error('Error fetching product by code:', err);
+        alert('Lỗi khi tìm sản phẩm.');
+      })
+      .finally(() => {
+        e.target.value = '';
+        e.target.focus();
+      });
+  });
+
 
 
   document.getElementById('open-payment').addEventListener('click', () => {

@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\OrderProduct;
 use App\Models\Order;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class OrderProductController extends Controller
 {
@@ -20,44 +20,70 @@ class OrderProductController extends Controller
     // ✅ add products to an order
     public function store(Request $request)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $request->validate([
-            'order_id' => 'required|exists:orders,id',
+            'order_id'   => 'required|exists:orders,id',
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
+            'quantity'   => 'required|integer|min:1',
         ]);
 
-        $product = Product::find($request->product_id);
+        // 1) Load order & desired qty
+        $order = Order::findOrFail($request->order_id);
+        $qty   = $request->quantity;
 
-        if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
-        }
+        // 2) Grab one product row so we know the code & price
+        $initial = Product::findOrFail($request->product_id);
+        $code    = $initial->code;
 
-        // ✅ Check if product stock is sufficient
-        if ($product->actual_quantity < $request->quantity) {
+        // 3) Fetch ALL lots (product rows) with that code, in FIFO order
+        $lots = Product::with('shipment')
+            ->where('code', $code)
+            ->where('actual_quantity', '>', 0)
+            ->get()
+            ->sortBy(function($lot) {
+                return $lot->shipment && $lot->shipment->order_date
+                    ? $lot->shipment->order_date
+                    : $lot->created_at;
+            })
+            ->values();
+
+        // 4) Check total stock
+        $totalStock = $lots->sum('actual_quantity');
+        if ($totalStock < $qty) {
             return response()->json(['message' => 'Insufficient stock'], 400);
         }
 
-        // ✅ Deduct stock from product
-        $product->actual_quantity -= $request->quantity;
-        $product->save();
+        // 5) Deduct across shipments, then create the order line
+        DB::transaction(function() use ($order, $lots, $qty, $initial) {
+            $remaining = $qty;
 
-        $orderProduct = OrderProduct::create([
-            'order_id' => $request->order_id,
-            'product_id' => $request->product_id,
-            'quantity' => $request->quantity,
-            'price' => $product->price
-        ]);
+            foreach ($lots as $lot) {
+                if ($remaining <= 0) break;
+                $take = min($lot->actual_quantity, $remaining);
+                $lot->actual_quantity -= $take;
+                $lot->save();
+                $remaining -= $take;
+            }
 
-        // ✅ Update total price of order
-        $order = Order::find($request->order_id);
-        $order->updateTotalPrice();
+            OrderProduct::create([
+                'order_id'   => $order->id,
+                'product_id' => $initial->id,
+                'quantity'   => $qty,
+                'price'      => $initial->price,
+            ]);
 
-        return response()->json(['message' => 'Product added to order successfully', 'order_product' => $orderProduct], 201);
+            $order->updateTotalPrice();
+        });
+
+        return response()->json([
+            'message'        => 'Product added to order successfully',
+            'remainingStock' => $initial->fresh()->actual_quantity,
+        ], 201);
     }
+
 
     // ✅ View products in a single order (Admin & Staff)
     public function show($order_id)

@@ -212,25 +212,42 @@ function updatePaymentDisplay() {
       updatePaymentDisplay();
 
       // In hoá đơn nếu cần
+      // In hoá đơn nếu cần
       if (printWindow) {
-          generateReceiptHtml(cartSnapshot, window.EUR_RATE, CURRENT_USER_ID, shiftName)
-          .then(html => {
-            printWindow.document.write(html);
-            printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
-            printWindow.close();
+        generateReceiptHtml({
+          cart:          cartSnapshot,
+          eurRate:       window.EUR_RATE,
+          cashierId:     CURRENT_USER_ID,
+          invoiceNumber: data.id, // hoặc thay bằng data.invoice_number nếu có
+          settings: {
+            storeName:  'Tappo Market',
+            ico:        '28872380',
+            dic:        'CZ8002201944',
+            address:    'Đà Nẵng, Vietnam',
+            thankYou1:  'Cảm ơn quý khách!',
+            thankYou2:  'Hẹn gặp lại!'
+          },
+          tip:     parseFloat(tipInput.value) || 0,
+          tender:  tender
+        })
+        .then(html => {
+          printWindow.document.write(html);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
 
-            // Sau khi in xong mới clear cart chính thức
-            window.cart = {};
-            window.updateCart();
-            updatePaymentDisplay();
-          })
-          .catch(err => {
-            console.error('Lỗi tạo hóa đơn:', err);
-            printWindow.close();
-            alert('Không thể tạo hóa đơn.');
-          });
+          // Sau khi in xong mới clear cart chính thức
+          window.cart = {};
+          window.updateCart();
+          updatePaymentDisplay();
+        })
+        .catch(err => {
+          console.error('Lỗi tạo hóa đơn:', err);
+          printWindow.close();
+          alert('Không thể tạo hóa đơn.');
+        });
+
       } else {
         // Nếu không in: clear cart luôn
         window.cart = {};

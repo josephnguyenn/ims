@@ -67,8 +67,6 @@ while ($row = $res->fetch_assoc()) {
     </div>
 
     <div class="controls">
-      <button id="page-up">▲ Qty</button>
-      <button id="page-down">▼ Qty</button>
       <button id="weigh">Weigh</button>
       <button id="toggle-print">
         Auto Print: <span id="print-status">OFF</span>
@@ -80,6 +78,8 @@ while ($row = $res->fetch_assoc()) {
       <?php foreach ([1,2,3,4,5,6,7,8,9,0] as $n): ?>
         <button class="num-button"><?= $n ?></button>
       <?php endforeach; ?>
+        <button id="page-up">▲ Qty</button>
+        <button id="page-down">▼ Qty</button>
     </div>
 
     <table class="cart-table" id="cart-table">
