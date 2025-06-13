@@ -101,31 +101,39 @@ if ($res = $mysqli->query("SELECT id, name FROM shifts ORDER BY sort_order ASC")
   <button id="btn-load-report">Tải báo cáo</button>
 </div>
 
-<table class="pos-report-table" id="tbl-invoices">
-  <thead>
-    <tr>
-      <th>#ID</th>
-      <th>Ngày giờ</th>
-      <th>Ca</th>
-      <th>Thu ngân</th>
-      <th>PTTT</th>
-      <th>Thanh toán CZK</th>
-      <th>Thanh toán EUR</th>
-      <th>Tip CZK</th>
-      <th>Tip EUR</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div style="overflow-x:auto;">
+  <table class="pos-report-table" id="tbl-invoices">
+    <thead>
+      <tr>
+        <th>#ID</th>
+        <th>Ngày giờ</th>
+        <th>Ca</th>
+        <th>Thu ngân</th>
+        <th>PTTT</th>
+        <th>Thanh toán CZK</th>
+        <th>Thanh toán EUR</th>
+        <th>Tip CZK</th>
+        <th>Tip EUR</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
 <div class="summary-box">
   <div class="summary-item">CZK Cash: <strong><span id="sum-czk-cash">0.00</span></strong></div>
   <div class="summary-item">CZK Card: <strong><span id="sum-czk-card">0.00</span></strong></div>
+  <div class="summary-item">CZK Transfer: <strong><span id="sum-czk-transfer">0.00</span></strong></div>
+
   <div class="summary-item">EUR Cash: <strong><span id="sum-eur-cash">0.00</span></strong></div>
   <div class="summary-item">EUR Card: <strong><span id="sum-eur-card">0.00</span></strong></div>
+  <div class="summary-item">EUR Transfer: <strong><span id="sum-eur-transfer">0.00</span></strong></div>
+
   <div class="summary-item">Tip CZK: <strong><span id="sum-tip-czk">0.00</span></strong></div>
   <div class="summary-item">Tip EUR: <strong><span id="sum-tip-eur">0.00</span></strong></div>
 </div>
+
 
 
 
@@ -151,6 +159,14 @@ function loadReport() {
     data.invoices.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     data.invoices.forEach(inv => {
+      const czk_cash     = (inv.payment_method === 'cash'     && inv.payment_currency === 'CZK') ? inv.amount_tendered_czk : 0;
+      const czk_transfer = (inv.payment_method === 'transfer' && inv.payment_currency === 'CZK') ? inv.amount_tendered_czk : 0;
+      const czk_card     = (inv.payment_method === 'card'     && inv.payment_currency === 'CZK') ? inv.amount_tendered_czk : 0;
+
+      const eur_cash     = (inv.payment_method === 'cash'     && inv.payment_currency === 'EUR') ? inv.amount_tendered_eur : 0;
+      const eur_transfer = (inv.payment_method === 'transfer' && inv.payment_currency === 'EUR') ? inv.amount_tendered_eur : 0;
+      const eur_card     = (inv.payment_method === 'card'     && inv.payment_currency === 'EUR') ? inv.amount_tendered_eur : 0;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${inv.id}</td>
@@ -158,14 +174,15 @@ function loadReport() {
         <td>${inv.shift_name || '-'}</td>
         <td>${inv.cashier_name || inv.cashier_id || '-'}</td>
         <td>${inv.payment_method}</td>
-        <td>${parseFloat(inv.amount_tendered_czk || 0).toFixed(2)}</td>
-        <td>${parseFloat(inv.amount_tendered_eur || 0).toFixed(2)}</td>
+        <td>${parseFloat(inv.amount_tendered_czk || 0).toFixed(2)} (${inv.payment_method})</td>
+        <td>${parseFloat(inv.amount_tendered_eur || 0).toFixed(2)} (${inv.payment_method})</td>
         <td>${parseFloat(inv.tip_czk || 0).toFixed(2)}</td>
         <td>${parseFloat(inv.tip_eur || 0).toFixed(2)}</td>
         <td><button class="btn-view-receipt" data-order-id="${inv.id}">Xem hóa đơn</button></td>
       `;
       tbody.appendChild(tr);
     });
+
 
     // render summary
     document.getElementById('sum-czk-cash').textContent = data.summary.sum_czk_cash.toFixed(2);
@@ -174,6 +191,9 @@ function loadReport() {
     document.getElementById('sum-eur-card').textContent = data.summary.sum_eur_card.toFixed(2);
     document.getElementById('sum-tip-czk').textContent = data.summary.sum_tip_czk.toFixed(2);
     document.getElementById('sum-tip-eur').textContent = data.summary.sum_tip_eur.toFixed(2);
+    document.getElementById('sum-czk-transfer').textContent = data.summary.sum_czk_transfer.toFixed(2);
+    document.getElementById('sum-eur-transfer').textContent = data.summary.sum_eur_transfer.toFixed(2);
+
   })
   .catch(err => {
     console.error('Error loading report:', err);

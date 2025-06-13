@@ -68,8 +68,10 @@ $stmt->close();
 $summary = [
   'sum_czk_cash' => 0,
   'sum_czk_card' => 0,
+  'sum_czk_transfer' => 0,
   'sum_eur_cash' => 0,
   'sum_eur_card' => 0,
+  'sum_eur_transfer' => 0,
   'sum_tip_czk'  => 0,
   'sum_tip_eur'  => 0,
 ];
@@ -78,14 +80,17 @@ foreach ($invoices as $inv) {
   if ($inv['payment_method'] === 'cash') {
     $summary['sum_czk_cash'] += $inv['amount_tendered_czk'];
     $summary['sum_eur_cash'] += $inv['amount_tendered_eur'];
-  } else {
+  } elseif ($inv['payment_method'] === 'card') {
     $summary['sum_czk_card'] += $inv['amount_tendered_czk'];
     $summary['sum_eur_card'] += $inv['amount_tendered_eur'];
+  } elseif ($inv['payment_method'] === 'transfer') {
+    $summary['sum_czk_transfer'] += $inv['amount_tendered_czk'];
+    $summary['sum_eur_transfer'] += $inv['amount_tendered_eur'];
   }
+
   $summary['sum_tip_czk'] += $inv['tip_czk'];
   $summary['sum_tip_eur'] += $inv['tip_eur'];
 }
-
 
 // 6) Trả về JSON
 echo json_encode([
