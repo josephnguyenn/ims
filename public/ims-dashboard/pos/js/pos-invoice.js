@@ -2,6 +2,18 @@
 // File tách riêng logic in hoá đơn
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  if (!window.lastReceipt) {
+  const saved = localStorage.getItem('lastReceiptData');
+  if (saved) {
+    try {
+      window.lastReceipt = JSON.parse(saved);
+    } catch(e) {
+      console.warn('Không thể khôi phục hóa đơn cuối:', e);
+    }
+  }
+}
+
   const TEMPLATE_PATH = 'pos-receipt.html';
 
   /**
@@ -12,11 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
    *   invoiceNumber,
    *   settings,
    *   tip,
-   *   tender
+   *   tender,
+   *   paymentCurrency // NEW
    * }
    */
   async function generateReceiptHtml(data) {
-    const { cart, eurRate, cashierId, invoiceNumber, settings, tip, tender } = data;
+    const { cart, eurRate, cashierId, invoiceNumber, settings, tip, tender, paymentCurrency } = data;
 
     // Load template
     let tpl = await fetch(TEMPLATE_PATH)
@@ -34,12 +47,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalCzk     = roundHalf(rawCzk).toFixed(2);
     const totalEur     = (rawCzk / eurRate).toFixed(2);
     const totalUnits   = Object.values(cart).reduce((sum,i) => sum + i.qty, 0);
-    const changeCzk    = (tender - roundHalf(rawCzk)).toFixed(2);
+
+    // Calculate change and tender display
+    let changeDisplay = '';
+    let tenderDisplay = '';
+
+    if (paymentCurrency === 'EUR') {
+      const totalEurRounded = roundHalf(rawCzk / eurRate);
+      const changeEur = (tender - totalEurRounded).toFixed(2);
+      changeDisplay = `${changeEur} EUR`;
+      tenderDisplay = `${tender.toFixed(2)} EUR`;
+    } else {
+      const changeCzk = (tender - roundHalf(rawCzk)).toFixed(2);
+      changeDisplay = `${changeCzk} CZK`;
+      tenderDisplay = `${tender.toFixed(2)} CZK`;
+    }
 
     // Build item rows
     const rows = Object.values(cart).map(item => {
       const vat = item.tax != null ? item.tax + '%' : '-';
-      const cleanName = item.name.replace(/\n/g, ' ').trim();  // <-- THÊM DÒNG NÀY
+      const cleanName = item.name.replace(/\n/g, ' ').trim();
 
       return `
         <tr>
@@ -65,8 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace('{{ROUNDING_DIFF}}',   roundingDiff)
       .replace('{{TOTAL_CZK}}',       totalCzk)
       .replace('{{TOTAL_EUR}}',       totalEur)
-      .replace('{{AMOUNT_TENDERED}}', tender.toFixed(2))
-      .replace('{{CHANGE}}',          changeCzk)
+      .replace('{{AMOUNT_TENDERED}}', tenderDisplay)
+      .replace('{{CHANGE}}',          changeDisplay)
       .replace('{{TIP}}',             tip.toFixed(2))
       .replace('{{TOTAL_UNITS}}',     totalUnits)
       .replace('{{THANK_YOU_LINE1}}', settings.thankYou1)
@@ -80,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let printData;
 
     if (window.cart && Object.keys(window.cart).length) {
-      // Print right after payment
       printData = {
         cart:          window.cart,
         eurRate:       window.EUR_RATE,
@@ -88,17 +114,19 @@ document.addEventListener('DOMContentLoaded', () => {
         invoiceNumber: window.lastReceipt?.invoiceNumber || '—',
         settings:      SETTINGS,
         tip:           window.lastReceipt?.tip || 0,
-        tender:        window.lastReceipt?.tender || 0
+        tender:        window.lastReceipt?.tender || 0,
+        paymentCurrency: window.lastReceipt?.currency || 'CZK' // NEW
       };
     } else if (window.lastReceipt) {
-      // Re-print last invoice
-      printData = window.lastReceipt;
+      printData = {
+        ...window.lastReceipt,
+        settings: window.lastReceipt.settings || window.SETTINGS || {}
+      };
     } else {
       return alert('Không có hóa đơn nào để in lại!');
     }
 
     try {
-      // Pass a single data object (not positional args)
       const receiptHtml = await generateReceiptHtml(printData);
       const w = window.open('', '_blank');
       w.document.write(receiptHtml);
@@ -121,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Expose for pos-payment.js
+  // Expose
   window.generateReceiptHtml = generateReceiptHtml;
   window.printInvoice        = printInvoice;
 });

@@ -111,159 +111,141 @@ function updatePaymentDisplay() {
   [tipInput, tenderInput].forEach(el => el.addEventListener('input', updatePaymentDisplay));
 
   // Xử lý nút Hoàn tất
-  completeBtn.addEventListener('click', () => {
-    console.log('AutoPrint flag:', autoPrint);
+completeBtn.addEventListener('click', () => {
+  console.log('AutoPrint flag:', autoPrint);
 
-    let printWindow = null;
-    if (autoPrint) {
-      printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        return alert('Pop-up bị chặn hoặc không thể mở. Vui lòng cho phép.');
-      }
+  let printWindow = null;
+  if (autoPrint) {
+    printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      return alert('Pop-up bị chặn hoặc không thể mở. Vui lòng cho phép.');
     }
+  }
 
-    // Chuẩn bị payload
-    // Chuẩn bị payload
-    const sub     = computeSubtotal();                       // Tổng tiền hàng
-    const tip     = parseFloat(tipInput.value) || 0;         // Tip nhập từ người dùng
-    const rate    = window.EUR_RATE;
-    let grand, rounded, tender;
+  const sub     = computeSubtotal();
+  const tip     = parseFloat(tipInput.value) || 0;
+  const rate    = window.EUR_RATE;
+  let grand, rounded, tender;
 
-    if (currency === 'CZK') {
-      grand   = sub;                                         // KHÔNG cộng tip!
-      rounded = roundHalf(grand);
-      tender  = parseFloat(tenderInput.value) || 0;
-    } else {
-      grand   = sub / rate;                                  // KHÔNG cộng tip!
-      rounded = roundHalf(grand);
-      tender  = parseFloat(tenderInput.value) || 0;
-    }
+  if (currency === 'CZK') {
+    grand   = sub;
+    rounded = roundHalf(grand);
+    tender  = parseFloat(tenderInput.value) || 0;
+  } else {
+    grand   = sub / rate;
+    rounded = roundHalf(grand);
+    tender  = parseFloat(tenderInput.value) || 0;
+  }
 
-    const payload = {
-      source: 'pos',
-      cashier_id: CURRENT_USER_ID,
-      customer_id: null,
-      paid_amount: rounded,
-      subtotal_czk: sub,                   // Chỉ tổng hàng hóa (CZK)
-      tip_czk: currency === 'CZK' ? tip : null,
-      tip_eur: currency === 'EUR' ? tip : null,
-      grand_total_czk: sub,                // KHÔNG cộng tip!
-      rounded_total_czk: rounded,          // KHÔNG cộng tip!
-      payment_currency: currency,
-      amount_tendered_czk: currency === 'CZK' ? tender : null,
-      amount_tendered_eur: currency === 'EUR' ? tender : null,
-      change_due_czk: currency === 'CZK' ? (tender - rounded) : null,
-      change_due_eur: currency === 'EUR' ? (tender - rounded / rate) : null,
-      payment_method: method,
-      items: Object.entries(cart).map(([id, i]) => ({
-        product_id: +id,
-        quantity: i.qty,
-        unit_price: i.price
-      }))
-    };
+  const payload = {
+    source: 'pos',
+    cashier_id: CURRENT_USER_ID,
+    customer_id: null,
+    paid_amount: rounded,
+    subtotal_czk: sub,
+    tip_czk: currency === 'CZK' ? tip : null,
+    tip_eur: currency === 'EUR' ? tip : null,
+    grand_total_czk: sub,
+    rounded_total_czk: rounded,
+    payment_currency: currency,
+    amount_tendered_czk: currency === 'CZK' ? tender : null,
+    amount_tendered_eur: currency === 'EUR' ? tender : null,
+    change_due_czk: currency === 'CZK' ? (tender - rounded) : null,
+    change_due_eur: currency === 'EUR' ? (tender - rounded / rate) : null,
+    payment_method: method,
+    items: Object.entries(cart).map(([id, i]) => ({
+      product_id: +id,
+      quantity: i.qty,
+      unit_price: i.price
+    }))
+  };
 
+  fetch('api/pos-orders.php', {
+    credentials: 'same-origin',
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${AUTH_TOKEN}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.ok ? res.json() : res.json().then(e => { throw e; }))
+  .then(data => {
+    showToast(`Thanh toán thành công! Mã đơn #${data.id}`);
+    const shiftName = data.shift_name;
+    const cartSnapshot = { ...window.cart };
 
-    fetch('api/pos-orders.php', {
-      credentials: 'same-origin',
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${AUTH_TOKEN}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(res => res.ok ? res.json() : res.json().then(e => { throw e; }))
-    .then(data => {
-      showToast(`Thanh toán thành công! Mã đơn #${data.id}`);
-      
-      const shiftName = data.shift_name;
+    // Fetch cấu hình in hóa đơn rồi tạo lastReceipt và in nếu cần
+    return fetch('api/get_invoice_settings.php')
+      .then(res => res.json())
+      .then(config => {
+        window.lastReceipt = {
+          cart: cartSnapshot,
+          eurRate: window.EUR_RATE,
+          cashierId: CURRENT_USER_ID,
+          shiftName,
+          tip,
+          currency,
+          settings: config,
+          rounded,
+          grand,
+          tender,
+          payment_method: method
+        };
+        try {
+          localStorage.setItem('lastReceiptData', JSON.stringify(window.lastReceipt));
+        } catch (e) {
+          console.warn('Không thể lưu hóa đơn vào localStorage:', e);
+        }
 
-      // Giữ snapshot của cart trước khi clear
-      const cartSnapshot = { ...window.cart };
-
-      // Lưu lại snapshot cho hóa đơn cuối cùng (đầy đủ thông tin cần thiết)
-      window.lastReceipt = {
-        cart: { ...cartSnapshot },
-        eurRate: window.EUR_RATE,
-        cashierId: CURRENT_USER_ID,
-        shiftName: shiftName,
-        tip: parseFloat(tipInput.value) || 0,
-        currency: currency,
-        rounded: rounded,
-        grand: grand,
-        tender: tender,
-        payment_method: method,
-        // có thể bổ sung các field khác nếu cần
-      };
-
-      // Reset inputs và UI
-      tipInput.value    = '';
-      tenderInput.value = '';
-      currency = 'CZK';
-      method   = 'cash';
-      curCzkBtn.classList.add('on');
-      curEurBtn.classList.remove('on');
-      tenderInput.placeholder = '0.00 CZK';
-      methodCashBtn.classList.add('on');
-      methodTransferBtn.classList.remove('on');
-      methodCardBtn.classList.remove('on');
-      qrContainer.style.display = 'none';
-      updatePaymentDisplay();
-
-      // In hoá đơn nếu cần
-      // In hoá đơn nếu cần
-      if (printWindow) {
-        generateReceiptHtml({
-          cart:          cartSnapshot,
-          eurRate:       window.EUR_RATE,
-          cashierId:     CURRENT_USER_ID,
-          invoiceNumber: data.id, // hoặc thay bằng data.invoice_number nếu có
-          settings: {
-            storeName:  'Tappo Market',
-            ico:        '28872380',
-            dic:        'CZ8002201944',
-            address:    'Đà Nẵng, Vietnam',
-            thankYou1:  'Cảm ơn quý khách!',
-            thankYou2:  'Hẹn gặp lại!'
-          },
-          tip:     parseFloat(tipInput.value) || 0,
-          tender:  tender
-        })
-        .then(html => {
-          printWindow.document.write(html);
-          printWindow.document.close();
-          printWindow.focus();
-          printWindow.print();
-          printWindow.close();
-
-          // Sau khi in xong mới clear cart chính thức
-          window.cart = {};
-          window.updateCart();
-          updatePaymentDisplay();
-        })
-        .catch(err => {
-          console.error('Lỗi tạo hóa đơn:', err);
-          printWindow.close();
-          alert('Không thể tạo hóa đơn.');
-        });
-
-      } else {
-        // Nếu không in: clear cart luôn
+        if (printWindow) {
+          return generateReceiptHtml({
+            cart: cartSnapshot,
+            eurRate: window.EUR_RATE,
+            cashierId: CURRENT_USER_ID,
+            invoiceNumber: data.id,
+            settings: config,
+            tip,
+            tender,
+            paymentCurrency: currency
+          }).then(html => {
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+          });
+        }
+      })
+      .finally(() => {
+        // Clear cart & UI
         window.cart = {};
         window.updateCart();
         updatePaymentDisplay();
-      }
 
-      // Đóng panel payment
-      document.getElementById('open-payment').click();
-    })
-    .catch(err => {
-      console.error('Payment error:', err);
-      alert('Lỗi thanh toán.');
-      if (printWindow) printWindow.close();
-    });
+        tipInput.value = '';
+        tenderInput.value = '';
+        currency = 'CZK';
+        method = 'cash';
+        curCzkBtn.classList.add('on');
+        curEurBtn.classList.remove('on');
+        tenderInput.placeholder = '0.00 CZK';
+        methodCashBtn.classList.add('on');
+        methodTransferBtn.classList.remove('on');
+        methodCardBtn.classList.remove('on');
+        qrContainer.style.display = 'none';
+
+        // Đóng popup
+        document.getElementById('open-payment').click();
+      });
+  })
+  .catch(err => {
+    console.error('Payment error:', err);
+    alert('Lỗi thanh toán.');
+    if (printWindow) printWindow.close();
   });
+});
 
   // Hiển thị lần đầu
   updatePaymentDisplay();
