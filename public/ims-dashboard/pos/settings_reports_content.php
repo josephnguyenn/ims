@@ -131,7 +131,7 @@ if ($res = $mysqli->query("SELECT id, name FROM shifts ORDER BY sort_order ASC")
 
 <script>
 // 1) Fetch & render bảng báo cáo
-document.getElementById('btn-load-report').addEventListener('click', () => {
+function loadReport() {
   const shift = document.getElementById('shift-select').value;
   const from  = document.getElementById('date-from').value;
   const to    = document.getElementById('date-to').value;
@@ -144,9 +144,12 @@ document.getElementById('btn-load-report').addEventListener('click', () => {
     return r.json();
   })
   .then(data => {
-    // render table
     const tbody = document.querySelector('#tbl-invoices tbody');
     tbody.innerHTML = '';
+
+    // Sắp xếp theo thời gian mới nhất
+    data.invoices.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
     data.invoices.forEach(inv => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -176,7 +179,9 @@ document.getElementById('btn-load-report').addEventListener('click', () => {
     console.error('Error loading report:', err);
     alert('Không thể tải báo cáo. Vui lòng thử lại.');
   });
-});
+}
+
+document.getElementById('btn-load-report').addEventListener('click', loadReport);
 
 // 2) Modal popup hóa đơn
 function showModal(html) {
@@ -189,7 +194,6 @@ function showModal(html) {
      </div>`;
   document.getElementById('receipt-modal').style.display = 'block';
 
-  // **Chỉ ở đây mới được gán onclick!**
   document.getElementById('btn-print-receipt').onclick = function() {
     printModalReceipt();
   };
@@ -223,9 +227,6 @@ function printModalReceipt() {
   w.document.close();
   w.focus();
   w.print();
-
-  // Không đóng ngay, đợi user tự đóng hoặc dùng setTimeout (tùy ý)
-  // setTimeout(() => { w.close(); }, 1500);
 }
 
 // 3) Lắng nghe click nút Xem hóa đơn
@@ -241,7 +242,7 @@ document.addEventListener('click', function(e){
   }
 });
 
-// 4) Hàm render HTML hóa đơn (dựa vào template bạn gửi)
+// 4) Hàm render HTML hóa đơn
 function generateReceiptHtmlForModal(order, items) {
   const now = new Date(order.created_at);
   const cashier = order.cashier_name || order.cashier_id || '-';
@@ -281,7 +282,16 @@ function generateReceiptHtmlForModal(order, items) {
     </div>
   `;
 }
+
+// 5) Auto load báo cáo ngày hôm nay
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('date-from').value = today;
+  document.getElementById('date-to').value = today;
+  loadReport(); // Tự động tải
+});
 </script>
+
 
 <!-- Thêm modal popup cuối file (một lần duy nhất trong trang) -->
 <div id="receipt-modal" style="display:none;position:fixed;z-index:1000;top:0;left:0;right:0;bottom:0;background:#0005;">
