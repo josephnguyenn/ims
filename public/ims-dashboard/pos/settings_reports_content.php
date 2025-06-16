@@ -207,7 +207,7 @@ document.getElementById('btn-load-report').addEventListener('click', loadReport)
 function showModal(html) {
   document.getElementById('receipt-modal-content').innerHTML =
     `<button onclick="document.getElementById('receipt-modal').style.display='none'"
-      style="position:absolute;top:12px;right:18px;font-size:20px;background:none;border:none;cursor:pointer;">×</button>
+      style=" color: black; position:absolute;top:12px;right:18px;font-size:20px;background:none;border:none;cursor:pointer;">×</button>
      <button id="btn-print-receipt" style="position:absolute;top:12px;left:18px;padding:4px 12px;cursor:pointer;">🖨️ In hóa đơn</button>
      <div id="modal-receipt-scroll" style="overflow-y:auto;max-height:68vh;padding-right:10px;">
        <div id="modal-receipt-content">${html}</div>
@@ -266,14 +266,26 @@ document.addEventListener('click', function(e){
 function generateReceiptHtmlForModal(order, items) {
   const now = new Date(order.created_at);
   const cashier = order.cashier_name || order.cashier_id || '-';
-  const rows = items.map(item => `
-    <tr>
-      <td>${item.quantity}</td>
-      <td>${item.product_name || item.product_id}</td>
-      <td>${parseFloat(item.price).toFixed(2)}</td>
-      <td>${(item.quantity * item.price).toFixed(2)}</td>
-    </tr>
-  `).join('');
+
+  const rows = items.map(item => {
+    const name = item.product_name || item.product_id;
+    const qty = item.quantity;
+    const price = parseFloat(item.price).toFixed(2);
+    const vat = item.tax != null ? item.tax + '%' : '-';
+    const total = (qty * item.price).toFixed(2);
+
+    return `
+      <div style="margin:6px 0;">
+        <strong>${name}</strong><br>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span>${qty}x</span>
+          <span>${price}</span>
+          <span>${vat}</span>
+          <span>${total}</span>
+        </div>
+      </div>`;
+  }).join('');
+
   return `
     <div class="receipt" style="font-family:monospace;font-size:13px;max-width:330px;">
       <div class="header" style="text-align:center;margin:8px 0;">
@@ -284,14 +296,7 @@ function generateReceiptHtmlForModal(order, items) {
         <div>Ngày: ${now.toLocaleDateString()} Giờ: ${now.toLocaleTimeString()}</div>
         <div>Thu ngân: ${cashier}</div>
       </div>
-      <table class="items" style="width:100%;border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th>SL</th><th>Sản phẩm</th><th>Giá</th><th>Thành tiền</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
+      ${rows}
       <div class="totals" style="margin:4px 0;">
         <div><strong>Tổng CZK:</strong> ${order.rounded_total_czk}</div>
         <div><strong>Tổng EUR:</strong> ${(order.rounded_total_czk / window.EUR_RATE).toFixed(2)}</div>
@@ -302,6 +307,7 @@ function generateReceiptHtmlForModal(order, items) {
     </div>
   `;
 }
+
 
 // 5) Auto load báo cáo ngày hôm nay
 window.addEventListener('DOMContentLoaded', () => {

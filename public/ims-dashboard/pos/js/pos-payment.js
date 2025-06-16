@@ -125,15 +125,17 @@ completeBtn.addEventListener('click', () => {
   const sub     = computeSubtotal();
   const tip     = parseFloat(tipInput.value) || 0;
   const rate    = window.EUR_RATE;
-  let grand, rounded, tender;
+  let grand, rounded, tender, roundedInCzk;
 
   if (currency === 'CZK') {
     grand   = sub;
     rounded = roundHalf(grand);
+    roundedInCzk = rounded;
     tender  = parseFloat(tenderInput.value) || 0;
   } else {
     grand   = sub / rate;
-    rounded = roundHalf(grand);
+    rounded = roundHalf(grand);      // EUR rounded
+    roundedInCzk = Math.round(rounded * rate); // ✅ convert về CZK
     tender  = parseFloat(tenderInput.value) || 0;
   }
 
@@ -141,7 +143,7 @@ completeBtn.addEventListener('click', () => {
     source: 'pos',
     cashier_id: CURRENT_USER_ID,
     customer_id: null,
-    paid_amount: rounded,
+    paid_amount: roundedInCzk,
     subtotal_czk: sub,
     tip_czk: currency === 'CZK' ? tip : null,
     tip_eur: currency === 'EUR' ? tip : null,

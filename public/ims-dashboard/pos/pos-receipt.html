@@ -75,26 +75,12 @@
 
     <hr>
 
-    <table class="items">
-      <thead>
-        <tr>
-          <th>Název</th>
-          <th>Ks</th>
-          <th>Cena</th>
-          <th>DPH</th>
-          <th>Celkem</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{ITEM_ROWS}}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4">Zaokrouhleni</td>
-          <td>{{ROUNDING_DIFF}}</td>
-        </tr>
-      </tfoot>
-    </table>
+<div class="items">
+  {{ITEM_ROWS}}
+</div>
+<div style="padding: 4px;">
+  <div><strong>Zaokrouhleni:</strong> {{ROUNDING_DIFF}}</div>
+</div>
 
     <hr>
 
