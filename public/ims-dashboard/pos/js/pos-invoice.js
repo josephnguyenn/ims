@@ -36,8 +36,8 @@ async function generateReceiptHtml(data) {
   let tenderDisplay = '';
 
   if (paymentCurrency === 'EUR') {
-    const totalEurRounded = roundHalf(rawCzk / eurRate);
-    const changeEur = (tender - totalEurRounded).toFixed(2);
+    const grandEur = rawCzk / eurRate;
+    const changeEur = (tender - grandEur).toFixed(2);
     changeDisplay = `${changeEur} EUR`;
     tenderDisplay = `${tender.toFixed(2)} EUR`;
   } else {
@@ -147,41 +147,43 @@ async function generateReceiptHtml(data) {
 }
 
 
-  async function printInvoice() {
-    let printData;
+async function printInvoice() {
+  let printData;
 
-    if (window.cart && Object.keys(window.cart).length) {
-      printData = {
-        cart: window.cart,
-        eurRate: window.EUR_RATE,
-        cashierId: CURRENT_USER_ID,
-        invoiceNumber: window.lastReceipt?.invoiceNumber || '—',
-        settings: SETTINGS,
-        tip: window.lastReceipt?.tip || 0,
-        tender: window.lastReceipt?.tender || 0,
-        paymentCurrency: window.lastReceipt?.currency || 'CZK'
-      };
-    } else if (window.lastReceipt) {
-      printData = {
-        ...window.lastReceipt,
-        settings: window.lastReceipt.settings || window.SETTINGS || {}
-      };
-    } else {
-      return alert('Không có hóa đơn nào để in lại!');
-    }
-
-    try {
-      const receiptHtml = await generateReceiptHtml(printData);
-      const w = window.open('', '_blank');
-      w.document.write(receiptHtml);
-      w.document.close();
-      w.focus();
-      w.print();
-    } catch (err) {
-      console.error('Lỗi khi tạo hóa đơn:', err);
-      alert('Lỗi khi tạo hóa đơn.');
-    }
+  if (window.lastReceipt) {
+    printData = {
+      ...window.lastReceipt,
+      settings: window.lastReceipt.settings || window.SETTINGS || {},
+      invoiceNumber: window.lastReceipt.invoiceNumber || '—',
+      eurRate: window.lastReceipt.eurRate || window.EUR_RATE,
+    };
+  } else if (window.cart && Object.keys(window.cart).length) {
+    printData = {
+      cart: window.cart,
+      eurRate: window.EUR_RATE,
+      cashierId: CURRENT_USER_ID,
+      invoiceNumber: '—',
+      settings: SETTINGS,
+      tip: 0,
+      tender: 0,
+      paymentCurrency: 'CZK'
+    };
+  } else {
+    return alert('Không có hóa đơn nào để in lại!');
   }
+
+  try {
+    const receiptHtml = await generateReceiptHtml(printData);
+    const w = window.open('', '_blank');
+    w.document.write(receiptHtml);
+    w.document.close();
+    w.focus();
+    w.print();
+  } catch (err) {
+    console.error('Lỗi khi tạo hóa đơn:', err);
+    alert('Lỗi khi tạo hóa đơn.');
+  }
+}
 
   document.getElementById('pm-print')?.addEventListener('click', printInvoice);
   document.getElementById('print-invoice')?.addEventListener('click', printInvoice);
