@@ -26,7 +26,7 @@
     <div class="toggle-group">
       <button id="pm-currency-czk" class="toggle on">CZK</button>
       <button id="pm-currency-eur" class="toggle">EUR</button>
-    </div>
+    </div>  
   </div>
 
   <div class="section">

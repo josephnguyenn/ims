@@ -27,13 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function roundHalf(x) { return Math.ceil(x * 2) / 2; }
   // Cập nhật hiển thị thanh toán
 function updatePaymentDisplay() {
-  const sub     = computeSubtotal();              // subtotal hàng hóa
+  const sub     = computeSubtotal();
   const tip     = parseFloat(tipInput.value) || 0;
   const rate    = window.EUR_RATE;
   let grand, rounded, tender, change, unit;
 
   if (currency === 'CZK') {
-    grand   = sub; // KHÔNG cộng tip!
+    grand   = sub;
     rounded = roundHalf(grand);
     tender  = parseFloat(tenderInput.value) || 0;
     change  = tender - rounded;
@@ -43,21 +43,29 @@ function updatePaymentDisplay() {
     grandEl.textContent    = `${grand.toFixed(2)} CZK`;
     roundedEl.textContent  = `${rounded.toFixed(2)} CZK`;
     changeEl.textContent   = `${change.toFixed(2)} CZK`;
-  } else {
-    grand   = sub / rate; // KHÔNG cộng tip!
-    rounded = roundHalf(grand);
-    tender  = parseFloat(tenderInput.value) || 0;
-    change  = tender - rounded;
-    unit    = 'EUR';
 
-    subtotalEl.textContent = `${(sub / rate).toFixed(2)} EUR`;
-    grandEl.textContent    = `${grand.toFixed(2)} EUR`;
-    roundedEl.textContent  = `${rounded.toFixed(2)} EUR`;
-    changeEl.textContent   = `${change.toFixed(2)} EUR`;
-  }
+    // ✅ Hiện dòng rounded
+    document.getElementById('pm-rounded-label').style.display = 'inline';
+    roundedEl.style.display = 'inline';
+    } else {
+      grand   = sub / rate;
+      tender  = parseFloat(tenderInput.value) || 0;
+      change  = tender - grand;
+      unit    = 'EUR';
+
+      subtotalEl.textContent = `${grand.toFixed(2)} EUR`;
+      grandEl.textContent    = `${grand.toFixed(2)} EUR`;
+      changeEl.textContent   = `${change.toFixed(2)} EUR`;
+
+      // ❌ Ẩn dòng rounded
+      document.getElementById('pm-rounded-label').style.display = 'none';
+      roundedEl.style.display = 'none';
+    }
 }
 
-  window.updatePaymentDisplay = updatePaymentDisplay;
+
+window.updatePaymentDisplay = updatePaymentDisplay;
+
 
   // Toast không block UI
   function showToast(msg) {
@@ -153,7 +161,7 @@ completeBtn.addEventListener('click', () => {
     amount_tendered_czk: currency === 'CZK' ? tender : null,
     amount_tendered_eur: currency === 'EUR' ? tender : null,
     change_due_czk: currency === 'CZK' ? (tender - rounded) : null,
-    change_due_eur: currency === 'EUR' ? (tender - rounded / rate) : null,
+    change_due_eur: currency === 'EUR' ? (tender - grand) : null,
     payment_method: method,
     items: Object.entries(cart).map(([id, i]) => ({
       product_id: +id,
@@ -201,25 +209,42 @@ completeBtn.addEventListener('click', () => {
           console.warn('Không thể lưu hóa đơn vào localStorage:', e);
         }
 
-        if (printWindow) {
-          return generateReceiptHtml({
-            cart: cartSnapshot,
-            eurRate: window.EUR_RATE,
-            cashierId: CURRENT_USER_ID,
-            invoiceNumber: data.id,
-            settings: config,
-            tip,
-            tender,
-            paymentCurrency: currency
-          }).then(html => {
-            printWindow.document.write(html);
-            printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
-            printWindow.close();
-          });
+        // Always generate the receipt HTML and save it
+      generateReceiptHtml({
+        cart: cartSnapshot,
+        eurRate: window.EUR_RATE,
+        cashierId: CURRENT_USER_ID,
+        invoiceNumber: data.id,
+        settings: config,
+        tip,
+        tender,
+        paymentCurrency: currency
+      }).then(html => {
+        // ✅ Save to DB even if autoPrint is off
+        fetch('api/save-invoice.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${AUTH_TOKEN}`
+          },
+          body: JSON.stringify({
+            order_id: data.id,
+            html: html
+          })
+        });
+
+        // 🖨️ Only print if autoPrint is on
+        if (autoPrint && printWindow) {
+          printWindow.document.write(html);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
         }
+      });
+
       })
+
       .finally(() => {
         // Clear cart & UI
         window.cart = {};

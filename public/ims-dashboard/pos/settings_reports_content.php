@@ -205,19 +205,50 @@ document.getElementById('btn-load-report').addEventListener('click', loadReport)
 
 // 2) Modal popup hóa đơn
 function showModal(html) {
-  document.getElementById('receipt-modal-content').innerHTML =
-    `<button onclick="document.getElementById('receipt-modal').style.display='none'"
+  document.getElementById('receipt-modal-content').innerHTML = `
+    <button onclick="document.getElementById('receipt-modal').style.display='none'"
       style=" color: black; position:absolute;top:12px;right:18px;font-size:20px;background:none;border:none;cursor:pointer;">×</button>
-     <button id="btn-print-receipt" style="position:absolute;top:12px;left:18px;padding:4px 12px;cursor:pointer;">🖨️ In hóa đơn</button>
-     <div id="modal-receipt-scroll" style="overflow-y:auto;max-height:68vh;padding-right:10px;">
-       <div id="modal-receipt-content">${html}</div>
-     </div>`;
+    <button id="btn-print-receipt" style="position:absolute;top:12px;left:18px;padding:4px 12px;cursor:pointer;">🖨️ In hóa đơn</button>
+    <div id="modal-receipt-scroll" style="overflow-y:auto;max-height:68vh;padding-right:10px;">
+      <style>
+        .receipt * {
+          font-family: 'Courier New', monospace !important;
+          font-size: 11px !important;
+          line-height: 1.4 !important;
+        }
+        .receipt {
+          width: 100%;
+          max-width: 360px;
+          margin: 0 auto;
+        }
+        .receipt .header,
+        .receipt .footer {
+          text-align: center;
+          margin: 8px 0;
+        }
+        .receipt .info,
+        .receipt .totals {
+          margin: 4px 0;
+          padding: 0 4px;
+        }
+        .receipt .items > div {
+          margin: 6px 0;
+          padding: 0 4px;
+        }
+        .receipt .items span {
+          font-size: 11px;
+        }
+      </style>
+      <div id="modal-receipt-content">${html}</div>
+    </div>
+  `;
   document.getElementById('receipt-modal').style.display = 'block';
 
-  document.getElementById('btn-print-receipt').onclick = function() {
+  document.getElementById('btn-print-receipt').onclick = function () {
     printModalReceipt();
   };
 }
+
 
 function printModalReceipt() {
   const html = document.getElementById('modal-receipt-content').innerHTML;
@@ -227,16 +258,41 @@ function printModalReceipt() {
     <head>
       <title>In hóa đơn</title>
       <style>
-        body { margin: 0; font-family: monospace; font-size: 13px; }
-        .receipt { max-width:330px;margin:0 auto;}
-        .header, .footer { text-align:center;margin:8px 0; }
-        .info, .totals { margin:4px 0; }
-        table { width:100%; border-collapse:collapse; }
-        th, td { padding:4px 0; }
-        th { border-bottom:1px dashed #000; }
-        .items td:nth-child(1) { width:12%; }
-        .items td:nth-child(2) { width:52%; }
-        .items td:nth-child(3), .items td:nth-child(4) { width:18%; text-align:right; }
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          font-family: 'Courier New', monospace;
+          font-size: 11px;
+          line-height: 1.4;
+        }
+        .receipt {
+          width: 80mm;
+          margin: 0 auto;
+        }
+        .header, .footer {
+          text-align: center;
+          margin: 8px 0;
+        }
+        .info, .totals {
+          margin: 4px 0;
+          padding: 0 4px;
+        }
+        .items > div {
+          margin: 6px 0;
+          padding: 0 4px;
+        }
+        .items span {
+          font-size: 11px;
+        }
+        @media print {
+          .receipt {
+            width: 80mm;
+            margin: 0 auto;
+          }
+        }
       </style>
     </head>
     <body>
@@ -249,64 +305,22 @@ function printModalReceipt() {
   w.print();
 }
 
+
 // 3) Lắng nghe click nút Xem hóa đơn
 document.addEventListener('click', function(e){
   if(e.target.classList.contains('btn-view-receipt')) {
     const orderId = e.target.dataset.orderId;
-    fetch(`api/pos-get-receipt.php?id=${orderId}`)
-      .then(r => r.json())
-      .then(data => {
-        const html = generateReceiptHtmlForModal(data.order, data.items);
+      fetch(`/tappomarket/public/ims-dashboard/pos/api/get-invoice-html.php?order_id=${orderId}`)
+      .then(r => r.text())
+      .then(html => {
         showModal(html);
       });
   }
 });
 
-// 4) Hàm render HTML hóa đơn
-function generateReceiptHtmlForModal(order, items) {
-  const now = new Date(order.created_at);
-  const cashier = order.cashier_name || order.cashier_id || '-';
 
-  const rows = items.map(item => {
-    const name = item.product_name || item.product_id;
-    const qty = item.quantity;
-    const price = parseFloat(item.price).toFixed(2);
-    const vat = item.tax != null ? item.tax + '%' : '-';
-    const total = (qty * item.price).toFixed(2);
 
-    return `
-      <div style="margin:6px 0;">
-        <strong>${name}</strong><br>
-        <div style="display:flex;justify-content:space-between;font-size:13px;">
-          <span>${qty}x</span>
-          <span>${price}</span>
-          <span>${vat}</span>
-          <span>${total}</span>
-        </div>
-      </div>`;
-  }).join('');
 
-  return `
-    <div class="receipt" style="font-family:monospace;font-size:13px;max-width:330px;">
-      <div class="header" style="text-align:center;margin:8px 0;">
-        <strong>Tappo Market</strong><br>
-        Đà Nẵng, Vietnam
-      </div>
-      <div class="info" style="margin:4px 0;">
-        <div>Ngày: ${now.toLocaleDateString()} Giờ: ${now.toLocaleTimeString()}</div>
-        <div>Thu ngân: ${cashier}</div>
-      </div>
-      ${rows}
-      <div class="totals" style="margin:4px 0;">
-        <div><strong>Tổng CZK:</strong> ${order.rounded_total_czk}</div>
-        <div><strong>Tổng EUR:</strong> ${(order.rounded_total_czk / window.EUR_RATE).toFixed(2)}</div>
-      </div>
-      <div class="footer" style="text-align:center;margin:8px 0;">
-        Cảm ơn quý khách!<br>Hẹn gặp lại.
-      </div>
-    </div>
-  `;
-}
 
 
 // 5) Auto load báo cáo ngày hôm nay

@@ -61,7 +61,7 @@ function renderOrders(page) {
       <td>${order.id}</td>
       <td>${custName}</td>
       <td>${suppName}</td>
-      <td>${order.total_price} Kč</td>
+      <td>${Math.round(order.total_price)} Kč</td>
       <td>${order.paid_amount} Kč</td>
       <td>
         <button onclick="window.location.href='order-products.php?order_id=${order.id}'">

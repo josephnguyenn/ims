@@ -81,13 +81,19 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                                 ?? '—'      // or “N/A” / “Khách vãng lai” / whatever makes sense
                             ) ?>
                         </td>
-                        <td>$<?= htmlspecialchars($order['total_price']) ?></td>
-                        <td>$<?= htmlspecialchars($order['paid_amount']) ?></td>
+                        <td><?= round($order['total_price']) ?> Kč</td>
+                        <td><?= htmlspecialchars($order['paid_amount']) ?> Kč</td>
                         <td>
                             <button onclick="window.location.href='order-products.php?order_id=<?= $order['id'] ?>'">Quản lý Sản phẩm</button>
                             <script>
                             </script>
-                            <button onclick="openEditOrderForm(<?= $order['id'] ?>, <?= $order['delivery_supplier']['id'] ?>, <?= $order['paid_amount'] ?>, <?= $order['total_price'] ?>)">Sửa</button>
+                            <?php
+                            $orderId = (int)$order['id'];
+                            $supplierId = isset($order['delivery_supplier']['id']) ? (int)$order['delivery_supplier']['id'] : 0;
+                            $paidAmount = isset($order['paid_amount']) ? (float)$order['paid_amount'] : 0;
+                            $totalPrice = isset($order['total_price']) ? (float)$order['total_price'] : 0;
+                            ?>
+                            <button onclick="openEditOrderForm(<?= $orderId ?>, <?= $supplierId ?>, <?= $paidAmount ?>, <?= $totalPrice ?>)">Sửa</button>
                             <button onclick="deleteOrder(<?= $order['id'] ?>)">Xóa</button>
                         </td>
                     </tr>
