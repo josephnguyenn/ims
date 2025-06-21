@@ -46,24 +46,30 @@ async function generateReceiptHtml(data) {
     tenderDisplay = `${tender.toFixed(2)} CZK`;
   }
 
-  const rows = Object.values(cart).map(item => {
-    const name = item.name.replace(/\n/g, ' ').trim();
-    const qty = item.qty;
-    const price = item.price.toFixed(2);
-    const vat = item.tax != null ? item.tax + '%' : '-';
-    const total = (item.price * item.qty).toFixed(2);
-
-    return `
-      <div style="margin:6px 0;">
-        <strong>${name}</strong><br>
-        <div style="display:flex;justify-content:space-between;font-size:11px;">
-          <span>${qty}x</span>
-          <span>${price}</span>
-          <span>${vat}</span>
-          <span>${total}</span>
+const rows = `
+  <div class="items">
+    <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:11px;border-bottom:1px dashed #000;margin-bottom:4px;padding:0 4px;">
+      <span style="flex:2;">Název</span>
+      <span style="flex:1;text-align:center;">Ks</span>
+      <span style="flex:1;text-align:right;">Cena</span>
+      <span style="flex:1;text-align:right;">DPH</span>
+      <span style="flex:1;text-align:right;">Celkem</span>
+    </div>
+    ${Object.values(cart).map(item => {
+      const total = (item.price * item.qty).toFixed(2);
+      return `
+        <div style="display:flex;justify-content:space-between;padding:0 4px;">
+          <span style="flex:2;">${item.name}</span>
+          <span style="flex:1;text-align:center;">${item.qty}</span>
+          <span style="flex:1;text-align:right;">${item.price.toFixed(2)}</span>
+          <span style="flex:1;text-align:right;">${(item.tax || 0).toFixed(0)}%</span>
+          <span style="flex:1;text-align:right;">${total}</span>
         </div>
-      </div>`;
-  }).join('');
+      `;
+    }).join('')}
+  </div>
+`;
+
 
   tpl = tpl
     .replace('{{STORE_NAME}}', settings.storeName)
