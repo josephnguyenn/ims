@@ -1,0 +1,184 @@
+Array
+(
+    [order_id] => 341
+    [html] => 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>POS Receipt</title>
+  <style>
+    @media print {
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+      .receipt {
+        width: 80mm;
+        padding: 0;
+        margin: 0 auto;
+      }
+      .header, .footer {
+        text-align: center;
+        margin: 8px 0;
+      }
+      .info, .totals {
+        margin: 4px 0;
+        padding: 0 4px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+      th, td {
+        padding: 2px 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      th {
+        border-bottom: 1px dashed #000;
+        text-align: left;
+      }
+      .items td:nth-child(1) { width: 38%; text-align: left; }
+      .items td:nth-child(2) { width: 10%; text-align: center; }
+      .items td:nth-child(3),
+      .items td:nth-child(4),
+      .items td:nth-child(5) { width: 16%; text-align: right; }
+    }
+  </style>
+</head>
+<body>
+  <!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>POS Receipt</title>
+  <style>
+    @media print {
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .receipt {
+        width: 80mm;
+        padding: 0;
+        margin: 0 auto;
+      }
+
+      .header, .footer {
+        text-align: center;
+        margin: 8px 0;
+      }
+
+      .info, .totals {
+        margin: 4px 0;
+        padding: 0 4px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      th, td {
+        padding: 2px 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      th {
+        border-bottom: 1px dashed #000;
+        text-align: left;
+      }
+
+      .items td:nth-child(1) { width: 38%; text-align: left; }
+      .items td:nth-child(2) { width: 10%; text-align: center; }
+      .items td:nth-child(3),
+      .items td:nth-child(4),
+      .items td:nth-child(5) { width: 16%; text-align: right; }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <strong>Test</strong><br>
+      IČO: 123121312<br>
+      DIČ: CZ8002201944<br>
+      PRODEJNA: CZK
+    </div>
+
+    <div class="info">
+      <div>Daň. doklad: undefined</div>
+      <div>Datum: 6/22/2025 Čas: 3:26:14 PM</div>
+    </div>
+
+    <hr>
+
+<div class="items">
+  
+console.log('🧾 Cart before rendering invoice:', cart);
+  <div class="items">
+    <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:11px;border-bottom:1px dashed #000;margin-bottom:4px;padding:0 4px;">
+      <span style="flex:2;">Název</span>
+      <span style="flex:1;text-align:center;">Ks</span>
+      <span style="flex:1;text-align:right;">Cena</span>
+      <span style="flex:1;text-align:right;">DPH</span>
+      <span style="flex:1;text-align:right;">Celkem</span>
+    </div>
+    
+        <div style="display:flex;justify-content:space-between;padding:0 4px;">
+          <span style="flex:2;">Bohemia Cibule & Smetana 130g</span>
+          <span style="flex:1;text-align:center;">1</span>
+          <span style="flex:1;text-align:right;">35.90</span>
+          <span style="flex:1;text-align:right;">12%</span>
+          <span style="flex:1;text-align:right;">35.90</span>
+        </div>
+      
+  </div>
+
+</div>
+<div style="padding: 4px;">
+  <div><strong>Zaokrouhleni:</strong> 0.10</div>
+</div>
+
+    <hr>
+
+    <div class="totals">
+      <div><strong>Celkem KČ:</strong> 36.00</div>
+      <div><strong>TOTAL EUR:</strong> 17.95</div>
+      <div><strong>Hotově:</strong> 40.00 CZK</div>
+      <div><strong>Vráceno:</strong> 4.00 CZK</div>
+      <div><strong>Tips:</strong> 0.00</div>
+      <div><strong>Počet ks na účtence:</strong> 1</div>
+    </div>
+
+    <div class="footer">
+      Cảm ơn quý khách!<br>
+      Hẹn gặp lại!
+    </div>
+  </div>
+</body>
+</html>
+
+</body>
+</html>
+)

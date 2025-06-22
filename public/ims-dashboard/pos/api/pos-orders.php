@@ -96,20 +96,20 @@ try {
     $itemStmt->close();
 
     // 3) Decrement stock
-    $decStmt = $mysqli->prepare("
-        UPDATE products
-           SET actual_quantity = actual_quantity - ?
-         WHERE id = ?
-    ");
-    foreach ($payload['items'] as $item) {
-        $decStmt->bind_param(
-            'ii',
-            $item['quantity'],
-            $item['product_id']
-        );
-        $decStmt->execute();
-    }
-    $decStmt->close();
+    // $decStmt = $mysqli->prepare("
+    //     UPDATE products
+    //        SET actual_quantity = actual_quantity - ?
+    //      WHERE id = ?
+    // ");
+    // foreach ($payload['items'] as $item) {
+    //     $decStmt->bind_param(
+    //         'ii',
+    //         $item['quantity'],
+    //         $item['product_id']
+    //     );
+    //     $decStmt->execute();
+    // }
+    // $decStmt->close();
 
     // 4) Tính và lưu shift_id
     // Lấy thời gian hiện tại theo PHP (giờ server)

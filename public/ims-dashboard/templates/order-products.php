@@ -245,7 +245,7 @@ if (!isset($order['id'])) {
 
     document.addEventListener("DOMContentLoaded", function () {
         fetch(`${BASE_URL}/api/products`, {
-            headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+            headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
         })
         .then(res => res.json())
         .then(data => {

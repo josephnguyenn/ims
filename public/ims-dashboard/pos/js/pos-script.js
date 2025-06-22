@@ -58,8 +58,10 @@ function renderProductList(list) {
     const card = document.createElement('div');
     card.className     = 'product-card';
     card.dataset.id    = p.id;
+    card.dataset.code = p.code;
     card.dataset.name  = p.name;
     card.dataset.price = p.price;
+    card.dataset.tax   = p.tax || 0; // ✅ Add tax here 
     card.dataset.maxQty = p.actual_quantity;    // ← dùng maxQty
 
     card.innerHTML = `
@@ -84,6 +86,7 @@ function attachProductEvents() {
     card.addEventListener('click', () => {
       const id     = card.dataset.id;
       const name   = card.dataset.name;
+      const code = card.dataset.code;
       const price  = parseFloat(card.dataset.price);
       const maxQty = parseInt(card.dataset.maxQty, 10) || 0;  // ← đọc đúng
 
@@ -95,7 +98,8 @@ function attachProductEvents() {
         }
       } else {
         if (maxQty > 0) {
-          cart[id] = { name, price, qty: 1, maxQty };
+        const tax = parseFloat(card.dataset.tax) || 0;
+        cart[id] = { name, price, qty: 1, maxQty, code, tax }; // FIXED: use `card`, not `p`
         } else {
           alert('Sản phẩm đã hết hàng.');
         }
@@ -242,7 +246,10 @@ function adjustLastQty(delta) {
             alert('Đã đạt giới hạn tồn kho.');
           }
         } else {
-          cart[id] = { name, price, qty: 1, maxQty };
+          const tax = parseFloat(p.tax) || 0;
+          cart[id] = { name, price, qty: 1, maxQty, code: p.code, tax };
+          console.log('✅ Added via barcode:', cart[id]);
+
         }
 
         updateCart();

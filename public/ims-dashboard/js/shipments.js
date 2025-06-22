@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // Add this inside the `loadShipmentData()` function
 function loadShipmentData() {
     fetch(`${BASE_URL}/api/shipments`, {
-        headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
     })
     .then(response => response.json())
     .then(shipments => {
@@ -56,7 +56,7 @@ function addShipment() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Authorization": "Bearer " + localStorage.getItem("token"),
             "X-CSRF-TOKEN": csrfToken
         },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ function deleteShipment(id) {
     fetch(`${BASE_URL}/api/shipments/${id}`, {
         method: "DELETE",
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(async (response) => {

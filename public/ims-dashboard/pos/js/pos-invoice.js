@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saved) {
       try {
         window.lastReceipt = JSON.parse(saved);
-      } catch (e) {
+      } catch (e) {generateReceiptHtml
+
         console.warn('Không thể khôi phục hóa đơn cuối:', e);
       }
     }

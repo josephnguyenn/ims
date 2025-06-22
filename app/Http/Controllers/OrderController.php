@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\InventoryService;
 use App\Models\Order as OrderModel; // ✅ Avoid class conflict
 use App\Models\OrderProduct;
 use App\Models\Customer;
+use Illuminate\Support\Facades\DB; // ✅ Thêm dòng này
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,7 +48,7 @@ class OrderController extends Controller
             $data = $request->validate([
                 'cashier_id'           => 'required|exists:users,id',
                 'subtotal_czk'         => 'required|numeric|min:0',
-                'tip_czk'              => 'required|numeric|min:0',
+                'tip_czk'              => 'nullable|numeric|min:0',
                 'grand_total_czk'      => 'required|numeric|min:0',
                 'rounded_total_czk'    => 'required|numeric|min:0',
                 'payment_currency'     => 'required|in:CZK,EUR',
@@ -56,22 +58,27 @@ class OrderController extends Controller
                 'change_due_eur'       => 'nullable|numeric',
                 'payment_method'       => 'required|in:cash,card',
                 'items'                => 'required|array|min:1',
-                'items.*.product_id'   => 'required|exists:products,id',
+                'items.*.code'         => 'required|string|exists:products,code',
                 'items.*.quantity'     => 'required|integer|min:1',
+                'paid_amount' => 'required|numeric|min:0', // ✅ ADD THIS
                 'items.*.unit_price'   => 'required|numeric|min:0',
             ]);
 
             // 2) Server-side rounding check
-            $computed = ceil(($data['subtotal_czk'] + $data['tip_czk']) * 2) / 2;
-            if ($computed != $data['rounded_total_czk']) {
-                return response()->json(['message' => 'Invalid rounding'], 422);
+            if ($data['payment_currency'] === 'CZK') {
+                $computed = ceil(($data['subtotal_czk'] + ($data['tip_czk'] ?? 0)) * 2) / 2;
+                if ($computed != $data['rounded_total_czk']) {
+                    return response()->json(['message' => 'Invalid rounding'], 422);
+                }
             }
+
+            
 
             // 3) Extract only the order columns for creation
             $orderPayload = [
                 'cashier_id'          => $data['cashier_id'],
                 'subtotal_czk'        => $data['subtotal_czk'],
-                'tip_czk'             => $data['tip_czk'],
+                'tip_czk'             => $data['tip_czk'] ?? 0,
                 'grand_total_czk'     => $data['grand_total_czk'],
                 'rounded_total_czk'   => $data['rounded_total_czk'],
                 'payment_currency'    => $data['payment_currency'],
@@ -81,27 +88,70 @@ class OrderController extends Controller
                 'change_due_eur'      => $data['change_due_eur'] ?? null,
                 'payment_method'      => $data['payment_method'],
                 'source'              => 'pos',
-                // if you have nullable customer_id, delivery_supplier_id:
                 'customer_id'         => $request->input('customer_id'),
                 'delivery_supplier_id'=> $request->input('delivery_supplier_id'),
+                'paid_amount'         => $data['paid_amount'], // ✅ Add this line
             ];
 
             // 4) Create the order
             $order = OrderModel::create($orderPayload);
 
-            // 5) Attach items and decrement stock
-            foreach ($data['items'] as $item) {
-                $order->orderProducts()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity'   => $item['quantity'],
-                    'price'      => $item['unit_price'],
-                ]);
-                Product::find($item['product_id'])
-                    ->decrement('actual_quantity', $item['quantity']);
+            $shiftId = $this->determineCurrentShiftId();
+            if ($shiftId) {
+                $order->update(['shift_id' => $shiftId]);
             }
 
-            return response()->json($order->load('orderProducts.product'), 201);
+            // 5) Attach items and decrement stock
+            foreach ($data['items'] as $item) {
+            $code = $item['code'];
+            $qty  = $item['quantity'];
+
+            // Get all matching products (shipments) for this code
+            $products = Product::where('code', $code)
+                ->where('actual_quantity', '>', 0)
+                ->orderByRaw('ISNULL(expired_date), expired_date ASC') // NULL last
+                ->orderBy('created_at', 'asc') // fallback FIFO
+                ->get();
+
+            $remaining = $qty;
+            $usedProductId = null;
+
+            foreach ($products as $product) {
+                if ($remaining <= 0) break;
+
+                $deductQty = min($product->actual_quantity, $remaining);
+                $product->decrement('actual_quantity', $deductQty);
+                $remaining -= $deductQty;
+
+                // Save the first product ID used (to log in order_products)
+                if (!$usedProductId) {
+                    $usedProductId = $product->id;
+                }
+            }
+
+            if ($remaining > 0) {
+                return response()->json([
+                    'message' => "Không đủ hàng cho mã $code",
+                ], 422);
+            }
+
+            // Save the order product entry using the first product ID used
+            $order->orderProducts()->create([
+                'product_id' => $usedProductId,
+                'quantity'   => $qty,
+                'price'      => $item['unit_price'],
+                'tax'        => $product->tax,  // ✅ Correct key name
+
+            ]);
         }
+
+            return response()->json([
+                'message' => 'Order created successfully',
+                'order'   => $order
+            ], 201);
+
+        }
+
 
         // ------------------------
         // Legacy Admin IMS flow
@@ -177,4 +227,27 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Order deleted successfully'], 200);
     }
+
+    private function determineCurrentShiftId(): ?int {
+        $now = now()->format('H:i:s');
+        \Log::info('Current time for shift check: ' . $now);
+
+        $shift = DB::table('shifts')
+            ->where(function ($q) use ($now) {
+                $q->whereRaw('? BETWEEN start_time AND end_time', [$now])
+                ->whereRaw('start_time < end_time');
+            })
+            ->orWhere(function ($q) use ($now) {
+                $q->whereRaw('start_time > end_time')
+                ->whereRaw('? >= start_time OR ? < end_time', [$now, $now]);
+            })
+            ->orderBy('sort_order')
+            ->value('id');
+
+        \Log::info('Determined shift_id: ' . $shift);
+        return $shift;
+    }
+
+
+
 }

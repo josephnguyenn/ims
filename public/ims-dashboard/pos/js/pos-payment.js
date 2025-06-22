@@ -76,6 +76,13 @@ window.updatePaymentDisplay = updatePaymentDisplay;
     setTimeout(() => toast.remove(), 3000);
   }
 
+  
+  function getCurrentShiftId() {
+    return parseInt(localStorage.getItem('current_shift_id')) || null;
+  }
+
+  
+
   // Toggle currency
   curCzkBtn.addEventListener('click', () => {
     currency = 'CZK';
@@ -120,6 +127,8 @@ window.updatePaymentDisplay = updatePaymentDisplay;
 
   // Xử lý nút Hoàn tất
 completeBtn.addEventListener('click', () => {
+
+
   console.log('AutoPrint flag:', autoPrint);
 
   let printWindow = null;
@@ -147,45 +156,59 @@ completeBtn.addEventListener('click', () => {
     tender  = parseFloat(tenderInput.value) || 0;
   }
 
-  const payload = {
-    source: 'pos',
-    cashier_id: CURRENT_USER_ID,
-    customer_id: null,
-    paid_amount: roundedInCzk,
-    subtotal_czk: sub,
-    tip_czk: currency === 'CZK' ? tip : null,
-    tip_eur: currency === 'EUR' ? tip : null,
-    grand_total_czk: sub,
-    rounded_total_czk: rounded,
-    payment_currency: currency,
-    amount_tendered_czk: currency === 'CZK' ? tender : null,
-    amount_tendered_eur: currency === 'EUR' ? tender : null,
-    change_due_czk: currency === 'CZK' ? (tender - rounded) : null,
-    change_due_eur: currency === 'EUR' ? (tender - grand) : null,
-    payment_method: method,
-    items: Object.entries(cart).map(([id, i]) => ({
-      product_id: +id,
-      quantity: i.qty,
-      unit_price: i.price
-    }))
-  };
+const payload = {
+  source: 'pos',
+  cashier_id: CURRENT_USER_ID,
+  customer_id: null,
+  shift_id: getCurrentShiftId(),
+  paid_amount: roundedInCzk,
+  subtotal_czk: +sub,
+  tip_czk: currency === 'CZK' ? +tip : 0,
+  tip_eur: currency === 'EUR' ? +tip : 0,
+  grand_total_czk: +sub,
+  rounded_total_czk: +rounded,
+  payment_currency: currency || 'CZK', // ✅ Ensure this is always set
+  amount_tendered_czk: currency === 'CZK' ? +tender : 0,
+  amount_tendered_eur: currency === 'EUR' ? +tender : 0,
+  change_due_czk: currency === 'CZK' ? +(tender - rounded) : 0,
+  change_due_eur: currency === 'EUR' ? +(tender - grand) : 0,
+  payment_method: method,
+  items: Object.entries(cart).map(([id, i]) => ({
+    product_id: +id,
+    quantity: +i.qty,
+    unit_price: +i.price,
+    code: i.code || '',
+    tax: +i.tax || 0,   // ✅ add this
 
-  fetch('api/pos-orders.php', {
-    credentials: 'same-origin',
+  }))
+};
+
+  console.log('Payload to submit:', payload);
+  fetch(`${BASE_URL}/api/orders`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${AUTH_TOKEN}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Authorization': `Bearer ${localStorage.getItem("token")}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     },
     body: JSON.stringify(payload)
   })
   .then(res => res.ok ? res.json() : res.json().then(e => { throw e; }))
   .then(data => {
-    showToast(`Thanh toán thành công! Mã đơn #${data.id}`);
-    const shiftName = data.shift_name;
-    const cartSnapshot = { ...window.cart };
-
+    console.log('✅ Order response:', data);
+    showToast(`Thanh toán thành công! Mã đơn #${data.order.id}`);
+    const orderId = data.order.id;          // ✅ Get the actual order ID
+    const shiftName = data.order.shift_name; // ✅ If available (check if exists first)
+    const cartSnapshot = {};
+    Object.entries(cart).forEach(([id, i]) => {
+      cartSnapshot[id] = {
+        name: i.name,
+        qty: i.qty,
+        price: i.price,
+        code: i.code || '',
+        tax: i.tax || 0  // ✅ added tax here too
+      };
+    });
     // Fetch cấu hình in hóa đơn rồi tạo lastReceipt và in nếu cần
     return fetch('api/get_invoice_settings.php')
       .then(res => res.json())
@@ -221,17 +244,23 @@ completeBtn.addEventListener('click', () => {
         paymentCurrency: currency
       }).then(html => {
         // ✅ Save to DB even if autoPrint is off
+
+        console.log("Saving invoice...", {
+          order_id: orderId,
+          html: html
+        });
         fetch('api/save-invoice.php', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${AUTH_TOKEN}`
+            'Authorization': `Bearer ${localStorage.getItem("token")}`
           },
           body: JSON.stringify({
-            order_id: data.id,
-            html: html
+            order_id: orderId,    // ✅ This is the order ID returned from Laravel
+            html: html            // ✅ This is the receipt HTML you just generated
           })
         });
+
 
         // 🖨️ Only print if autoPrint is on
         if (autoPrint && printWindow) {

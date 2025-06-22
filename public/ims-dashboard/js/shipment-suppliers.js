@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function loadShipmentSuppliers() {
     fetch(`${BASE_URL}/api/shipment-suppliers`, {
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(response => response.json())
@@ -51,7 +51,7 @@ function addShipmentSupplier() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ name })
     })
@@ -80,7 +80,7 @@ function updateShipmentSupplier() {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ name })
     })
@@ -98,7 +98,7 @@ function deleteShipmentSupplier(id) {
     fetch(`${BASE_URL}/api/shipment-suppliers/${id}`, {
         method: "DELETE",
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(response => response.json())

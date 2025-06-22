@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 function loadDashboard(from = null, to = null) {
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
     // Build query params
     let params = '';

@@ -102,12 +102,20 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
         </table>
 
         <div class="pagination">
-    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-        <a href="?page=<?= $i ?>" class="<?= ($i === $page) ? 'active' : '' ?>">
-            <?= $i ?>
-        </a>
-    <?php endfor; ?>
-</div>
+            <?php if ($page > 1): ?>
+                <a href="?page=<?= $page - 1 ?>">&laquo;</a>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>">
+                    <?= $i ?>
+                </a>
+            <?php endfor; ?>
+
+            <?php if ($page < $totalPages): ?>
+                <a href="?page=<?= $page + 1 ?>">&raquo;</a>
+            <?php endif; ?>
+        </div>
 
         <!-- ✅ Thêm Đơn hàng Modal -->
         <div id="addOrderModal" class="modal">

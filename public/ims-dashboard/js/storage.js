@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function loadStorageData() {
     fetch(`${BASE_URL}/api/storages`, {
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(response => response.json())
@@ -55,7 +55,7 @@ function addStorage() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Authorization": "Bearer " + localStorage.getItem("token"),
             "X-CSRF-TOKEN": csrfToken
         },
         body: JSON.stringify({ name, location })
@@ -82,7 +82,7 @@ function deleteStorage(id) {
     fetch(`${BASE_URL}/api/storages/${id}`, {
         method: "DELETE",
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Authorization": "Bearer " + localStorage.getItem("token"),
             "X-CSRF-TOKEN": csrfToken
         }
     })
@@ -125,7 +125,7 @@ function updateStorage() {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ name, location })
     })

@@ -23,23 +23,24 @@ $sql = "
     o.id,
     o.created_at,
     s.name          AS shift_name,
-    u.name      AS cashier_name,
+    u.name          AS cashier_name,
     o.cashier_id,
     o.payment_method,
-    o.payment_currency,              -- Thêm dòng này
+    o.payment_currency,
     o.rounded_total_czk,
     o.tip_czk,
     o.tip_eur,
-    o.amount_tendered_czk,           -- Thêm dòng này
-    o.amount_tendered_eur            -- Thêm dòng này
+    o.amount_tendered_czk,
+    o.amount_tendered_eur
   FROM orders o
   LEFT JOIN shifts s ON o.shift_id = s.id
   LEFT JOIN users u ON o.cashier_id = u.id
-  WHERE DATE(o.created_at) BETWEEN ? AND ?
+  WHERE o.created_at BETWEEN ? AND ?
+  ORDER BY o.created_at DESC
 ";
 
 
-$params = [$from, $to];
+$params = ["$from 00:00:00", "$to 23:59:59"];
 $types  = "ss";
 
 if ($shift) {

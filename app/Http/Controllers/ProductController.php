@@ -200,11 +200,10 @@ class ProductController extends Controller
                     'name'             => $p->name,
                     'price'            => $p->price,
                     'code'             => $p->code,
+                    'tax'              => $p->tax, // ✅ Add this line
                     'shipment_id'      => $p->shipment_id,
                     'actual_quantity'  => $p->actual_quantity,
-                    // bạn có thể đổi thành $p->shipment->order_date nếu muốn
-                    'created_at'       => optional($p->shipment)->order_date
-                                        ?? $p->created_at->toDateTimeString(),
+                    'created_at'       => optional($p->shipment)->order_date ?? $p->created_at->toDateTimeString(),
                 ];
             });
 

@@ -18,7 +18,7 @@ function addShipmentProduct() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({
             shipment_id: shipmentId,
@@ -41,7 +41,7 @@ function deleteShipmentProduct(productId, shipmentId) {
     fetch(`${BASE_URL}/api/shipment-products/${productId}`, {
         method: "DELETE",
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(() => {

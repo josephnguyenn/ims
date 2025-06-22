@@ -15,7 +15,7 @@ document.getElementById("login-form").addEventListener("submit", function(event)
     .then(data => {
         console.log("Response from /public/api/login:", data); // Make sure you see the role here
         if (data.token && data.user && data.user.role) { // Check if user and role are present
-            sessionStorage.setItem("token", data.token);
+            localStorage.setItem("token", data.token);
 
             fetch("session_store.php", {
                 method: "POST",

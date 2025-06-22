@@ -134,7 +134,7 @@ function closeModal(modalId) {
 // Authorization header helper
 function authHeader() {
   return {
-    'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
+    'Authorization': 'Bearer ' + localStorage.getItem('token'),
     'Accept': 'application/json'
   };
 }

@@ -39,7 +39,7 @@ function getShipmentIdFromURL() {
             : `${BASE_URL}/api/products`;
 
         fetch(url, {
-            headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+            headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
         })
         .then(response => response.json())
         .then(products => {
@@ -78,7 +78,7 @@ function getShipmentIdFromURL() {
 function loadCategoryOptions(selectId) {
   console.log(`▶️ Loading categories into #${selectId}`);               // ← add this
   fetch(`${BASE_URL}/api/categories`, {
-    headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+    headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
   })
   .then(res => {
     console.log(`GET /api/categories →`, res.status, res.statusText); // ← and this
@@ -120,7 +120,7 @@ function addProduct() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ 
             name, 
@@ -151,7 +151,7 @@ function openEditModal(productId) {
     console.log("edit_product_id", document.getElementById("edit_product_id")); // should not be null
     fetch(`${BASE_URL}/api/products/${productId}`, {
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(res => res.json())
@@ -225,7 +225,7 @@ function updateProduct() {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Authorization": "Bearer " + localStorage.getItem("token"),
             "Accept": "application/json", // <-- ✅ Fixes redirect to HTML
 
         },
@@ -260,7 +260,7 @@ function deleteProduct(id) {
     fetch(`${BASE_URL}/api/products/${id}`, {
         method: "DELETE",
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Authorization": "Bearer " + localStorage.getItem("token"),
             "Accept": "application/json"
         }
     })
@@ -321,7 +321,7 @@ function suggestProductCode() {
 
     fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(input)}`, {
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(res => res.json())

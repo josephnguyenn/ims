@@ -34,7 +34,7 @@ function loadOrderProducts() {
     let orderId = document.getElementById("order_id").value;
 
     fetch(`${BASE_URL}/api/order-products/${orderId}`, {
-        headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
     })
     .then(response => response.json())
     .then(orderProducts => {
@@ -96,7 +96,7 @@ function addProductToOrder() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ order_id: orderId, product_id: productId, quantity: quantity })
     })
@@ -122,7 +122,7 @@ function openEditOrderProductForm(orderProductId, quantity, fetchDetails = false
     if (fetchDetails) {
         fetch(`${BASE_URL}/api/order-products/${orderProductId}`, {
             headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("token")
+                "Authorization": "Bearer " + localStorage.getItem("token")
             }
         })
         .then(res => res.json())
@@ -169,7 +169,7 @@ function editProductInOrder() {
         method: "PUT", // or "PATCH" depending on how your API is setup
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({
             order_id: orderId,
@@ -197,7 +197,7 @@ function deleteOrderProduct(orderProductId, orderId) {
 
     fetch(`${BASE_URL}/api/order-products/${orderProductId}`, {
         method: "DELETE",
-        headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
     })
     .then(response => response.json())
     .then(() => {

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function loadCustomerData() {
     fetch(`${BASE_URL}/api/customers`, {
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(response => response.json())
@@ -75,7 +75,7 @@ function addCustomer() {
         headers: {
             "Content-Type": "application/json",
             "Accept": "application/json", // <-- ✅ Fixes redirect to HTML
-            "Authorization": "Bearer " + sessionStorage.getItem("token"),
+            "Authorization": "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({ name, email, phone, address, vat_code, city, postal_code, tax_code })
     })
@@ -132,7 +132,7 @@ function updateCustomer() {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ name, email, phone, address, vat_code, city, postal_code, tax_code })
     })
@@ -160,7 +160,7 @@ function deleteCustomer(id) {
     fetch(`${BASE_URL}/api/customers/${id}`, {
         method: "DELETE",
         headers: {
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         }
     })
     .then(response => response.json())

@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // ✅ Function to Load Users
 function loadUsers() {
     fetch(`${BASE_URL}/api/users`, {
-        headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
     })
     .then(response => response.json())
     .then(users => {
@@ -55,7 +55,7 @@ function addUser() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ name, email, role, password })
     })
@@ -97,7 +97,7 @@ function editUser() {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + sessionStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({ name, email, role })
     })
@@ -115,7 +115,7 @@ function deleteUser(userId) {
 
     fetch(`${BASE_URL}/api/users/${userId}`, {
         method: "DELETE",
-        headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
     })
     .then(() => {
         alert("User deleted!");

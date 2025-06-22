@@ -13,12 +13,13 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-    'customer_id','delivery_supplier_id','cashier_id','paid_amount',
-    'subtotal_czk','tip_czk','grand_total_czk','rounded_total_czk',
-    'payment_currency','amount_tendered_czk','amount_tendered_eur',
-    'change_due_czk','change_due_eur','payment_method','source'
+        'customer_id','delivery_supplier_id','cashier_id','paid_amount',
+        'subtotal_czk','tip_czk','grand_total_czk','rounded_total_czk',
+        'payment_currency','amount_tendered_czk','amount_tendered_eur',
+        'change_due_czk','change_due_eur', 'payment_method','source',
+        'shift_id' // ✅ thêm dòng này
     ];
-    
+        
     protected $appends = ['total_price']; // ✅ Ensure total_price is in JSON response
 
     public function customer()
