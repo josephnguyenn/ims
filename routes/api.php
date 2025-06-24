@@ -120,11 +120,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 //report route//
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/reports/sales', [ReportController::class, 'salesReport']); // ✅ Sales & Revenue Report
-    Route::get('/reports/top-products', [ReportController::class, 'topSellingProducts']); // ✅ Best-Selling Products
-    Route::get('/reports/monthly-sales', [ReportController::class, 'monthlySalesReport']); // ✅ Monthly Sales Report
-});
+    Route::get('/reports/sales', [ReportController::class, 'salesReport']);
+    Route::get('/reports/top-products', [ReportController::class, 'topSellingProducts']);
+    Route::get('/reports/monthly-sales', [ReportController::class, 'monthlySalesReport']);
 
+    // ✅ New POS Report endpoint (replaces old pos-reports.php)
+    Route::get('/reports/pos', [ReportController::class, 'posReport']);
+});
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('categories', CategoryController::class);
 });

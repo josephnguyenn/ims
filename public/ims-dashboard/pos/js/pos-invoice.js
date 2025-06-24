@@ -17,7 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const TEMPLATE_PATH = 'pos-receipt.html';
 
 async function generateReceiptHtml(data) {
-  const { cart, eurRate, cashierId, invoiceNumber, settings, tip, tender, paymentCurrency } = data;
+  const {
+    cart,
+    eurRate,
+    cashierId,
+    invoiceNumber,
+    settings,
+    tip,
+    tender,
+    paymentCurrency
+  } = data;
+
+  console.log('🧾 Invoice number inside generator:', data.invoiceNumber);
+
+  // ✅ Safely coerce values
+  const safeTip = parseFloat(tip) || 0;
+  const safeTender = parseFloat(tender) || 0;
+  const safeCurrency = paymentCurrency || 'CZK';
 
   let tpl = await fetch(TEMPLATE_PATH)
     .then(res => {
@@ -36,15 +52,16 @@ async function generateReceiptHtml(data) {
   let changeDisplay = '';
   let tenderDisplay = '';
 
-  if (paymentCurrency === 'EUR') {
-    const grandEur = rawCzk / eurRate;
-    const changeEur = (tender - grandEur).toFixed(2);
+  if (safeCurrency === 'EUR') {
+    const grandEur = rawCzk / eurRate + safeTip; // ✅ include tip
+    const changeEur = Math.max(0, safeTender - grandEur).toFixed(2);
     changeDisplay = `${changeEur} EUR`;
-    tenderDisplay = `${tender.toFixed(2)} EUR`;
+    tenderDisplay = `${safeTender.toFixed(2)} EUR`;
   } else {
-    const changeCzk = (tender - roundHalf(rawCzk)).toFixed(2);
+    const grandCzk = rawCzk + safeTip;
+    const changeCzk = Math.max(0, safeTender - roundHalf(grandCzk)).toFixed(2);
     changeDisplay = `${changeCzk} CZK`;
-    tenderDisplay = `${tender.toFixed(2)} CZK`;
+    tenderDisplay = `${safeTender.toFixed(2)} CZK`;
   }
 
 const rows = `
@@ -77,7 +94,7 @@ const rows = `
     .replace('{{ICO}}', settings.ico)
     .replace('{{DIC}}', settings.dic)
     .replace('{{STORE_ADDRESS}}', settings.address)
-    .replace('{{INVOICE_NUMBER}}', invoiceNumber)
+    .replace('{{INVOICE_NUMBER}}', invoiceNumber || '—')
     .replace('{{DATE}}', new Date().toLocaleDateString())
     .replace('{{TIME}}', new Date().toLocaleTimeString())
     .replace('{{CASHIER}}', `#${cashierId}`)
@@ -87,7 +104,7 @@ const rows = `
     .replace('{{TOTAL_EUR}}', totalEur)
     .replace('{{AMOUNT_TENDERED}}', tenderDisplay)
     .replace('{{CHANGE}}', changeDisplay)
-    .replace('{{TIP}}', tip.toFixed(2))
+    .replace('{{TIP}}', (parseFloat(tip) || 0).toFixed(2))
     .replace('{{TOTAL_UNITS}}', totalUnits)
     .replace('{{THANK_YOU_LINE1}}', settings.thankYou1)
     .replace('{{THANK_YOU_LINE2}}', settings.thankYou2);

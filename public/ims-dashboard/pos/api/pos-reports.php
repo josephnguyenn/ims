@@ -18,12 +18,13 @@ if ($r = $mysqli->query("SELECT value FROM settings WHERE name='exchange_rate' L
 }
 
 // 3) Build và chạy query
+// 3) Build và chạy query
 $sql = "
   SELECT
     o.id,
     o.created_at,
-    s.name          AS shift_name,
-    u.name          AS cashier_name,
+    s.name AS shift_name,
+    u.name AS cashier_name,
     o.cashier_id,
     o.payment_method,
     o.payment_currency,
@@ -36,10 +37,9 @@ $sql = "
   LEFT JOIN shifts s ON o.shift_id = s.id
   LEFT JOIN users u ON o.cashier_id = u.id
   WHERE o.created_at BETWEEN ? AND ?
-  ORDER BY o.created_at DESC
 ";
 
-
+// 🛠️ Apply shift filter BEFORE ORDER BY
 $params = ["$from 00:00:00", "$to 23:59:59"];
 $types  = "ss";
 
@@ -49,6 +49,9 @@ if ($shift) {
   $params[]  = $shift;
 }
 
+$sql .= " ORDER BY o.created_at DESC"; // ✅ Move this to the end
+
+// Run query
 $stmt = $mysqli->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
@@ -58,6 +61,7 @@ $res = $stmt->get_result();
 $invoices = [];
 while ($inv = $res->fetch_assoc()) {
   $inv['rounded_total_eur'] = round($inv['rounded_total_czk'] / $rate, 2);
+  $inv['tip_czk']           = (float)$inv['tip_czk'];
   $inv['tip_eur']           = (float)$inv['tip_eur'];
   $inv['amount_tendered_czk'] = (float)($inv['amount_tendered_czk'] ?? 0);
   $inv['amount_tendered_eur'] = (float)($inv['amount_tendered_eur'] ?? 0);

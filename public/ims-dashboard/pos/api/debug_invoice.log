@@ -1,6 +1,6 @@
 Array
 (
-    [order_id] => 341
+    [order_id] => 392
     [html] => 
 <!DOCTYPE html>
 <html lang="vi">
@@ -127,15 +127,14 @@ Array
     </div>
 
     <div class="info">
-      <div>Daň. doklad: undefined</div>
-      <div>Datum: 6/22/2025 Čas: 3:26:14 PM</div>
+      <div>Daň. doklad: 392</div>
+      <div>Datum: 6/24/2025 Čas: 7:34:31 PM</div>
     </div>
 
     <hr>
 
 <div class="items">
   
-console.log('🧾 Cart before rendering invoice:', cart);
   <div class="items">
     <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:11px;border-bottom:1px dashed #000;margin-bottom:4px;padding:0 4px;">
       <span style="flex:2;">Název</span>
@@ -146,29 +145,37 @@ console.log('🧾 Cart before rendering invoice:', cart);
     </div>
     
         <div style="display:flex;justify-content:space-between;padding:0 4px;">
-          <span style="flex:2;">Bohemia Cibule & Smetana 130g</span>
+          <span style="flex:2;">Strongbow cider 0,44L Dark Fruit 4,5 % plech SC</span>
           <span style="flex:1;text-align:center;">1</span>
-          <span style="flex:1;text-align:right;">35.90</span>
-          <span style="flex:1;text-align:right;">12%</span>
-          <span style="flex:1;text-align:right;">35.90</span>
+          <span style="flex:1;text-align:right;">24.91</span>
+          <span style="flex:1;text-align:right;">21%</span>
+          <span style="flex:1;text-align:right;">24.91</span>
+        </div>
+      
+        <div style="display:flex;justify-content:space-between;padding:0 4px;">
+          <span style="flex:2;">Strongbow cider 0,44L Tropical 4,5 % plech</span>
+          <span style="flex:1;text-align:center;">2</span>
+          <span style="flex:1;text-align:right;">25.90</span>
+          <span style="flex:1;text-align:right;">21%</span>
+          <span style="flex:1;text-align:right;">51.80</span>
         </div>
       
   </div>
 
 </div>
 <div style="padding: 4px;">
-  <div><strong>Zaokrouhleni:</strong> 0.10</div>
+  <div><strong>Zaokrouhleni:</strong> 0.29</div>
 </div>
 
     <hr>
 
     <div class="totals">
-      <div><strong>Celkem KČ:</strong> 36.00</div>
-      <div><strong>TOTAL EUR:</strong> 17.95</div>
-      <div><strong>Hotově:</strong> 40.00 CZK</div>
-      <div><strong>Vráceno:</strong> 4.00 CZK</div>
+      <div><strong>Celkem KČ:</strong> 77.00</div>
+      <div><strong>TOTAL EUR:</strong> 38.35</div>
+      <div><strong>Hotově:</strong> 77.00 CZK</div>
+      <div><strong>Vráceno:</strong> 0.00 CZK</div>
       <div><strong>Tips:</strong> 0.00</div>
-      <div><strong>Počet ks na účtence:</strong> 1</div>
+      <div><strong>Počet ks na účtence:</strong> 3</div>
     </div>
 
     <div class="footer">

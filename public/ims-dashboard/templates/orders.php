@@ -106,11 +106,28 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                 <a href="?page=<?= $page - 1 ?>">&laquo;</a>
             <?php endif; ?>
 
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>">
-                    <?= $i ?>
-                </a>
-            <?php endfor; ?>
+            <?php
+            $range = 2; // Number of pages to show before/after current page
+
+            for ($i = 1; $i <= $totalPages; $i++) {
+                if (
+                    $i == 1 ||
+                    $i == $totalPages ||
+                    ($i >= $page - $range && $i <= $page + $range)
+                ) {
+                    if ($i == $page) {
+                        echo "<a class='active' href='?page=$i'>$i</a>";
+                    } else {
+                        echo "<a href='?page=$i'>$i</a>";
+                    }
+                } elseif (
+                    $i == $page - $range - 1 ||
+                    $i == $page + $range + 1
+                ) {
+                    echo "<span style='padding: 0 4px;'>...</span>";
+                }
+            }
+            ?>
 
             <?php if ($page < $totalPages): ?>
                 <a href="?page=<?= $page + 1 ?>">&raquo;</a>

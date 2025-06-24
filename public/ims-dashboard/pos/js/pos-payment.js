@@ -145,18 +145,21 @@ completeBtn.addEventListener('click', () => {
   let grand, rounded, tender, roundedInCzk;
 
   if (currency === 'CZK') {
-    grand   = sub;
+    grand = sub + tip;
     rounded = roundHalf(grand);
     roundedInCzk = rounded;
     tender  = parseFloat(tenderInput.value) || 0;
   } else {
-    grand   = sub / rate;
-    rounded = roundHalf(grand);      // EUR rounded
-    roundedInCzk = Math.round(rounded * rate); // ✅ convert về CZK
+    const tipEur = tip;
+    grand   = sub / rate + tipEur; // ✅ include tip
+    rounded = roundHalf(grand);   // ✅ round full amount (subtotal + tip)
+    roundedInCzk = Math.round(rounded * rate); // ✅ still use CZK for reports
     tender  = parseFloat(tenderInput.value) || 0;
   }
 
+
 const payload = {
+
   source: 'pos',
   cashier_id: CURRENT_USER_ID,
   customer_id: null,
@@ -165,7 +168,7 @@ const payload = {
   subtotal_czk: +sub,
   tip_czk: currency === 'CZK' ? +tip : 0,
   tip_eur: currency === 'EUR' ? +tip : 0,
-  grand_total_czk: +sub,
+  grand_total_czk: currency === 'EUR' ? sub + tip * rate : sub + tip,
   rounded_total_czk: +rounded,
   payment_currency: currency || 'CZK', // ✅ Ensure this is always set
   amount_tendered_czk: currency === 'CZK' ? +tender : 0,
@@ -181,7 +184,9 @@ const payload = {
     tax: +i.tax || 0,   // ✅ add this
 
   }))
+  
 };
+console.log("🧾 tip:", tip, "sub:", sub, "grand_total_czk:", payload.grand_total_czk);
 
   console.log('Payload to submit:', payload);
   fetch(`${BASE_URL}/api/orders`, {
@@ -219,12 +224,14 @@ const payload = {
           cashierId: CURRENT_USER_ID,
           shiftName,
           tip,
+          tender,
           currency,
+          paymentCurrency: currency, // ✅ <-- THIS FIXES IT
           settings: config,
           rounded,
           grand,
-          tender,
-          payment_method: method
+          payment_method: method,
+          invoiceNumber: orderId
         };
         try {
           localStorage.setItem('lastReceiptData', JSON.stringify(window.lastReceipt));
@@ -237,7 +244,7 @@ const payload = {
         cart: cartSnapshot,
         eurRate: window.EUR_RATE,
         cashierId: CURRENT_USER_ID,
-        invoiceNumber: data.id,
+        invoiceNumber: data.order.id,
         settings: config,
         tip,
         tender,
@@ -279,6 +286,9 @@ const payload = {
         window.cart = {};
         window.updateCart();
         updatePaymentDisplay();
+
+        changeEl.textContent = ''; // 🔄 Clear the amount
+        document.getElementById('pm-change-label').textContent = 'Change Due'; // (Optional) reset label if dynamic
 
         tipInput.value = '';
         tenderInput.value = '';
