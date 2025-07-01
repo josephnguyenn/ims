@@ -181,10 +181,10 @@ window.updateCart = updateCart;
 
   // Quantity adjustments
 function adjustLastQty(delta) {
-  const keys = Object.keys(cart);
+  const keys = Object.keys(window.cart);
   if (!keys.length) return;
   const lastKey = keys[keys.length - 1];
-  const item    = cart[lastKey];
+  const item = window.cart[lastKey];
   const current = item.qty;
   const maxQty  = item.maxQty;
 
@@ -286,14 +286,35 @@ function adjustLastQty(delta) {
     });
   });
 
-const togglePrintBtn   = document.getElementById('toggle-print');
-const printStatusElem  = document.getElementById('print-status');
+  const togglePrintBtn   = document.getElementById('toggle-print');
+  const printStatusElem  = document.getElementById('print-status');
 
-togglePrintBtn.addEventListener('click', () => {
-  window.autoPrint = !window.autoPrint;
-  printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
-});
+  togglePrintBtn.addEventListener('click', () => {
+    window.autoPrint = !window.autoPrint;
+    printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
+  });
 
+  // Prevent PageUp/PageDown scrolling and adjust quantity
+  function handleQtyKeys(e) {
+    if (e.key === 'PageUp') {
+      e.preventDefault();
+      adjustLastQty(1);
+    } else if (e.key === 'PageDown') {
+      e.preventDefault();
+      adjustLastQty(-1);
+    } else if (e.key === 'F11') {
+      e.preventDefault();
+      printInvoice();
+    }
+  }
+
+  // Add to both document AND barcode input (in case it's focused)
+  document.addEventListener('keydown', handleQtyKeys, { passive: false });
+
+  const barcodeInput = document.getElementById('barcode-input');
+  if (barcodeInput) {
+    barcodeInput.addEventListener('keydown', handleQtyKeys, { passive: false });
+  }
 
   function printInvoice() {
     if (!Object.keys(cart).length) return alert('Cart is empty!');
@@ -302,11 +323,5 @@ togglePrintBtn.addEventListener('click', () => {
     updateCart();
   }
   document.getElementById('print-invoice').addEventListener('click', printInvoice);
-  document.addEventListener('keydown', e => {
-    if (e.key === 'F11')   { e.preventDefault(); printInvoice(); }
-    if (e.key === 'PageUp')   { e.preventDefault(); adjustLastQty(1); }
-    if (e.key === 'PageDown') { e.preventDefault(); adjustLastQty(-1); }
-  });
 });
-
 
