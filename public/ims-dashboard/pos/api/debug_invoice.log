@@ -1,6 +1,6 @@
 Array
 (
-    [order_id] => 392
+    [order_id] => 393
     [html] => 
 <!DOCTYPE html>
 <html lang="vi">
@@ -127,8 +127,8 @@ Array
     </div>
 
     <div class="info">
-      <div>Daň. doklad: 392</div>
-      <div>Datum: 6/24/2025 Čas: 7:34:31 PM</div>
+      <div>Daň. doklad: 393</div>
+      <div>Datum: 7/4/2025 Čas: 12:09:27 AM</div>
     </div>
 
     <hr>
@@ -145,37 +145,29 @@ Array
     </div>
     
         <div style="display:flex;justify-content:space-between;padding:0 4px;">
-          <span style="flex:2;">Strongbow cider 0,44L Dark Fruit 4,5 % plech SC</span>
-          <span style="flex:1;text-align:center;">1</span>
-          <span style="flex:1;text-align:right;">24.91</span>
-          <span style="flex:1;text-align:right;">21%</span>
-          <span style="flex:1;text-align:right;">24.91</span>
-        </div>
-      
-        <div style="display:flex;justify-content:space-between;padding:0 4px;">
-          <span style="flex:2;">Strongbow cider 0,44L Tropical 4,5 % plech</span>
-          <span style="flex:1;text-align:center;">2</span>
-          <span style="flex:1;text-align:right;">25.90</span>
-          <span style="flex:1;text-align:right;">21%</span>
-          <span style="flex:1;text-align:right;">51.80</span>
+          <span style="flex:2;">Orion Meruňky v čokoládě 45g</span>
+          <span style="flex:1;text-align:center;">5</span>
+          <span style="flex:1;text-align:right;">17.90</span>
+          <span style="flex:1;text-align:right;">12%</span>
+          <span style="flex:1;text-align:right;">89.50</span>
         </div>
       
   </div>
 
 </div>
 <div style="padding: 4px;">
-  <div><strong>Zaokrouhleni:</strong> 0.29</div>
+  <div><strong>Zaokrouhleni:</strong> 0.00</div>
 </div>
 
     <hr>
 
     <div class="totals">
-      <div><strong>Celkem KČ:</strong> 77.00</div>
-      <div><strong>TOTAL EUR:</strong> 38.35</div>
-      <div><strong>Hotově:</strong> 77.00 CZK</div>
-      <div><strong>Vráceno:</strong> 0.00 CZK</div>
+      <div><strong>Celkem KČ:</strong> 89.50</div>
+      <div><strong>TOTAL EUR:</strong> 44.75</div>
+      <div><strong>Hotově:</strong> 90.00 CZK</div>
+      <div><strong>Vráceno:</strong> 0.50 CZK</div>
       <div><strong>Tips:</strong> 0.00</div>
-      <div><strong>Počet ks na účtence:</strong> 3</div>
+      <div><strong>Počet ks na účtence:</strong> 5</div>
     </div>
 
     <div class="footer">

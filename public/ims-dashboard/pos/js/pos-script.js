@@ -294,33 +294,31 @@ function adjustLastQty(delta) {
     printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
   });
 
-  // Prevent PageUp/PageDown scrolling and adjust quantity
-  function handleQtyKeys(e) {
-    if (e.key === 'PageUp') {
+
+
+  document.addEventListener('keydown', function (e) {
+    const key = e.key;
+    if (['F11', 'PageUp', 'PageDown'].includes(key)) {
       e.preventDefault();
-      adjustLastQty(1);
-    } else if (e.key === 'PageDown') {
-      e.preventDefault();
-      adjustLastQty(-1);
-    } else if (e.key === 'F11') {
-      e.preventDefault();
-      printInvoice();
+      e.stopImmediatePropagation();
+
+      if (key === 'F11') {
+        printInvoice(); // calls the shared version
+      } else if (key === 'PageUp') {
+        adjustLastQty(1);
+      } else if (key === 'PageDown') {
+        adjustLastQty(-1);
+      }
     }
-  }
+  }, { passive: false });
 
-  // Add to both document AND barcode input (in case it's focused)
-  document.addEventListener('keydown', handleQtyKeys, { passive: false });
-
-  const barcodeInput = document.getElementById('barcode-input');
-  if (barcodeInput) {
-    barcodeInput.addEventListener('keydown', handleQtyKeys, { passive: false });
-  }
 
   function printInvoice() {
-    if (!Object.keys(cart).length) return alert('Cart is empty!');
-    if (autoPrint) window.print();
-    cart = {};
-    updateCart();
+    if (!window._printing) {
+      window._printing = true;
+      window.printInvoice?.(); // call the version from pos-invoice.js
+      setTimeout(() => window._printing = false, 500);
+    }
   }
   document.getElementById('print-invoice').addEventListener('click', printInvoice);
 });
