@@ -66,22 +66,24 @@ async function generateReceiptHtml(data) {
 
 const rows = `
   <div class="items">
-    <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:11px;border-bottom:1px dashed #000;margin-bottom:4px;padding:0 4px;">
-      <span style="flex:2;">Název</span>
-      <span style="flex:1;text-align:center;">Ks</span>
+    <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:11px;border-bottom:1px dashed #000;margin-bottom:4px;padding:0 4px; align-items: flex-end;">
+      <span style="flex:2;">Název<br>Ks</span>
       <span style="flex:1;text-align:right;">Cena</span>
       <span style="flex:1;text-align:right;">DPH</span>
       <span style="flex:1;text-align:right;">Celkem</span>
     </div>
     ${Object.values(cart).map(item => {
       const total = (item.price * item.qty).toFixed(2);
+      const tax = (item.tax || 0).toFixed(0);
       return `
-        <div style="display:flex;justify-content:space-between;padding:0 4px;">
-          <span style="flex:2;">${item.name}</span>
-          <span style="flex:1;text-align:center;">${item.qty}</span>
-          <span style="flex:1;text-align:right;">${item.price.toFixed(2)}</span>
-          <span style="flex:1;text-align:right;">${(item.tax || 0).toFixed(0)}%</span>
-          <span style="flex:1;text-align:right;">${total}</span>
+        <div style="padding:4px 4px 0 4px;">
+          <div style="font-weight:bold;">${item.name}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:2px;">
+            <span style="flex:2;">${item.qty}x</span>
+            <span style="flex:1;text-align:right;">${item.price.toFixed(2)}</span>
+            <span style="flex:1;text-align:right;">${tax ? tax + '%' : '-'}</span>
+            <span style="flex:1;text-align:right;">${total}</span>
+          </div>
         </div>
       `;
     }).join('')}
