@@ -2,7 +2,7 @@
 // ✅ 1. Define BASE_URL from .env or fallback
 if (!defined('BASE_URL')) {
     $envUrl = getenv('APP_URL');
-    $defaultLocalUrl = 'http://localhost/tappomarket/public';
+    $defaultLocalUrl = 'http://localhost/ims/public';
     define('BASE_URL', rtrim($envUrl ?: $defaultLocalUrl, '/'));
 }
 

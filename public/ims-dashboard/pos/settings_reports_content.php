@@ -310,7 +310,7 @@ function printModalReceipt() {
 document.addEventListener('click', function(e){
   if(e.target.classList.contains('btn-view-receipt')) {
     const orderId = e.target.dataset.orderId;
-      fetch(`/tappomarket/public/ims-dashboard/pos/api/get-invoice-html.php?order_id=${orderId}`)
+      fetch(`/ims/public/ims-dashboard/pos/api/get-invoice-html.php?order_id=${orderId}`)
       .then(r => r.text())
       .then(html => {
         showModal(html);

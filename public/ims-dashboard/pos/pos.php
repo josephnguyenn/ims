@@ -67,7 +67,7 @@ while ($row = $res->fetch_assoc()) {
     </div>
 
     <div class="controls">
-      <button id="weigh">Weigh</button>
+      <button id="weight">Weigh</button>
       <button id="toggle-print">
         Auto Print: <span id="print-status">OFF</span>
       </button>
@@ -100,6 +100,23 @@ while ($row = $res->fetch_assoc()) {
       | <span id="total-eur">0 EUR</span>
     </div>
   </div>
+
+    <!-- Weight Input Modal -->
+    <div id="weightModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Nhập khối lượng</h2>
+            <div class="form-group">
+              <div class="add-row">
+                <label for="weight-input">Khối lượng (kg):</label>
+                <input type="number" id="weight-input" step="0.01" min="0">
+              </div>
+            </div>
+            <div class="form-actions">
+                <button onclick="saveWeight()">Save</button>
+                <button onclick="closeWeightModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
 </div>
 

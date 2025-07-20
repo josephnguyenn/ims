@@ -318,6 +318,39 @@ td button.delete {
     background-color: #e74c3c; /* Delete Button */
 }
 
+/* Quantity and unit type styling */
+.unit-select {
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    min-width: 90px;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+.unit-select:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+.quantity-input-group {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-input-group input[type="checkbox"] {
+    width: 120px !important;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.quantity-input-group input:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-content {

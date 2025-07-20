@@ -1,4 +1,29 @@
+function updateQuantityUnit() {
+    const isWeighted = document.getElementById("is_weighted").checked;
+    const quantityUnit = document.getElementById("quantity_unit");
+    if (quantityUnit) {
+        quantityUnit.textContent = isWeighted ? 'kg' : 'sản phẩm';
+    }
+}
+
+function updateEditQuantityUnit() {
+    const isWeighted = document.getElementById("edit_is_weighted").checked;
+    const quantityUnit = document.getElementById("edit_quantity_unit");
+    if (quantityUnit) {
+        quantityUnit.textContent = isWeighted ? 'kg' : 'sản phẩm';
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    const isWeightedCheckbox = document.getElementById("is_weighted");
+    if (isWeightedCheckbox) {
+        isWeightedCheckbox.addEventListener("change", updateQuantityUnit);
+    }
+
+    const editIsWeightedCheckbox = document.getElementById("edit_is_weighted");
+    if (editIsWeightedCheckbox) {
+        editIsWeightedCheckbox.addEventListener("change", updateEditQuantityUnit);
+    }
 
     const productForm = document.getElementById("product-form");
     if (productForm) {
@@ -110,6 +135,7 @@ function addProduct() {
     let tax = taxInput === "" ? null : parseFloat(taxInput);
     let category_id = document.getElementById("category_id").value;
     let shipmentId = document.getElementById("shipment_id").value;
+    let isWeighted = document.getElementById("is_weighted").checked;
 
     if (!name || !code || !originalQuantity || !price || !cost || !category_id || !shipmentId) {
         alert("Please fill in all required fields.");
@@ -132,7 +158,8 @@ function addProduct() {
             expired_date: expiredDate || null,
             expiry_mode: expiryMode,
             category_id, 
-            shipment_id: shipmentId 
+            shipment_id: shipmentId,
+            is_weighted: isWeighted
         })
     })
     .then(response => response.json())
@@ -165,6 +192,13 @@ function openEditModal(productId) {
         document.getElementById("edit_tax").value = product.tax || 0;
         document.getElementById("edit_category_id").value = product.category_id;
         document.getElementById("edit_shipment_id").value = product.shipment_id;
+        document.getElementById("edit_is_weighted").checked = product.is_weighted;
+
+        // Update quantity unit display
+        const editQuantityUnit = document.getElementById("edit_quantity_unit");
+        if (editQuantityUnit) {
+            editQuantityUnit.textContent = product.is_weighted ? 'kg' : 'cái';
+        }
 
         // Handle expiry mode
         const expiredDate = product.expired_date;
@@ -193,7 +227,7 @@ function openEditModal(productId) {
 
 function updateProduct() {
     let id = document.getElementById("edit_product_id").value;
-    console.log("Updating product with ID:", id); // ✅ Add here to debug
+    console.log("Updating product with ID:", id);
     
     let name = document.getElementById("edit_product_name").value;
     let code = document.getElementById("edit_product_code").value;
@@ -203,31 +237,17 @@ function updateProduct() {
     let taxInput = document.getElementById("edit_tax").value.trim();
     let expiredDate = document.getElementById("edit_expired_date").value;
     let expiryMode = document.getElementById("edit_expiry_mode").value;
-    let tax = taxInput === "" ? null : parseFloat(taxInput)
+    let tax = taxInput === "" ? null : parseFloat(taxInput);
     let category_id = document.getElementById("edit_category_id").value;
     let shipmentId = document.getElementById("edit_shipment_id").value;
-
-        // ✅ DEBUG: Check the data before sending
-        console.log("Updating product with ID:", id);
-        console.log({
-            name,
-            code,
-            original_quantity: originalQuantity,
-            price,
-            cost,
-            expired_date: expiredDate,
-            tax,
-            category_id,
-            shipment_id: shipmentId
-        });
+    let isWeighted = document.getElementById("edit_is_weighted").checked;
 
     fetch(`${BASE_URL}/api/products/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + localStorage.getItem("token"),
-            "Accept": "application/json", // <-- ✅ Fixes redirect to HTML
-
+            "Accept": "application/json",
         },
         body: JSON.stringify({ 
             name, 
@@ -239,7 +259,8 @@ function updateProduct() {
             category_id, 
             expired_date: expiredDate || null,
             expiry_mode: expiryMode,
-            shipment_id: shipmentId 
+            shipment_id: shipmentId,
+            is_weighted: isWeighted
         })               
     })
     .then(response => response.json())
@@ -251,7 +272,10 @@ function updateProduct() {
             alert("Error updating product: " + (data.message || "Unknown error"));
         }
     })
-    .catch(error => console.error("Error updating product:", error));
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to update product. Please try again.");
+    });
 }
 
 function deleteProduct(id) {

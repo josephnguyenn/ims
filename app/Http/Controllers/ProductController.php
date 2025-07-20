@@ -61,6 +61,7 @@ class ProductController extends Controller
         'tax' => 'nullable|numeric|min:0',
         'expired_date' => 'nullable|date',
         'expiry_mode' => 'required|in:custom,inherit,none',
+        'is_weighted' => 'required|boolean',
     ]);
 
     $shipment = Shipment::find($request->shipment_id);
@@ -91,6 +92,7 @@ class ProductController extends Controller
     $product->shipment_id = $request->shipment_id;
     $product->tax = $request->tax;
     $product->expired_date = $expiredDate;
+    $product->is_weighted = $request->input('is_weighted', false);
     $product->save();
 
     $shipment->calculateTotalCost();
@@ -139,13 +141,14 @@ class ProductController extends Controller
                 'category_id' => 'required|exists:product_categories,id',
                 'shipment_id' => 'sometimes|exists:shipments,id',
                 'tax' => 'sometimes|numeric|min:0',
+                'is_weighted' => 'sometimes|boolean',
             ]);
         
             $shipment = Shipment::find($request->shipment_id ?? $product->shipment_id);
         
             // ✅ Fill all other fields *except* expired_date
             $product->fill($request->only([
-                'name', 'code', 'original_quantity', 'price', 'cost', 'category_id', 'shipment_id', 'tax'
+                'name', 'code', 'original_quantity', 'price', 'cost', 'category_id', 'shipment_id', 'tax', 'is_weighted'
             ]));
         
             // ✅ Now handle expired_date *last* based on mode

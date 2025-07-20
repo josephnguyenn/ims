@@ -143,6 +143,7 @@ $_SESSION['csrf_token'] = $csrfToken;
                     <th>Mã</th>
                     <th>Số lượng gốc</th>
                     <th>Số lượng thực tế</th>
+                    <th>Đơn vị</th>
                     <th>Giá</th>
                     <th>Chi phí</th>
                     <th>Tổng chi phí</th>
@@ -160,6 +161,7 @@ $_SESSION['csrf_token'] = $csrfToken;
                             <td><?= htmlspecialchars($product['code']) ?></td>
                             <td><?= htmlspecialchars($product['original_quantity']) ?></td>
                             <td><?= htmlspecialchars($product['actual_quantity']) ?></td>
+                            <td><?= $product['is_weighted'] ? 'kg' : 'sản phẩm' ?></td>
                             <td><?= htmlspecialchars($product['price']) ?>Kč</td>
                             <td><?= htmlspecialchars($product['cost']) ?>Kč</td>
                             <td><?= htmlspecialchars($product['total_cost']) ?>Kč</td>
@@ -248,8 +250,18 @@ $_SESSION['csrf_token'] = $csrfToken;
                     </div>
 
                     <div class="add-row">
-                        <label for="original_quantity">Số lượng gốc:</label>
-                        <input type="number" id="original_quantity" placeholder="Nhập số lượng gốc" required>
+                        <div class="quantity-input-group">
+                            <label for="is_weighted">Sản phẩm cân theo kg:</label>
+                            <input type="checkbox" id="is_weighted">
+                        </div>
+                    </div>
+
+                    <div class="add-row">
+                        <label for="original_quantity">Số lượng:</label>
+                        <div class="quantity-input-group">
+                            <input type="number" id="original_quantity" placeholder="Nhập số lượng" required>
+                            <span id="quantity_unit" class="unit-label">sản phẩm</span>
+                        </div>
                     </div>
 
                     <div class="add-row">
@@ -322,8 +334,18 @@ $_SESSION['csrf_token'] = $csrfToken;
         </div>
 
         <div class="add-row">
+            <div class="quantity-input-group">
+                <label for="edit_is_weighted">Sản phẩm cân theo kg:</label>
+                <input type="checkbox" id="edit_is_weighted">
+            </div>
+        </div>
+
+        <div class="add-row">
             <label for="edit_original_quantity">Số lượng gốc:</label>
-            <input type="number" id="edit_original_quantity" required>
+            <div class="quantity-input-group">
+                <input type="number" id="edit_original_quantity" required>
+                <span id="edit_quantity_unit" class="unit-label">sản phẩm</span>
+            </div>
         </div>
 
         <div class="add-row">

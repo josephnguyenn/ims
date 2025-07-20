@@ -1,10 +1,14 @@
+# Enable CORS
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
-
     # ✅ Redirect root URL to ims-dashboard dashboard
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/(\s|\?) [NC]
     RewriteRule ^$ ims-dashboard/templates/dashboard.php [R=302,L]

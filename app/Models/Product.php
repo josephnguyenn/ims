@@ -21,6 +21,7 @@ class Product extends Model
         'shipment_id',
         'tax',
         'expired_date',
+        'is_weighted',
     ]; // ❌ actual_quantity, total_cost, expired_date are NOT fillable
 
     public function shipment()

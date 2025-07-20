@@ -3,17 +3,55 @@ const broadcast = new BroadcastChannel('pos-cart');
 window.currentPaymentMethod = 'cash';
 window.currentQrUrl        = null; 
 
+let currentWeightProduct = null;
+const weightModal = document.getElementById('weightModal');
+const weightInput = document.getElementById('weight-input');
+
+window.openWeightModal = function() {
+  if (!window.cart.length) return;
+  const item = window.cart[window.cart.length - 1];
+  if (item.isWeighted) {
+    weightInput.value = item.qty;
+    weightModal.style.display = 'flex';
+    weightInput.focus();
+  }
+}
+
+window.closeWeightModal = function() {
+  weightModal.style.display = 'none';
+}
+
+window.saveWeight = function() {
+  if (!window.cart.length) return;
+  
+  const item = window.cart[window.cart.length - 1];
+  
+  const weight = parseFloat(weightInput.value);
+  if (isNaN(weight) || weight <= 0) {
+    alert('Vui lòng nhập khối lượng hợp lệ');
+    return;
+  }
+
+  if (weight > item.maxQty) {
+    alert('Khối lượng vượt quá tồn kho');
+    return;
+  }
+
+  item.qty = weight;
+  updateCart();
+  closeWeightModal();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const productList    = document.getElementById('product-list');
   const cartTableBody  = document.querySelector('#cart-table tbody');
   const totalCZK       = document.getElementById('total-czk');
   const totalEUR       = document.getElementById('total-eur');
   const printStatus    = document.getElementById('print-status');
-  window.cart      = {};
+  window.cart      = [];
   window.autoPrint = false;
   window.EUR_RATE  = 25;
   
-
   // 1) Load exchange rate
   fetch(`${BASE_URL}/ims-dashboard/pos/api/get_exchange_rate.php`)
     .then(r => r.json())
@@ -50,6 +88,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const weightButton = document.getElementById('weight');
+  if (weightButton) {
+    weightButton.addEventListener('click', openWeightModal);
+  }
+
+  // Add event listener for Enter key in weight input
+  if (weightInput) {
+    weightInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        saveWeight();
+      }
+    });
+  }
+
   // Build the cards
 function renderProductList(list) {
   productList.innerHTML = '';
@@ -61,14 +113,15 @@ function renderProductList(list) {
     card.dataset.code = p.code;
     card.dataset.name  = p.name;
     card.dataset.price = p.price;
-    card.dataset.tax   = p.tax || 0; // ✅ Add tax here 
-    card.dataset.maxQty = p.actual_quantity;    // ← dùng maxQty
+    card.dataset.tax   = p.tax || 0;
+    card.dataset.maxQty = p.actual_quantity;
+    card.dataset.isWeighted = p.is_weighted ? 'true' : 'false';
 
     card.innerHTML = `
       <div class="product-name">${p.name}</div>
       <div class="product-price">${parseFloat(p.price).toFixed(2)} CZK</div>
       <div class="product-stock">
-        <strong>In stock:</strong> ${p.actual_quantity}
+        <strong>In stock:</strong> ${p.actual_quantity}${p.is_weighted ? ' kg' : ''}
       </div>
       <div class="product-shipment"><em>${p.shipment_id ? `Shipment #${p.shipment_id}` : ''}</em></div>
     `;
@@ -79,27 +132,38 @@ function renderProductList(list) {
   updateCardAvailability();
 }
 
-
-  // “Add to cart” on click
 function attachProductEvents() {
   document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
-      const id     = card.dataset.id;
-      const name   = card.dataset.name;
+      const id = card.dataset.id;
+      const name = card.dataset.name;
       const code = card.dataset.code;
-      const price  = parseFloat(card.dataset.price);
-      const maxQty = parseInt(card.dataset.maxQty, 10) || 0;  // ← đọc đúng
+      const price = parseFloat(card.dataset.price);
+      const maxQty = parseInt(card.dataset.maxQty, 10) || 0;
+      const isWeighted = card.dataset.isWeighted === 'true';
 
-      if (cart[id]) {
-        if (cart[id].qty < maxQty) {
-          cart[id].qty++;
+      const existingItemIndex = window.cart.findIndex(item => item.id === id);
+      
+      if (existingItemIndex !== -1) {
+        const item = window.cart[existingItemIndex];
+        if (item.qty < maxQty) {
+          item.qty++;
         } else {
           alert('Đã đạt giới hạn tồn kho.');
         }
       } else {
         if (maxQty > 0) {
-        const tax = parseFloat(card.dataset.tax) || 0;
-        cart[id] = { name, price, qty: 1, maxQty, code, tax }; // FIXED: use `card`, not `p`
+          const tax = parseFloat(card.dataset.tax) || 0;
+          window.cart.push({ 
+            id,
+            name, 
+            price, 
+            qty: isWeighted ? 0 : 1, 
+            maxQty, 
+            code, 
+            tax,
+            isWeighted 
+          });
         } else {
           alert('Sản phẩm đã hết hàng.');
         }
@@ -111,9 +175,11 @@ function attachProductEvents() {
 
 function updateCardAvailability() {
   document.querySelectorAll('.product-card').forEach(card => {
-    const id        = card.dataset.id;
-    const maxQty    = parseInt(card.dataset.maxQty, 10) || 0;  // <-- đổi here
-    const inCartQty = (cart[id]?.qty) || 0;
+    const id = card.dataset.id;
+    const maxQty = parseInt(card.dataset.maxQty, 10) || 0;
+    const cartItem = window.cart.find(item => item.id === id);
+    const inCartQty = cartItem ? cartItem.qty : 0;
+    
     if (inCartQty >= maxQty) {
       card.classList.add('disabled');
     } else {
@@ -122,27 +188,28 @@ function updateCardAvailability() {
   });
 }
 
-
-  // Rebuild cart table & totals
+// Rebuild cart table & totals
 function updateCart() {
   cartTableBody.innerHTML = '';
   let total = 0;
 
-  for (let id in cart) {
-    const { name, price, qty } = cart[id];
+  window.cart.forEach((item, index) => {
+    const { name, price, qty, isWeighted } = item;
     const lineTotal = price * qty;
     total += lineTotal;
-    cartTableBody.innerHTML += `
-      <tr>
-        <td>${name}</td>
-        <td>${qty}</td>
-        <td>${price.toFixed(2)} CZK</td>
-        <td>${lineTotal.toFixed(2)} CZK</td>
-        <td>
-          <button class="remove-item" data-id="${id}">✖</button>
-        </td>
-      </tr>`;
-  }
+    const row = document.createElement('tr');
+    row.className = (isWeighted && qty === 0) ? 'weighted-product' : '';
+    row.innerHTML = `
+      <td>${name}</td>
+      <td>${qty}${isWeighted ? ' kg' : ''}</td>
+      <td>${price.toFixed(2)} CZK</td>
+      <td>${lineTotal.toFixed(2)} CZK</td>
+      <td>
+        <button class="remove-item" data-index="${index}">✖</button>
+      </td>
+    `;
+    cartTableBody.appendChild(row);
+  });
 
   const czkRounded = Math.round(total);
   const eurRounded = (total / EUR_RATE).toFixed(2);
@@ -150,12 +217,11 @@ function updateCart() {
   totalCZK.innerText = `${czkRounded} CZK`;
   totalEUR.innerText = `${eurRounded} EUR`;
 
-
   // attach removal handlers
   document.querySelectorAll('.remove-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      delete cart[btn.dataset.id];
-      updateCart();     // recursively re-render & broadcast
+      window.cart.splice(parseInt(btn.dataset.index), 1);
+      updateCart();
     });
   });
 
@@ -177,96 +243,93 @@ function updateCart() {
 
 window.updateCart = updateCart;
 
-
-
-  // Quantity adjustments
+// Quantity adjustments
 function adjustLastQty(delta) {
-  const keys = Object.keys(window.cart);
-  if (!keys.length) return;
-  const lastKey = keys[keys.length - 1];
-  const item = window.cart[lastKey];
+  if (!window.cart.length) return;
+  const item = window.cart[window.cart.length - 1];
   const current = item.qty;
-  const maxQty  = item.maxQty;
+  const maxQty = item.maxQty;
 
   if (delta > 0) {
-    // nếu đã đạt max thì báo và dừng
     if (current >= maxQty) {
       alert('Đã đạt giới hạn tồn kho.');
       return;
     }
     item.qty = current + 1;
   } else {
-    // chỉ giảm xuống tối thiểu 1
     item.qty = Math.max(1, current - 1);
   }
 
   updateCart();
 }
 
-  document.getElementById('page-up').addEventListener('click', () => adjustLastQty(1));
-  document.getElementById('page-down').addEventListener('click', () => adjustLastQty(-1));
+document.getElementById('page-up').addEventListener('click', () => adjustLastQty(1));
+document.getElementById('page-down').addEventListener('click', () => adjustLastQty(-1));
 
-  // Barcode scanning
-  // Barcode scanning: lookup via product code
-  document.getElementById('barcode-input')
-    .addEventListener('keypress', e => {
-      if (e.key !== 'Enter') return;
-      const code = e.target.value.trim();
-      if (!code) return;
+// Barcode scanning
+document.getElementById('barcode-input')
+  .addEventListener('keypress', e => {
+    if (e.key !== 'Enter') return;
+    const code = e.target.value.trim();
+    if (!code) return;
 
-      fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
-        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Accept': 'application/json' }
-      })
-      .then(r => r.json())
-      .then(products => {
-        if (!Array.isArray(products) || products.length === 0) {
-          return alert('Không tìm thấy sản phẩm với mã: ' + code);
-        }
+    fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
+      headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Accept': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(products => {
+      if (!Array.isArray(products) || products.length === 0) {
+        return alert('Không tìm thấy sản phẩm với mã: ' + code);
+      }
 
-        const available = products
-          .filter(p => Number(p.actual_quantity) > 0)
-          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      const available = products
+        .filter(p => Number(p.actual_quantity) > 0)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-        const totalStock = available.reduce((sum, lot) => sum + Number(lot.actual_quantity), 0);
+      const totalStock = available.reduce((sum, lot) => sum + Number(lot.actual_quantity), 0);
 
-        if (totalStock === 0) {
-          return alert('Sản phẩm đã hết hàng.');
-        }
+      if (totalStock === 0) {
+        return alert('Sản phẩm đã hết hàng.');
+      }
 
-        const p      = available[0];
-        const id     = p.id;
-        const name   = p.name;
-        const price  = parseFloat(p.price);
-        const maxQty = totalStock;
+      const p = available[0];
+      const id = p.id;
+      const existingItemIndex = window.cart.findIndex(item => item.id === id);
 
-        if (cart[id]) {
-          if (cart[id].qty < maxQty) {
-            cart[id].qty++;
-          } else {
-            alert('Đã đạt giới hạn tồn kho.');
-          }
+      if (existingItemIndex !== -1) {
+        const item = window.cart[existingItemIndex];
+        if (item.qty < totalStock) {
+          item.qty++;
         } else {
-          const tax = parseFloat(p.tax) || 0;
-          cart[id] = { name, price, qty: 1, maxQty, code: p.code, tax };
-          console.log('✅ Added via barcode:', cart[id]);
-
+          alert('Đã đạt giới hạn tồn kho.');
         }
+      } else {
+        const tax = parseFloat(p.tax) || 0;
+        window.cart.push({ 
+          id,
+          name: p.name, 
+          price: parseFloat(p.price), 
+          qty: 1, 
+          maxQty: totalStock, 
+          code: p.code, 
+          tax 
+        });
+        console.log('✅ Added via barcode:', window.cart[window.cart.length - 1]);
+      }
 
-        updateCart();
-      })
-      .catch(err => {
-        console.error('Error fetching product by code:', err);
-        alert('Lỗi khi tìm sản phẩm.');
-      })
-      .finally(() => {
-        e.target.value = '';
-        e.target.focus();
-      });
-  });
+      updateCart();
+    })
+    .catch(err => {
+      console.error('Error fetching product by code:', err);
+      alert('Lỗi khi tìm sản phẩm.');
+    })
+    .finally(() => {
+      e.target.value = '';
+      e.target.focus();
+    });
+});
 
-
-
-  document.getElementById('open-payment').addEventListener('click', () => {
+document.getElementById('open-payment').addEventListener('click', () => {
   // deactivate product tab
   document.querySelectorAll('.inner-tab-button').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.inner-panel').forEach(p => p.style.display = 'none');
@@ -277,49 +340,44 @@ function adjustLastQty(delta) {
   document.getElementById('panel-payment').style.display = 'block';
 });
 
-
-
-  // Numpad
-  document.querySelectorAll('.num-button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('barcode-input').value += btn.innerText;
-    });
+// Numpad
+document.querySelectorAll('.num-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('barcode-input').value += btn.innerText;
   });
+});
 
-  const togglePrintBtn   = document.getElementById('toggle-print');
-  const printStatusElem  = document.getElementById('print-status');
+const togglePrintBtn   = document.getElementById('toggle-print');
+const printStatusElem  = document.getElementById('print-status');
 
-  togglePrintBtn.addEventListener('click', () => {
-    window.autoPrint = !window.autoPrint;
-    printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
-  });
+togglePrintBtn.addEventListener('click', () => {
+  window.autoPrint = !window.autoPrint;
+  printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
+});
 
+document.addEventListener('keydown', function (e) {
+  const key = e.key;
+  if (['F11', 'PageUp', 'PageDown'].includes(key)) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
 
-
-  document.addEventListener('keydown', function (e) {
-    const key = e.key;
-    if (['F11', 'PageUp', 'PageDown'].includes(key)) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      if (key === 'F11') {
-        printInvoice(); // calls the shared version
-      } else if (key === 'PageUp') {
-        adjustLastQty(1);
-      } else if (key === 'PageDown') {
-        adjustLastQty(-1);
-      }
-    }
-  }, { passive: false });
-
-
-  function printInvoice() {
-    if (!window._printing) {
-      window._printing = true;
-      window.printInvoice?.(); // call the version from pos-invoice.js
-      setTimeout(() => window._printing = false, 500);
+    if (key === 'F11') {
+      printInvoice(); // calls the shared version
+    } else if (key === 'PageUp') {
+      adjustLastQty(1);
+    } else if (key === 'PageDown') {
+      adjustLastQty(-1);
     }
   }
-  document.getElementById('print-invoice').addEventListener('click', printInvoice);
+}, { passive: false });
+
+function printInvoice() {
+  if (!window._printing) {
+    window._printing = true;
+    window.printInvoice?.(); // call the version from pos-invoice.js
+    setTimeout(() => window._printing = false, 500);
+  }
+}
+document.getElementById('print-invoice').addEventListener('click', printInvoice);
 });
 

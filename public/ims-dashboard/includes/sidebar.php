@@ -1,6 +1,6 @@
 <?php
 if (!defined('BASE_URL')) {
-    $baseUrl = getenv('APP_URL') ?: 'http://localhost/tappomarket/public/ims-dashboard';
+    $baseUrl = getenv('APP_URL') ?: 'http://localhost//public/ims-dashboard';
     define('BASE_URL', $baseUrl . '/ims-dashboard');
 }
 ?>
