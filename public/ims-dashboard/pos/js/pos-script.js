@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.cart      = [];
   window.autoPrint = false;
   window.EUR_RATE  = 25;
-  
+
   // 1) Load exchange rate
   fetch(`${BASE_URL}/ims-dashboard/pos/api/get_exchange_rate.php`)
     .then(r => r.json())
@@ -141,7 +141,7 @@ function attachProductEvents() {
       const price = parseFloat(card.dataset.price);
       const maxQty = parseInt(card.dataset.maxQty, 10) || 0;
       const isWeighted = card.dataset.isWeighted === 'true';
-
+      
       const existingItemIndex = window.cart.findIndex(item => item.id === id);
       
       if (existingItemIndex !== -1) {
@@ -164,6 +164,9 @@ function attachProductEvents() {
             tax,
             isWeighted 
           });
+          if (isWeighted) {
+            openWeightModal();
+          }
         } else {
           alert('Sản phẩm đã hết hàng.');
         }
@@ -188,7 +191,7 @@ function updateCardAvailability() {
   });
 }
 
-// Rebuild cart table & totals
+  // Rebuild cart table & totals
 function updateCart() {
   cartTableBody.innerHTML = '';
   let total = 0;
@@ -243,7 +246,7 @@ function updateCart() {
 
 window.updateCart = updateCart;
 
-// Quantity adjustments
+  // Quantity adjustments
 function adjustLastQty(delta) {
   if (!window.cart.length) return;
   const item = window.cart[window.cart.length - 1];
@@ -263,34 +266,33 @@ function adjustLastQty(delta) {
   updateCart();
 }
 
-document.getElementById('page-up').addEventListener('click', () => adjustLastQty(1));
-document.getElementById('page-down').addEventListener('click', () => adjustLastQty(-1));
+  document.getElementById('page-up').addEventListener('click', () => adjustLastQty(1));
+  document.getElementById('page-down').addEventListener('click', () => adjustLastQty(-1));
 
-// Barcode scanning
-document.getElementById('barcode-input')
-  .addEventListener('keypress', e => {
-    if (e.key !== 'Enter') return;
-    const code = e.target.value.trim();
-    if (!code) return;
+  // Barcode scanning
+  document.getElementById('barcode-input')
+    .addEventListener('keypress', e => {
+      if (e.key !== 'Enter') return;
+      const code = e.target.value.trim();
+      if (!code) return;
 
-    fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
-      headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Accept': 'application/json' }
-    })
-    .then(r => r.json())
-    .then(products => {
-      if (!Array.isArray(products) || products.length === 0) {
-        return alert('Không tìm thấy sản phẩm với mã: ' + code);
-      }
+      fetch(`${BASE_URL}/api/products/search?code=${encodeURIComponent(code)}`, {
+        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}`, 'Accept': 'application/json' }
+      })
+      .then(r => r.json())
+      .then(products => {
+        if (!Array.isArray(products) || products.length === 0) {
+          return alert('Không tìm thấy sản phẩm với mã: ' + code);
+        }
+        const available = products
+          .filter(p => Number(p.actual_quantity) > 0)
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-      const available = products
-        .filter(p => Number(p.actual_quantity) > 0)
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const totalStock = available.reduce((sum, lot) => sum + Number(lot.actual_quantity), 0);
 
-      const totalStock = available.reduce((sum, lot) => sum + Number(lot.actual_quantity), 0);
-
-      if (totalStock === 0) {
-        return alert('Sản phẩm đã hết hàng.');
-      }
+        if (totalStock === 0) {
+          return alert('Sản phẩm đã hết hàng.');
+        }
 
       const p = available[0];
       const id = p.id;
@@ -300,36 +302,40 @@ document.getElementById('barcode-input')
         const item = window.cart[existingItemIndex];
         if (item.qty < totalStock) {
           item.qty++;
+          } else {
+            alert('Đã đạt giới hạn tồn kho.');
+          }
         } else {
-          alert('Đã đạt giới hạn tồn kho.');
-        }
-      } else {
-        const tax = parseFloat(p.tax) || 0;
+          const tax = parseFloat(p.tax) || 0;
         window.cart.push({ 
           id,
           name: p.name, 
           price: parseFloat(p.price), 
-          qty: 1, 
+          qty: p.is_weighted ? 0 : 1, 
           maxQty: totalStock, 
+          isWeighted: p.is_weighted ? true : false,
           code: p.code, 
           tax 
         });
+        if (p.is_weighted) {
+          openWeightModal();
+        }
         console.log('✅ Added via barcode:', window.cart[window.cart.length - 1]);
-      }
+        }
 
-      updateCart();
-    })
-    .catch(err => {
-      console.error('Error fetching product by code:', err);
-      alert('Lỗi khi tìm sản phẩm.');
-    })
-    .finally(() => {
-      e.target.value = '';
-      e.target.focus();
-    });
-});
+        updateCart();
+      })
+      .catch(err => {
+        console.error('Error fetching product by code:', err);
+        alert('Lỗi khi tìm sản phẩm.');
+      })
+      .finally(() => {
+        e.target.value = '';
+        e.target.focus();
+      });
+  });
 
-document.getElementById('open-payment').addEventListener('click', () => {
+  document.getElementById('open-payment').addEventListener('click', () => {
   // deactivate product tab
   document.querySelectorAll('.inner-tab-button').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.inner-panel').forEach(p => p.style.display = 'none');
@@ -340,44 +346,44 @@ document.getElementById('open-payment').addEventListener('click', () => {
   document.getElementById('panel-payment').style.display = 'block';
 });
 
-// Numpad
-document.querySelectorAll('.num-button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.getElementById('barcode-input').value += btn.innerText;
+  // Numpad
+  document.querySelectorAll('.num-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('barcode-input').value += btn.innerText;
+    });
   });
-});
 
-const togglePrintBtn   = document.getElementById('toggle-print');
-const printStatusElem  = document.getElementById('print-status');
+  const togglePrintBtn   = document.getElementById('toggle-print');
+  const printStatusElem  = document.getElementById('print-status');
 
-togglePrintBtn.addEventListener('click', () => {
-  window.autoPrint = !window.autoPrint;
-  printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
-});
+  togglePrintBtn.addEventListener('click', () => {
+    window.autoPrint = !window.autoPrint;
+    printStatusElem.innerText = window.autoPrint ? 'ON' : 'OFF';
+  });
 
-document.addEventListener('keydown', function (e) {
-  const key = e.key;
-  if (['F11', 'PageUp', 'PageDown'].includes(key)) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
+  document.addEventListener('keydown', function (e) {
+    const key = e.key;
+    if (['F11', 'PageUp', 'PageDown'].includes(key)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
 
-    if (key === 'F11') {
-      printInvoice(); // calls the shared version
-    } else if (key === 'PageUp') {
-      adjustLastQty(1);
-    } else if (key === 'PageDown') {
-      adjustLastQty(-1);
+      if (key === 'F11') {
+        printInvoice(); // calls the shared version
+      } else if (key === 'PageUp') {
+        adjustLastQty(1);
+      } else if (key === 'PageDown') {
+        adjustLastQty(-1);
+      }
+    }
+  }, { passive: false });
+
+  function printInvoice() {
+    if (!window._printing) {
+      window._printing = true;
+      window.printInvoice?.(); // call the version from pos-invoice.js
+      setTimeout(() => window._printing = false, 500);
     }
   }
-}, { passive: false });
-
-function printInvoice() {
-  if (!window._printing) {
-    window._printing = true;
-    window.printInvoice?.(); // call the version from pos-invoice.js
-    setTimeout(() => window._printing = false, 500);
-  }
-}
-document.getElementById('print-invoice').addEventListener('click', printInvoice);
+  document.getElementById('print-invoice').addEventListener('click', printInvoice);
 });
 

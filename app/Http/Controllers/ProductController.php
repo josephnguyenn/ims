@@ -203,6 +203,7 @@ class ProductController extends Controller
                     'name'             => $p->name,
                     'price'            => $p->price,
                     'code'             => $p->code,
+                    'is_weighted'      => $p->is_weighted,
                     'tax'              => $p->tax, // ✅ Add this line
                     'shipment_id'      => $p->shipment_id,
                     'actual_quantity'  => $p->actual_quantity,
