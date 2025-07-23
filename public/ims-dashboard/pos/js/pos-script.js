@@ -7,10 +7,11 @@ let currentWeightProduct = null;
 const weightModal = document.getElementById('weightModal');
 const weightInput = document.getElementById('weight-input');
 
-window.openWeightModal = function() {
-  if (!window.cart.length) return;
-  const item = window.cart[window.cart.length - 1];
-  if (item.isWeighted) {
+window.openWeightModal = function(productIndex) {
+  if (typeof productIndex === 'undefined') return;
+  currentWeightProduct = productIndex;
+  const item = window.cart[productIndex];
+  if (item && item.isWeighted) {
     weightInput.value = item.qty;
     weightModal.style.display = 'flex';
     weightInput.focus();
@@ -19,12 +20,14 @@ window.openWeightModal = function() {
 
 window.closeWeightModal = function() {
   weightModal.style.display = 'none';
+  currentWeightProduct = null;
 }
 
 window.saveWeight = function() {
-  if (!window.cart.length) return;
+  if (currentWeightProduct === null) return;
   
-  const item = window.cart[window.cart.length - 1];
+  const item = window.cart[currentWeightProduct];
+  if (!item || !item.isWeighted) return;
   
   const weight = parseFloat(weightInput.value);
   if (isNaN(weight) || weight <= 0) {
@@ -141,13 +144,17 @@ function attachProductEvents() {
       const price = parseFloat(card.dataset.price);
       const maxQty = parseInt(card.dataset.maxQty, 10) || 0;
       const isWeighted = card.dataset.isWeighted === 'true';
-      
-      const existingItemIndex = window.cart.findIndex(item => item.id === id);
+
+      const existingItemIndex = window.cart.findIndex(item => item.code === code);
       
       if (existingItemIndex !== -1) {
         const item = window.cart[existingItemIndex];
         if (item.qty < maxQty) {
-          item.qty++;
+          if (isWeighted) {
+            openWeightModal(existingItemIndex);
+          } else {
+            item.qty++;
+          }
         } else {
           alert('Đã đạt giới hạn tồn kho.');
         }
@@ -165,7 +172,7 @@ function attachProductEvents() {
             isWeighted 
           });
           if (isWeighted) {
-            openWeightModal();
+            openWeightModal(window.cart.length - 1);
           }
         } else {
           alert('Sản phẩm đã hết hàng.');
@@ -284,6 +291,7 @@ function adjustLastQty(delta) {
         if (!Array.isArray(products) || products.length === 0) {
           return alert('Không tìm thấy sản phẩm với mã: ' + code);
         }
+
         const available = products
           .filter(p => Number(p.actual_quantity) > 0)
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -294,33 +302,36 @@ function adjustLastQty(delta) {
           return alert('Sản phẩm đã hết hàng.');
         }
 
-      const p = available[0];
-      const id = p.id;
-      const existingItemIndex = window.cart.findIndex(item => item.id === id);
+        const p = available[0];
+        const existingItemIndex = window.cart.findIndex(item => item.code === p.code);
 
-      if (existingItemIndex !== -1) {
-        const item = window.cart[existingItemIndex];
-        if (item.qty < totalStock) {
-          item.qty++;
+        if (existingItemIndex !== -1) {
+          const item = window.cart[existingItemIndex];
+          if (item.qty < totalStock) {
+            if (p.is_weighted) {
+              openWeightModal(existingItemIndex);
+            } else {
+              item.qty++;
+            }
           } else {
             alert('Đã đạt giới hạn tồn kho.');
           }
         } else {
           const tax = parseFloat(p.tax) || 0;
-        window.cart.push({ 
-          id,
-          name: p.name, 
-          price: parseFloat(p.price), 
-          qty: p.is_weighted ? 0 : 1, 
-          maxQty: totalStock, 
-          isWeighted: p.is_weighted ? true : false,
-          code: p.code, 
-          tax 
-        });
-        if (p.is_weighted) {
-          openWeightModal();
-        }
-        console.log('✅ Added via barcode:', window.cart[window.cart.length - 1]);
+          window.cart.push({ 
+            id: p.id,
+            name: p.name, 
+            price: parseFloat(p.price), 
+            qty: p.is_weighted ? 0 : 1,
+            maxQty: totalStock, 
+            isWeighted: p.is_weighted ? true : false,
+            code: p.code, 
+            tax 
+          });
+          if (p.is_weighted) {
+            openWeightModal(window.cart.length - 1);
+          }
+          console.log('✅ Added via barcode:', window.cart[window.cart.length - 1]);
         }
 
         updateCart();
