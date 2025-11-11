@@ -25,16 +25,21 @@ if (file_exists($envPath)) {
     foreach ($lines as $line) {
         if (strpos(trim($line), '#') === 0 || !strpos($line, '=')) continue;
         list($key, $value) = explode('=', $line, 2);
-        putenv(trim($key) . '=' . trim($value));
+        $key = trim($key);
+        $value = trim($value);
+        // Remove quotes if present
+        $value = trim($value, '"\'');
+        putenv($key . '=' . $value);
+        $_ENV[$key] = $value;
     }
 }
 
 // ✅ 3. Initialize MySQLi Connection if needed
 if (!isset($mysqli)) {
-    $dbHost = getenv('DB_HOST') ?: 'localhost';
-    $dbUser = getenv('DB_USERNAME') ?: 'root';
-    $dbPass = getenv('DB_PASSWORD') ?: '';
-    $dbName = getenv('DB_DATABASE') ?: 'tappomarket_ims';
+    $dbHost = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: '127.0.0.1';
+    $dbUser = $_ENV['DB_USERNAME'] ?? getenv('DB_USERNAME') ?: 'root';
+    $dbPass = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?: '';
+    $dbName = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE') ?: 'tappomarket_ims';
 
     $mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
     if ($mysqli->connect_error) {
