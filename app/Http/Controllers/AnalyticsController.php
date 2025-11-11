@@ -226,6 +226,14 @@ class AnalyticsController extends Controller
                     $insights = 'Invalid insight type';
             }
 
+            // Check if insights is null and provide helpful message
+            if ($insights === null) {
+                $insights = '🤖 AI Analysis Currently Unavailable\n\n' .
+                           'To enable AI-powered insights, please add your Google Gemini API key to the .env file:\n\n' .
+                           'GEMINI_API_KEY=your_api_key_here\n\n' .
+                           'Get your free API key at: https://makersuite.google.com/app/apikey';
+            }
+
             return response()->json([
                 'type' => $type,
                 'insights' => $insights,
