@@ -33,7 +33,7 @@ class AnalyticsController extends Controller
                 ->select(
                     DB::raw('DATE(created_at) as date'),
                     DB::raw('COUNT(*) as total_orders'),
-                    DB::raw('SUM(total) as total_revenue')
+                    DB::raw('SUM(grand_total_czk) as total_revenue')
                 )
                 ->where('created_at', '>=', $startDate)
                 ->groupBy(DB::raw('DATE(created_at)'))
@@ -69,7 +69,7 @@ class AnalyticsController extends Controller
                     'products.name',
                     'products.code',
                     DB::raw('SUM(order_products.quantity) as total_sold'),
-                    DB::raw('SUM(order_products.subtotal) as total_revenue')
+                    DB::raw('SUM(order_products.price * order_products.quantity) as total_revenue')
                 )
                 ->groupBy('products.id', 'products.name', 'products.code')
                 ->orderByDesc('total_sold')
@@ -94,9 +94,9 @@ class AnalyticsController extends Controller
             $period = $request->get('period', 'month'); // day, week, month, year
 
             $data = [
-                'total_revenue' => DB::table('orders')->sum('total'),
+                'total_revenue' => DB::table('orders')->sum('grand_total_czk'),
                 'total_orders' => DB::table('orders')->count(),
-                'average_order_value' => DB::table('orders')->avg('total'),
+                'average_order_value' => DB::table('orders')->avg('grand_total_czk'),
                 'by_period' => []
             ];
 
@@ -106,7 +106,7 @@ class AnalyticsController extends Controller
                     ->select(
                         DB::raw('DATE_FORMAT(created_at, "%Y-%m") as period'),
                         DB::raw('COUNT(*) as orders'),
-                        DB::raw('SUM(total) as revenue')
+                        DB::raw('SUM(grand_total_czk) as revenue')
                     )
                     ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
                     ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'), 'desc')
@@ -182,7 +182,7 @@ class AnalyticsController extends Controller
                         ->select(
                             DB::raw('DATE(created_at) as date'),
                             DB::raw('COUNT(*) as orders'),
-                            DB::raw('SUM(total) as revenue')
+                            DB::raw('SUM(grand_total_czk) as revenue')
                         )
                         ->where('created_at', '>=', Carbon::now()->subDays(30))
                         ->groupBy(DB::raw('DATE(created_at)'))
@@ -210,7 +210,7 @@ class AnalyticsController extends Controller
                         ->select(
                             'products.name',
                             DB::raw('SUM(order_products.quantity) as total_sold'),
-                            DB::raw('SUM(order_products.subtotal) as revenue'),
+                            DB::raw('SUM(order_products.price * order_products.quantity) as revenue'),
                             'products.actual_quantity'
                         )
                         ->groupBy('products.id', 'products.name', 'products.actual_quantity')
