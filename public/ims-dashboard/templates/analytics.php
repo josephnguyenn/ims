@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Include configuration
-require_once 'define.php';
+require_once '../define.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
