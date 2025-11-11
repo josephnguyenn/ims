@@ -25,6 +25,13 @@ class GeminiService
     public function generateContent(string $prompt): ?string
     {
         try {
+            if (empty($this->apiKey)) {
+                Log::error('Gemini API Key is empty');
+                return null;
+            }
+
+            Log::info('Calling Gemini API', ['prompt_length' => strlen($prompt)]);
+
             $response = Http::timeout(30)->post(
                 "{$this->baseUrl}/gemini-pro:generateContent?key={$this->apiKey}",
                 [
@@ -38,16 +45,25 @@ class GeminiService
                 ]
             );
 
+            Log::info('Gemini API Response Status', ['status' => $response->status()]);
+
             if ($response->successful()) {
                 $data = $response->json();
+                Log::info('Gemini API Success', ['has_candidates' => isset($data['candidates'])]);
                 return $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
             }
 
-            Log::error('Gemini API Error', ['response' => $response->body()]);
+            Log::error('Gemini API Error', [
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
             return null;
 
         } catch (\Exception $e) {
-            Log::error('Gemini API Exception', ['error' => $e->getMessage()]);
+            Log::error('Gemini API Exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return null;
         }
     }
