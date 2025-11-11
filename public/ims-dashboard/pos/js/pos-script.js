@@ -41,7 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     })
     .then(r => r.json())
-    .then(list => {
+    .then(response => {
+      // Laravel API returns {data: [...]} format
+      const list = response.data || response;
       renderProductList(list);
     })
     .catch(err => {
@@ -53,6 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Build the cards
 function renderProductList(list) {
   productList.innerHTML = '';
+  
+  // Check if list is an array
+  if (!Array.isArray(list)) {
+    console.error('Expected array but got:', list);
+    productList.innerHTML = '<div class="error">Dữ liệu sản phẩm không hợp lệ.</div>';
+    return;
+  }
+  
+  if (list.length === 0) {
+    productList.innerHTML = '<div class="error">Không có sản phẩm nào.</div>';
+    return;
+  }
+  
   list.forEach(p => {
     if ((p.actual_quantity ?? 0) <= 0) return;
     const card = document.createElement('div');
