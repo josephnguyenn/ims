@@ -80,5 +80,10 @@ $section = $_GET['section'] ?? 'exchange';
     </div>
 
 </div>
+
+<script>
+// Define BASE_URL for JavaScript
+const BASE_URL = '<?= BASE_URL ?>';
+</script>
 </body>
 </html>
