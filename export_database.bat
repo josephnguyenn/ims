@@ -24,8 +24,8 @@ echo Database: %DB_NAME%
 echo Backup file: %BACKUP_FILE%
 echo.
 
-REM Export database
-c:\xampp\mysql\bin\mysqldump -u %DB_USER% -h %DB_HOST% --routines --triggers --single-transaction %DB_NAME% > "%BACKUP_FILE%"
+REM Export database with UTF-8mb4 encoding
+c:\xampp\mysql\bin\mysqldump -u %DB_USER% -h %DB_HOST% --default-character-set=utf8mb4 --routines --triggers --single-transaction %DB_NAME% > "%BACKUP_FILE%"
 
 if %ERRORLEVEL% EQU 0 (
     echo.
