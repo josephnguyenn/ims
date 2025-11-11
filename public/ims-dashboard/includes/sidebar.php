@@ -8,6 +8,7 @@ if (! defined('BASE_URL')) {
     <h2>Bảng Điều Khiển</h2>
     <ul>
         <li><a href="dashboard.php">Bảng Điều Khiển</a></li>
+        <li><a href="templates/analytics.php"><i class="fas fa-chart-line"></i> Analytics & AI</a></li>
 
         <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager')) { ?>
             <li><a href="storage.php">Kho Hàng</a></li>

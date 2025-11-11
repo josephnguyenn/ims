@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliverySupplierController;
@@ -120,6 +121,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // ✅ New POS Report endpoint (replaces old pos-reports.php)
     Route::get('/reports/pos', [ReportController::class, 'posReport']);
 });
+
+// 📊 Analytics & AI Routes
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/analytics/sales-trends', [AnalyticsController::class, 'salesTrends']);
+    Route::get('/analytics/top-products', [AnalyticsController::class, 'topProducts']);
+    Route::get('/analytics/revenue', [AnalyticsController::class, 'revenueAnalysis']);
+    Route::get('/analytics/inventory-turnover', [AnalyticsController::class, 'inventoryTurnover']);
+    Route::get('/analytics/ai-insights', [AnalyticsController::class, 'aiInsights']);
+    Route::get('/analytics/sales-forecast', [AnalyticsController::class, 'salesForecast']);
+});
+
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('categories', CategoryController::class);
 });
