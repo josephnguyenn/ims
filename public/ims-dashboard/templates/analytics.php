@@ -2,7 +2,7 @@
 session_start();
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['token'])) {
     header('Location: ../login.php');
     exit;
 }
@@ -339,13 +339,26 @@ require_once '../define.php';
         });
 
         async function fetchAPI(endpoint) {
-            const response = await fetch(`${BASE_URL}/api${endpoint}`, {
-                headers: {
-                    'Authorization': `Bearer ${AUTH_TOKEN}`,
-                    'Accept': 'application/json'
+            try {
+                console.log('Fetching:', `${BASE_URL}/api${endpoint}`);
+                const response = await fetch(`${BASE_URL}/api${endpoint}`, {
+                    headers: {
+                        'Authorization': `Bearer ${AUTH_TOKEN}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            });
-            return response.json();
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
         }
 
         async function loadDashboardData() {
@@ -360,17 +373,33 @@ require_once '../define.php';
                     fetchAPI('/analytics/inventory-turnover')
                 ]);
 
+                console.log('Sales Trends:', salesTrends);
+                console.log('Top Products:', topProducts);
+                console.log('Revenue:', revenue);
+                console.log('Inventory:', inventory);
+
                 // Update stats cards
-                updateStatsCards(revenue);
+                if (revenue && revenue.total_revenue !== undefined) {
+                    updateStatsCards(revenue);
+                }
                 
                 // Update charts
-                updateSalesTrendChart(salesTrends.data);
-                updateTopProductsChart(topProducts);
-                updateRevenueChart(revenue.by_period);
-                updateInventoryChart(inventory);
+                if (salesTrends && salesTrends.data) {
+                    updateSalesTrendChart(salesTrends.data);
+                }
+                if (topProducts && topProducts.data) {
+                    updateTopProductsChart(topProducts.data);
+                }
+                if (revenue && revenue.by_period) {
+                    updateRevenueChart(revenue.by_period);
+                }
+                if (inventory && inventory.data) {
+                    updateInventoryChart(inventory.data);
+                }
                 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
+                alert('Failed to load analytics data. Please check console for details.');
             }
         }
 
@@ -383,6 +412,11 @@ require_once '../define.php';
         }
 
         function updateSalesTrendChart(data) {
+            if (!data || !Array.isArray(data) || data.length === 0) {
+                console.warn('No sales trend data available');
+                return;
+            }
+            
             const ctx = document.getElementById('salesTrendChart');
             
             if (charts.salesTrend) charts.salesTrend.destroy();
