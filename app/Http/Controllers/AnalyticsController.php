@@ -21,24 +21,32 @@ class AnalyticsController extends Controller
      */
     public function salesTrends(Request $request)
     {
-        $days = $request->get('days', 30);
-        $startDate = Carbon::now()->subDays($days);
+        try {
+            $days = $request->get('days', 30);
+            $startDate = Carbon::now()->subDays($days);
 
-        $data = DB::table('orders')
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as total_orders'),
-                DB::raw('SUM(total) as total_revenue')
-            )
-            ->where('created_at', '>=', $startDate)
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+            $data = DB::table('orders')
+                ->select(
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('COUNT(*) as total_orders'),
+                    DB::raw('SUM(total) as total_revenue')
+                )
+                ->where('created_at', '>=', $startDate)
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
 
-        return response()->json([
-            'data' => $data,
-            'period' => "{$days} days"
-        ]);
+            return response()->json([
+                'data' => $data,
+                'period' => "{$days} days"
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch sales trends',
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
     }
 
     /**
@@ -46,22 +54,29 @@ class AnalyticsController extends Controller
      */
     public function topProducts(Request $request)
     {
-        $limit = $request->get('limit', 10);
+        try {
+            $limit = $request->get('limit', 10);
 
-        $products = DB::table('order_products')
-            ->join('products', 'order_products.product_id', '=', 'products.id')
-            ->select(
-                'products.name',
-                'products.code',
-                DB::raw('SUM(order_products.quantity) as total_sold'),
-                DB::raw('SUM(order_products.subtotal) as total_revenue')
-            )
-            ->groupBy('products.id', 'products.name', 'products.code')
-            ->orderByDesc('total_sold')
-            ->limit($limit)
-            ->get();
+            $products = DB::table('order_products')
+                ->join('products', 'order_products.product_id', '=', 'products.id')
+                ->select(
+                    'products.name',
+                    'products.code',
+                    DB::raw('SUM(order_products.quantity) as total_sold'),
+                    DB::raw('SUM(order_products.subtotal) as total_revenue')
+                )
+                ->groupBy('products.id', 'products.name', 'products.code')
+                ->orderByDesc('total_sold')
+                ->limit($limit)
+                ->get();
 
-        return response()->json($products);
+            return response()->json(['data' => $products]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch top products',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -69,30 +84,37 @@ class AnalyticsController extends Controller
      */
     public function revenueAnalysis(Request $request)
     {
-        $period = $request->get('period', 'month'); // day, week, month, year
+        try {
+            $period = $request->get('period', 'month'); // day, week, month, year
 
-        $data = [
-            'total_revenue' => DB::table('orders')->sum('total'),
-            'total_orders' => DB::table('orders')->count(),
-            'average_order_value' => DB::table('orders')->avg('total'),
-            'by_period' => []
-        ];
+            $data = [
+                'total_revenue' => DB::table('orders')->sum('total'),
+                'total_orders' => DB::table('orders')->count(),
+                'average_order_value' => DB::table('orders')->avg('total'),
+                'by_period' => []
+            ];
 
-        // Monthly breakdown
-        if ($period === 'month') {
-            $data['by_period'] = DB::table('orders')
-                ->select(
-                    DB::raw('DATE_FORMAT(created_at, "%Y-%m") as period'),
-                    DB::raw('COUNT(*) as orders'),
-                    DB::raw('SUM(total) as revenue')
-                )
-                ->groupBy('period')
-                ->orderBy('period', 'desc')
-                ->limit(12)
-                ->get();
+            // Monthly breakdown
+            if ($period === 'month') {
+                $data['by_period'] = DB::table('orders')
+                    ->select(
+                        DB::raw('DATE_FORMAT(created_at, "%Y-%m") as period'),
+                        DB::raw('COUNT(*) as orders'),
+                        DB::raw('SUM(total) as revenue')
+                    )
+                    ->groupBy('period')
+                    ->orderBy('period', 'desc')
+                    ->limit(12)
+                    ->get();
+            }
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch revenue analysis',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json($data);
     }
 
     /**
@@ -100,26 +122,33 @@ class AnalyticsController extends Controller
      */
     public function inventoryTurnover()
     {
-        $products = DB::table('products')
-            ->leftJoin('order_products', 'products.id', '=', 'order_products.product_id')
-            ->select(
-                'products.id',
-                'products.name',
-                'products.actual_quantity',
-                DB::raw('COALESCE(SUM(order_products.quantity), 0) as total_sold'),
-                DB::raw('CASE 
-                    WHEN products.actual_quantity > 0 
-                    THEN ROUND(COALESCE(SUM(order_products.quantity), 0) / products.actual_quantity, 2)
-                    ELSE 0 
-                END as turnover_rate')
-            )
-            ->groupBy('products.id', 'products.name', 'products.actual_quantity')
-            ->havingRaw('total_sold > 0')
-            ->orderByDesc('turnover_rate')
-            ->limit(20)
-            ->get();
+        try {
+            $products = DB::table('products')
+                ->leftJoin('order_products', 'products.id', '=', 'order_products.product_id')
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.actual_quantity',
+                    DB::raw('COALESCE(SUM(order_products.quantity), 0) as total_sold'),
+                    DB::raw('CASE 
+                        WHEN products.actual_quantity > 0 
+                        THEN ROUND(COALESCE(SUM(order_products.quantity), 0) / products.actual_quantity, 2)
+                        ELSE 0 
+                    END as turnover_rate')
+                )
+                ->groupBy('products.id', 'products.name', 'products.actual_quantity')
+                ->havingRaw('total_sold > 0')
+                ->orderByDesc('turnover_rate')
+                ->limit(20)
+                ->get();
 
-        return response()->json($products);
+            return response()->json(['data' => $products]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch inventory turnover',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
