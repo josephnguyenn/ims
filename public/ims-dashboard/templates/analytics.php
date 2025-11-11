@@ -530,8 +530,10 @@ require_once '../define.php';
             // Update button states
             document.querySelectorAll('.insight-type button').forEach(btn => {
                 btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(type)) {
+                    btn.classList.add('active');
+                }
             });
-            event.target.classList.add('active');
             
             const content = document.getElementById('ai-content');
             content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>AI is analyzing your data...</p></div>';
