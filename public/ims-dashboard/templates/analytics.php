@@ -349,7 +349,9 @@ require_once '../define.php';
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json();
+                    console.error('API Error Response:', errorData);
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
                 }
                 
                 const data = await response.json();
