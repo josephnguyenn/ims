@@ -34,5 +34,5 @@ if (! isset($mysqli)) {
     if ($mysqli->connect_error) {
         exit('Database connection failed: '.$mysqli->connect_error);
     }
-    $mysqli->set_charset('utf8');
+    $mysqli->set_charset('utf8mb4');
 }
