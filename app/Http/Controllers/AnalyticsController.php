@@ -36,8 +36,8 @@ class AnalyticsController extends Controller
                     DB::raw('SUM(total) as total_revenue')
                 )
                 ->where('created_at', '>=', $startDate)
-                ->groupBy('date')
-                ->orderBy('date')
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->orderBy(DB::raw('DATE(created_at)'))
                 ->get();
 
             return response()->json([
@@ -45,10 +45,12 @@ class AnalyticsController extends Controller
                 'period' => "{$days} days"
             ]);
         } catch (\Exception $e) {
+            \Log::error('Sales Trends Error: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Failed to fetch sales trends',
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'line' => $e->getLine(),
+                'file' => basename($e->getFile())
             ], 500);
         }
     }
@@ -106,17 +108,19 @@ class AnalyticsController extends Controller
                         DB::raw('COUNT(*) as orders'),
                         DB::raw('SUM(total) as revenue')
                     )
-                    ->groupBy('period')
-                    ->orderBy('period', 'desc')
+                    ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
+                    ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'), 'desc')
                     ->limit(12)
                     ->get();
             }
 
             return response()->json($data);
         } catch (\Exception $e) {
+            \Log::error('Revenue Analysis Error: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Failed to fetch revenue analysis',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
@@ -181,7 +185,7 @@ class AnalyticsController extends Controller
                             DB::raw('SUM(total) as revenue')
                         )
                         ->where('created_at', '>=', Carbon::now()->subDays(30))
-                        ->groupBy('date')
+                        ->groupBy(DB::raw('DATE(created_at)'))
                         ->get()
                         ->toArray();
 
