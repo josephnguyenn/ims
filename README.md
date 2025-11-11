@@ -1,66 +1,272 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# IMS - Inventory Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive Laravel-based Inventory Management System with integrated Point of Sale (POS) capabilities.
 
-## About Laravel
+[![Tests](https://github.com/josephnguyenn/ims/actions/workflows/tests.yml/badge.svg)](https://github.com/josephnguyenn/ims/actions/workflows/tests.yml)
+[![Code Style](https://github.com/josephnguyenn/ims/actions/workflows/lint.yml/badge.svg)](https://github.com/josephnguyenn/ims/actions/workflows/lint.yml)
+[![Security](https://github.com/josephnguyenn/ims/actions/workflows/security.yml/badge.svg)](https://github.com/josephnguyenn/ims/actions/workflows/security.yml)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Core Inventory Management
+- **Product Management**: Complete CRUD operations with category support, barcode scanning, and expiry tracking
+- **FIFO Inventory System**: Automatic First-In-First-Out stock rotation based on shipment dates
+- **Multi-batch Support**: Track same product across multiple shipments with different expiry dates
+- **Storage Management**: Organize inventory across multiple storage locations
+- **Supplier Management**: Manage both shipment suppliers (incoming) and delivery suppliers (outgoing)
+- **Shipment Tracking**: Track incoming shipments with costs, dates, and supplier information
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Point of Sale (POS)
+- **Multi-currency Support**: CZK and EUR with real-time exchange rates
+- **Payment Methods**: Cash, card, and transfer options
+- **Smart Rounding**: Automatic CZK rounding to nearest 0.50
+- **Barcode Scanning**: Quick product lookup and checkout
+- **Receipt Printing**: Professional receipt generation
+- **Shift Management**: Track sales by shift and cashier
+- **Tip Handling**: Support for tips in both currencies
 
-## Learning Laravel
+### Customer & Order Management
+- **Customer Profiles**: Track customer information and order history
+- **Order Processing**: Complete order lifecycle from creation to delivery
+- **Order Products**: Line-item level tracking with pricing and quantities
+- **Payment Tracking**: Monitor paid amounts and outstanding balances
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Reporting & Analytics
+- **Sales Reports**: Comprehensive sales analysis with date range filtering
+- **Revenue Tracking**: Monitor revenue, debt, and payment collection
+- **Top Products**: Identify best-selling items
+- **Monthly Analysis**: Month-over-month sales trends
+- **POS Reports**: Detailed cashier and shift reports with payment method breakdowns
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Security & Authentication
+- **Laravel Sanctum**: Token-based API authentication
+- **Role-Based Access**: Admin, Manager, and Staff roles with different permissions
+- **CSRF Protection**: Built-in security for all forms
+- **Password Hashing**: Secure password storage with bcrypt
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### API Features
+- **RESTful Design**: Clean, predictable API endpoints
+- **Pagination**: Efficient data loading for large datasets
+- **Search & Filtering**: Advanced query capabilities across all resources
+- **Validation**: Comprehensive input validation
+- **Error Handling**: Consistent error responses
 
-## Laravel Sponsors
+## 📋 Requirements
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP 8.1 or higher
+- MySQL 8.0 or higher
+- Composer
+- Node.js 18+ and npm
+- Web server (Apache/Nginx)
 
-### Premium Partners
+## 🔧 Installation
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 1. Clone the Repository
+```bash
+git clone https://github.com/josephnguyenn/ims.git
+cd ims
+```
 
-## Contributing
+### 2. Install PHP Dependencies
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Install JavaScript Dependencies
+```bash
+npm install
+```
 
-## Code of Conduct
+### 4. Environment Setup
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Configure Database
+Edit `.env` file with your database credentials:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-## Security Vulnerabilities
+### 6. Run Migrations
+```bash
+php artisan migrate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 7. Build Assets
+```bash
+npm run build
+```
 
-## License
+### 8. Start Development Server
+```bash
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The application will be available at `http://localhost:8000`
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+vendor/bin/phpunit
+```
+
+Run with coverage:
+```bash
+vendor/bin/phpunit --coverage-html coverage
+```
+
+## 🎨 Code Style
+
+This project follows Laravel's coding standards using Laravel Pint.
+
+Check code style:
+```bash
+vendor/bin/pint --test
+```
+
+Fix code style issues:
+```bash
+vendor/bin/pint
+```
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+
+#### Register
+```http
+POST /api/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password",
+  "role": "staff"
+}
+```
+
+#### Login
+```http
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password"
+}
+```
+
+### Protected Endpoints
+
+All endpoints below require authentication. Include the token in the header:
+```http
+Authorization: Bearer {your-token}
+```
+
+#### Products
+- `GET /api/products` - List all products
+- `GET /api/products/{id}` - Get product details
+- `POST /api/products` - Create product
+- `PUT /api/products/{id}` - Update product
+- `DELETE /api/products/{id}` - Delete product
+- `GET /api/products/search?code={barcode}` - Search by barcode
+
+#### Orders
+- `GET /api/orders` - List all orders
+- `GET /api/orders/{id}` - Get order details
+- `POST /api/orders` - Create order (supports both admin and POS)
+- `PUT /api/orders/{id}` - Update order
+- `DELETE /api/orders/{id}` - Delete order
+
+#### Reports
+- `GET /api/reports/sales?from={date}&to={date}` - Sales report
+- `GET /api/reports/top-products` - Top selling products
+- `GET /api/reports/monthly-sales` - Monthly sales data
+- `GET /api/reports/pos?shift_id={id}` - POS shift reports
+
+## 🏗️ Project Structure
+
+```
+ims/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/        # API controllers
+│   │   │   ├── Api/           # Additional API controllers
+│   │   │   ├── AuthController.php
+│   │   │   ├── ProductController.php
+│   │   │   └── ...
+│   │   └── Middleware/        # Custom middleware
+│   ├── Models/                # Eloquent models
+│   │   ├── Product.php
+│   │   ├── Order.php
+│   │   └── ...
+│   └── Services/              # Business logic services
+│       └── InventoryService.php
+├── database/
+│   ├── migrations/            # Database migrations
+│   ├── factories/             # Model factories
+│   └── seeders/              # Database seeders
+├── public/
+│   └── ims-dashboard/        # Frontend application
+│       ├── pos/              # POS system
+│       ├── templates/        # Admin templates
+│       └── js/               # JavaScript modules
+├── routes/
+│   ├── api.php               # API routes
+│   └── web.php               # Web routes
+├── tests/
+│   ├── Feature/              # Feature tests
+│   └── Unit/                 # Unit tests
+└── .github/
+    └── workflows/            # CI/CD pipelines
+        ├── tests.yml
+        ├── lint.yml
+        └── security.yml
+```
+
+## 🔐 Security
+
+- All API endpoints require authentication (except register/login)
+- Role-based access control for sensitive operations
+- CSRF protection enabled
+- SQL injection prevention via Eloquent ORM
+- XSS protection via Laravel's Blade templating
+- Password hashing with bcrypt
+- Weekly security scans via GitHub Actions
+
+## 🚀 Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 👥 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+For issues and questions, please use the GitHub issue tracker.
+
+## 🙏 Acknowledgments
+
+Built with:
+- [Laravel](https://laravel.com/) - The PHP Framework
+- [Laravel Sanctum](https://laravel.com/docs/sanctum) - API Authentication
+- [Laravel Pint](https://laravel.com/docs/pint) - Code Style
+- [PHPUnit](https://phpunit.de/) - Testing Framework

@@ -1,27 +1,29 @@
 <?php
 // public/ims-dashboard/templates/category.php
 session_start();
-if (!isset($_SESSION['token'])) {
+if (! isset($_SESSION['token'])) {
     header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
 // Fetch data via API
-function fetchData($apiUrl) {
+function fetchData($apiUrl)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
 // Get all categories
-$categories = fetchData(BASE_URL . '/api/categories');
+$categories = fetchData(BASE_URL.'/api/categories');
 
 // CSRF token for form submissions (if needed in JS requests)
 $csrfToken = bin2hex(random_bytes(32));
@@ -39,9 +41,9 @@ $_SESSION['csrf_token'] = $csrfToken;
     <meta name="csrf-token" content="<?= $csrfToken ?>">
 </head>
 <body>
-    <?php include "../includes/header.php"; ?>
+    <?php include '../includes/header.php'; ?>
     <div class="main">
-        <?php include "../includes/sidebar.php"; ?>
+        <?php include '../includes/sidebar.php'; ?>
         <div class="main-content">
             <div class="main-content-header">
                 <h1>Quản lý Danh mục sản phẩm</h1>

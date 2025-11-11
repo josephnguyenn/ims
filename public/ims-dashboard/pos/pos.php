@@ -1,19 +1,19 @@
 <?php
 session_start();
-if (!isset($_SESSION['token']) || !isset($_SESSION['role'])) {
-    header("Location: login.php");
+if (! isset($_SESSION['token']) || ! isset($_SESSION['role'])) {
+    header('Location: login.php');
     exit;
 }
-include "../define.php";  // defines BASE_URL and $mysqli
+include '../define.php';  // defines BASE_URL and $mysqli
 
 // Fetch categories
 $categories = [];
-$res = $mysqli->query("
+$res = $mysqli->query('
     SELECT id, name
       FROM product_categories
      WHERE visible_in_pos = 1
      ORDER BY name ASC
-");
+');
 while ($row = $res->fetch_assoc()) {
     $categories[] = $row;
 }
@@ -47,11 +47,11 @@ while ($row = $res->fetch_assoc()) {
     </div>
 
     <div id="panel-product" class="inner-panel">
-      <?php include __DIR__ . '/views/product-panel.php'; ?>
+      <?php include __DIR__.'/views/product-panel.php'; ?>
     </div>
 
     <div id="panel-payment" class="inner-panel" hidden>
-        <?php include __DIR__ . '/views/payment-panel.php'; ?>
+        <?php include __DIR__.'/views/payment-panel.php'; ?>
     </div>
   </div>
 
@@ -75,9 +75,9 @@ while ($row = $res->fetch_assoc()) {
     </div>
 
     <div class="numpad">
-      <?php foreach ([1,2,3,4,5,6,7,8,9,0] as $n): ?>
+      <?php foreach ([1, 2, 3, 4, 5, 6, 7, 8, 9, 0] as $n) { ?>
         <button class="num-button"><?= $n ?></button>
-      <?php endforeach; ?>
+      <?php } ?>
         <button id="page-up">▲ Qty</button>
         <button id="page-down">▼ Qty</button>
     </div>

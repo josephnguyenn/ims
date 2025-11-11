@@ -1,21 +1,18 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController; 
-use App\Http\Controllers\StorageController;
-use App\Http\Controllers\ShipmentSupplierController;
-use App\Http\Controllers\ShipmentController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\DeliverySupplierController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DeliverySupplierController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderProductController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\Api\CategoryController;
-
-
+use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\ShipmentSupplierController;
+use App\Http\Controllers\StorageController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +41,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-//Storage Routes//
+// Storage Routes//
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/storages', [StorageController::class, 'index']); // ✅ View all storage locations
@@ -54,8 +51,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/storages/{id}', [StorageController::class, 'destroy']); // ❌ Only Admi and staff can add storage
 });
 
-
-//Shipment Supplier Routes//
+// Shipment Supplier Routes//
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/shipment-suppliers', [ShipmentSupplierController::class, 'index']); // ✅ View all suppliers
     Route::get('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'show']); // ✅ View a single supplier
@@ -64,7 +60,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'destroy']); // ❌ Only Admin can delete
 });
 
-//Shipment Routes//
+// Shipment Routes//
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/shipments', [ShipmentController::class, 'index']); // ✅ View all shipments
     Route::get('/shipments/{id}', [ShipmentController::class, 'show']); // ✅ View a single shipment
@@ -73,14 +69,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/shipments/{id}', [ShipmentController::class, 'destroy']); // ✅ Delete shipment
 });
 
-
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('products/search',         [ProductController::class, 'searchByCode']);
+    Route::get('products/search', [ProductController::class, 'searchByCode']);
     Route::apiResource('products', ProductController::class);
 });
 
-
-//Delivery Supplier Routes//
+// Delivery Supplier Routes//
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/delivery-suppliers', [DeliverySupplierController::class, 'index']); // ✅ View all suppliers
     Route::get('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'show']); // ✅ View a single supplier
@@ -89,7 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'destroy']); // ❌ Only Admin can delete
 });
 
-//customer routes//
+// customer routes//
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/customers', [CustomerController::class, 'index']); // ✅ View all customers
     Route::get('/customers/{id}', [CustomerController::class, 'show']); // ✅ View a single customer
@@ -98,7 +92,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy']); // ❌ Only Admin can delete
 });
 
-//order routes//
+// order routes//
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index']); // ✅ View all orders
     Route::get('/orders/{id}', [OrderController::class, 'show']); // ✅ View a single order
@@ -107,7 +101,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']); // ❌ Only Admin can delete
 });
 
-//order product routes//
+// order product routes//
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/order-products', [OrderProductController::class, 'index']); // ✅ View all order products
     Route::get('/order-products/{id}', [OrderProductController::class, 'show']); // ✅ View order product by ID
@@ -116,8 +110,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/order-products/{id}', [OrderProductController::class, 'destroy']); // ✅ Remove product from order
 });
 
-
-//report route//
+// report route//
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reports/sales', [ReportController::class, 'salesReport']);
@@ -130,4 +123,3 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('categories', CategoryController::class);
 });
-

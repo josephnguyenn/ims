@@ -1,22 +1,23 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
-if (!isset($_GET['order_id'])) {
-    die("Order ID is required.");
+if (! isset($_GET['order_id'])) {
+    exit('Order ID is required.');
 }
 $order_id = $_GET['order_id'];
 
-function fetchData($apiUrl) {
+function fetchData($apiUrl)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
@@ -24,13 +25,13 @@ function fetchData($apiUrl) {
     return json_decode($response, true);
 }
 
-$order = fetchData(BASE_URL . "/api/orders/$order_id");
-$orderProducts = fetchData(BASE_URL . "/api/order-products/$order_id");
-$shipments = fetchData(BASE_URL . "/api/shipments");
-$orderProducts = fetchData(BASE_URL . "/api/order-products/$order_id");
+$order = fetchData(BASE_URL."/api/orders/$order_id");
+$orderProducts = fetchData(BASE_URL."/api/order-products/$order_id");
+$shipments = fetchData(BASE_URL.'/api/shipments');
+$orderProducts = fetchData(BASE_URL."/api/order-products/$order_id");
 
-if (!isset($order['id'])) {
-    die("Order not found.");
+if (! isset($order['id'])) {
+    exit('Order not found.');
 }
 ?>
 
@@ -60,9 +61,9 @@ if (!isset($order['id'])) {
     </style>
 </head>
 <body>
-<?php include "../includes/header.php"; ?>
+<?php include '../includes/header.php'; ?>
 <div class="main">
-<?php include "../includes/sidebar.php"; ?>
+<?php include '../includes/sidebar.php'; ?>
 
 <div class="main-content">
     <div class="main-content-header">
@@ -80,9 +81,9 @@ if (!isset($order['id'])) {
         <label for="shipment_id">Chọn Lô Hàng</label>
         <select id="shipment_id">
             <option value="">Chọn lô hàng</option>
-            <?php foreach ($shipments as $shipment): ?>
+            <?php foreach ($shipments as $shipment) { ?>
                 <option value="<?= $shipment['id'] ?>">Lô Hàng #<?= $shipment['id'] ?></option>
-            <?php endforeach; ?>
+            <?php } ?>
         </select>
     </div>
 
@@ -198,26 +199,26 @@ if (!isset($order['id'])) {
             </tr>
         </thead>
         <tbody id="order-product-table">
-            <?php if (!empty($orderProducts)): ?>
-                <?php foreach ($orderProducts as $item): ?>
+            <?php if (! empty($orderProducts)) { ?>
+                <?php foreach ($orderProducts as $item) { ?>
                 <?php
                 $product = is_array($item['product']) ? $item['product'] : null;
-                ?>
+                    ?>
                 <tr>
                     <td><?= $product ? htmlspecialchars($product['name']) : 'N/A' ?></td>
                     <td><?= htmlspecialchars($item['quantity']) ?></td>
                     <td><?= $product ? htmlspecialchars($product['price']) : '0.00' ?>CZK</td>
                     <td><?= $product ? number_format($product['price'] * $item['quantity'], 2) : '0.00' ?>CZK</td>
-                    <td><?= $product ? 'Shipment #' . htmlspecialchars($product['shipment_id']) : 'N/A' ?></td>
+                    <td><?= $product ? 'Shipment #'.htmlspecialchars($product['shipment_id']) : 'N/A' ?></td>
                     <td>
                         <button onclick="openEditOrderProductForm(<?= $item['id'] ?>, <?= $item['quantity'] ?>)">Chỉnh sửa</button>
                         <button onclick="deleteOrderProduct(<?= $item['id'] ?>, <?= $order['id'] ?>)">Xóa</button>
                     </td>
                 </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
+                <?php } ?>
+            <?php } else { ?>
                 <tr><td colspan="6">No products in this order.</td></tr>
-            <?php endif; ?>
+            <?php } ?>
         </tbody>
     </table>
 

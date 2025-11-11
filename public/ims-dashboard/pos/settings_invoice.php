@@ -1,15 +1,15 @@
 <?php
 // Đường dẫn file lưu cấu hình
-$settingsFile = "../data/invoice_settings.json";
+$settingsFile = '../data/invoice_settings.json';
 
 // Mặc định ban đầu
 $invoiceSettings = [
-    "storeName" => "Tappo Market",
-    "ico"       => "28872380",
-    "dic"       => "CZ8002201944",
-    "address"   => "Đà Nẵng, Vietnam",
-    "thankYou1" => "Cảm ơn quý khách!",
-    "thankYou2" => "Hẹn gặp lại!"
+    'storeName' => 'Tappo Market',
+    'ico' => '28872380',
+    'dic' => 'CZ8002201944',
+    'address' => 'Đà Nẵng, Vietnam',
+    'thankYou1' => 'Cảm ơn quý khách!',
+    'thankYou2' => 'Hẹn gặp lại!',
 ];
 
 // Load từ file nếu đã có
@@ -24,17 +24,17 @@ if (file_exists($settingsFile)) {
 // Nếu submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $invoiceSettings = [
-        "storeName" => $_POST['storeName'] ?? '',
-        "ico"       => $_POST['ico'] ?? '',
-        "dic"       => $_POST['dic'] ?? '',
-        "address"   => $_POST['address'] ?? '',
-        "thankYou1" => $_POST['thankYou1'] ?? '',
-        "thankYou2" => $_POST['thankYou2'] ?? '',
+        'storeName' => $_POST['storeName'] ?? '',
+        'ico' => $_POST['ico'] ?? '',
+        'dic' => $_POST['dic'] ?? '',
+        'address' => $_POST['address'] ?? '',
+        'thankYou1' => $_POST['thankYou1'] ?? '',
+        'thankYou2' => $_POST['thankYou2'] ?? '',
     ];
 
     // Tạo thư mục nếu chưa có
-    if (!file_exists("../data")) {
-        mkdir("../data", 0777, true);
+    if (! file_exists('../data')) {
+        mkdir('../data', 0777, true);
     }
 
     // Lưu

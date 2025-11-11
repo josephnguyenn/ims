@@ -1,25 +1,26 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 $csrfToken = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrfToken;
 
 // Get basic stats only - no heavy data loading
-function getQuickStats() {
+function getQuickStats()
+{
     global $mysqli;
-    
+
     $stats = [];
-    
+
     // Quick count queries
-    $stats['total_products'] = $mysqli->query("SELECT COUNT(*) as count FROM products")->fetch_assoc()['count'];
-    $stats['total_orders'] = $mysqli->query("SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = CURDATE()")->fetch_assoc()['count'];
-    $stats['total_customers'] = $mysqli->query("SELECT COUNT(*) as count FROM customers")->fetch_assoc()['count'];
-    $stats['low_stock'] = $mysqli->query("SELECT COUNT(*) as count FROM products WHERE quantity < 10")->fetch_assoc()['count'];
-    
+    $stats['total_products'] = $mysqli->query('SELECT COUNT(*) as count FROM products')->fetch_assoc()['count'];
+    $stats['total_orders'] = $mysqli->query('SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = CURDATE()')->fetch_assoc()['count'];
+    $stats['total_customers'] = $mysqli->query('SELECT COUNT(*) as count FROM customers')->fetch_assoc()['count'];
+    $stats['low_stock'] = $mysqli->query('SELECT COUNT(*) as count FROM products WHERE quantity < 10')->fetch_assoc()['count'];
+
     return $stats;
 }
 

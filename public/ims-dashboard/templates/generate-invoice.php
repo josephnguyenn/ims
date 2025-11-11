@@ -1,33 +1,35 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
-if (!isset($_GET['order_id'])) {
-    die("ID objednávky je vyžadováno.");
+if (! isset($_GET['order_id'])) {
+    exit('ID objednávky je vyžadováno.');
 }
 $order_id = $_GET['order_id'];
 
-function fetchData($url) {
+function fetchData($url)
+{
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
-$order = fetchData(BASE_URL . "/api/orders/$order_id");
-$orderProducts = fetchData(BASE_URL . "/api/order-products/$order_id");
+$order = fetchData(BASE_URL."/api/orders/$order_id");
+$orderProducts = fetchData(BASE_URL."/api/order-products/$order_id");
 
-if (!$order || !isset($order['id'])) {
-    die("Objednávka nebyla nalezena.");
+if (! $order || ! isset($order['id'])) {
+    exit('Objednávka nebyla nalezena.');
 }
 
 $customer = $order['customer'] ?? [
@@ -151,25 +153,25 @@ function downloadPDF() {
                 </tr>
             </thead>
             <tbody>
-                <?php 
+                <?php
                     $subtotal = 0;
-                    $totalVAT = 0;
-                    $totalAmount = 0;
-                ?>
-                <?php if (!empty($orderProducts)): ?>
-                    <?php foreach ($orderProducts as $item): ?>
-                        <?php 
-                            $product = $item['product'] ?? ['name' => 'N/A', 'price' => 0, 'vat' => 10];
-                            $price = $item['price'] ?? $product['price'];
-                            $qty = $item['quantity'];
-                            $vatRate = $product['vat'] ?? 10;
-                            $preVAT = $price * $qty;
-                            $vatAmount = $preVAT * ($vatRate / 100);
-                            $lineTotal = $preVAT + $vatAmount;
+$totalVAT = 0;
+$totalAmount = 0;
+?>
+                <?php if (! empty($orderProducts)) { ?>
+                    <?php foreach ($orderProducts as $item) { ?>
+                        <?php
+            $product = $item['product'] ?? ['name' => 'N/A', 'price' => 0, 'vat' => 10];
+                        $price = $item['price'] ?? $product['price'];
+                        $qty = $item['quantity'];
+                        $vatRate = $product['vat'] ?? 10;
+                        $preVAT = $price * $qty;
+                        $vatAmount = $preVAT * ($vatRate / 100);
+                        $lineTotal = $preVAT + $vatAmount;
 
-                            $subtotal += $preVAT;
-                            $totalVAT += $vatAmount;
-                            $totalAmount += $lineTotal;
+                        $subtotal += $preVAT;
+                        $totalVAT += $vatAmount;
+                        $totalAmount += $lineTotal;
                         ?>
                         <tr>
                             <td><?= htmlspecialchars($product['name']) ?></td>
@@ -180,10 +182,10 @@ function downloadPDF() {
                             <td><?= $vatRate ?>%</td>
                             <td><?= number_format($lineTotal, 0) ?> CZK</td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
+                    <?php } ?>
+                <?php } else { ?>
                     <tr><td colspan="7">Žádné produkty v objednávce.</td></tr>
-                <?php endif; ?>
+                <?php } ?>
             </tbody>
         </table>
     </div>

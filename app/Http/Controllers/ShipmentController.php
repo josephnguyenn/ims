@@ -22,7 +22,7 @@ class ShipmentController extends Controller
             'storage_id' => 'required|exists:storages,id',
             'order_date' => 'required|date',
             'received_date' => 'nullable|date',
-            'expired_date' => 'nullable|date'
+            'expired_date' => 'nullable|date',
         ]);
 
         $shipment = Shipment::create($request->all());
@@ -35,7 +35,7 @@ class ShipmentController extends Controller
     {
         $shipment = Shipment::with(['supplier', 'storage'])->find($id);
 
-        if (!$shipment) {
+        if (! $shipment) {
             return response()->json(['message' => 'Shipment not found'], 404);
         }
 
@@ -45,22 +45,22 @@ class ShipmentController extends Controller
     // ✅ UPDATE SHIPMENT (Fixing BadMethodCallException)
     public function update(Request $request, $id)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-    
+
         $shipment = Shipment::find($id);
-    
-        if (!$shipment) {
+
+        if (! $shipment) {
             return response()->json(['message' => 'Shipment not found'], 404);
-        }    
+        }
 
         $request->validate([
             'shipment_supplier_id' => 'sometimes|exists:shipment_suppliers,id',
             'storage_id' => 'sometimes|exists:storages,id',
             'order_date' => 'sometimes|date',
             'received_date' => 'nullable|date',
-            'expired_date' => 'nullable|date'
+            'expired_date' => 'nullable|date',
         ]);
 
         $shipment->update($request->all());
@@ -77,7 +77,7 @@ class ShipmentController extends Controller
 
         $shipment = Shipment::find($id);
 
-        if (!$shipment) {
+        if (! $shipment) {
             return response()->json(['message' => 'Shipment not found'], 404);
         }
 

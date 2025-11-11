@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrderProduct;
 use App\Models\Order;
+use App\Models\OrderProduct;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderProductController extends Controller
 {
-    // ✅ View all order products 
+    // ✅ View all order products
     public function index()
     {
         return response()->json(OrderProduct::with('order', 'product')->get(), 200);
@@ -25,25 +25,25 @@ class OrderProductController extends Controller
         }
 
         $request->validate([
-            'order_id'   => 'required|exists:orders,id',
+            'order_id' => 'required|exists:orders,id',
             'product_id' => 'required|exists:products,id',
-            'quantity'   => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1',
         ]);
 
         // 1) Load order & desired qty
         $order = Order::findOrFail($request->order_id);
-        $qty   = $request->quantity;
+        $qty = $request->quantity;
 
         // 2) Grab one product row so we know the code & price
         $initial = Product::findOrFail($request->product_id);
-        $code    = $initial->code;
+        $code = $initial->code;
 
         // 3) Fetch ALL lots (product rows) with that code, in FIFO order
         $lots = Product::with('shipment')
             ->where('code', $code)
             ->where('actual_quantity', '>', 0)
             ->get()
-            ->sortBy(function($lot) {
+            ->sortBy(function ($lot) {
                 return $lot->shipment && $lot->shipment->order_date
                     ? $lot->shipment->order_date
                     : $lot->created_at;
@@ -57,11 +57,13 @@ class OrderProductController extends Controller
         }
 
         // 5) Deduct across shipments, then create the order line
-        DB::transaction(function() use ($order, $lots, $qty, $initial) {
+        DB::transaction(function () use ($order, $lots, $qty, $initial) {
             $remaining = $qty;
 
             foreach ($lots as $lot) {
-                if ($remaining <= 0) break;
+                if ($remaining <= 0) {
+                    break;
+                }
                 $take = min($lot->actual_quantity, $remaining);
                 $lot->actual_quantity -= $take;
                 $lot->save();
@@ -69,21 +71,20 @@ class OrderProductController extends Controller
             }
 
             OrderProduct::create([
-                'order_id'   => $order->id,
+                'order_id' => $order->id,
                 'product_id' => $initial->id,
-                'quantity'   => $qty,
-                'price'      => $initial->price,
+                'quantity' => $qty,
+                'price' => $initial->price,
             ]);
 
             $order->updateTotalPrice();
         });
 
         return response()->json([
-            'message'        => 'Product added to order successfully',
+            'message' => 'Product added to order successfully',
             'remainingStock' => $initial->fresh()->actual_quantity,
         ], 201);
     }
-
 
     // ✅ View products in a single order (Admin & Staff)
     public function show($order_id)
@@ -93,26 +94,26 @@ class OrderProductController extends Controller
         return response()->json($orderProducts, 200);
     }
 
-    // ✅ Update order product quantity 
+    // ✅ Update order product quantity
     public function update(Request $request, $id)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $orderProduct = OrderProduct::find($id);
 
-        if (!$orderProduct) {
+        if (! $orderProduct) {
             return response()->json(['message' => 'Order product not found'], 404);
         }
 
         $request->validate([
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
 
         $product = Product::find($orderProduct->product_id);
 
-        if (!$product) {
+        if (! $product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
 
@@ -151,7 +152,7 @@ class OrderProductController extends Controller
 
         $orderProduct = OrderProduct::find($id);
 
-        if (!$orderProduct) {
+        if (! $orderProduct) {
             return response()->json(['message' => 'Order product not found'], 404);
         }
 

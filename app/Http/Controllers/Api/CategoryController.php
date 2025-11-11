@@ -26,7 +26,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'           => 'required|string|max:100',
+            'name' => 'required|string|max:100',
             'visible_in_pos' => 'required|boolean',
         ]);
 
@@ -41,6 +41,7 @@ class CategoryController extends Controller
     public function show($id)
     {
         $category = ProductCategory::findOrFail($id);
+
         return response()->json($category, 200);
     }
 
@@ -52,7 +53,7 @@ class CategoryController extends Controller
         $category = ProductCategory::findOrFail($id);
 
         $data = $request->validate([
-            'name'           => 'sometimes|required|string|max:100',
+            'name' => 'sometimes|required|string|max:100',
             'visible_in_pos' => 'sometimes|required|boolean',
         ]);
 

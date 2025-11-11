@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\OrderProduct;
-use App\Models\DeliverySupplier;
 use Illuminate\Support\Facades\DB;
 
 class Order extends Model
@@ -13,13 +11,13 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_id','delivery_supplier_id','cashier_id','paid_amount',
-        'subtotal_czk','tip_czk','tip_eur','grand_total_czk','rounded_total_czk',
-        'payment_currency','amount_tendered_czk','amount_tendered_eur',
-        'change_due_czk','change_due_eur', 'payment_method','source',
-        'shift_id' // ✅ thêm dòng này
+        'customer_id', 'delivery_supplier_id', 'cashier_id', 'paid_amount',
+        'subtotal_czk', 'tip_czk', 'tip_eur', 'grand_total_czk', 'rounded_total_czk',
+        'payment_currency', 'amount_tendered_czk', 'amount_tendered_eur',
+        'change_due_czk', 'change_due_eur', 'payment_method', 'source',
+        'shift_id', // ✅ thêm dòng này
     ];
-        
+
     protected $appends = ['total_price']; // ✅ Ensure total_price is in JSON response
 
     public function customer()
@@ -30,6 +28,16 @@ class Order extends Model
     public function deliverySupplier()
     {
         return $this->belongsTo(DeliverySupplier::class);
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
+    }
+
+    public function cashier()
+    {
+        return $this->belongsTo(User::class, 'cashier_id');
     }
 
     public function orderProducts()

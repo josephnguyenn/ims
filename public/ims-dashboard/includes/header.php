@@ -1,5 +1,5 @@
 <?php
-if (!isset($_SESSION)) {
+if (! isset($_SESSION)) {
     session_start();
 }
 ?>
@@ -21,8 +21,8 @@ if (!isset($_SESSION)) {
 
         <?php
         $current_page = basename($_SERVER['PHP_SELF']);
-        if ($current_page === 'pos.php') { // Assuming POS main page is index.php
-        ?>
+if ($current_page === 'pos.php') { // Assuming POS main page is index.php
+    ?>
             <button onclick="window.location.href='settings.php'" 
                     class="gear-btn" title="Cài đặt">
                 ⚙️

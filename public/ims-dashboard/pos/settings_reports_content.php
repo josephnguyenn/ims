@@ -3,11 +3,11 @@
 
 // Lấy danh sách ca
 $shifts = [];
-if ($res = $mysqli->query("SELECT id, name FROM shifts ORDER BY sort_order ASC")) {
-  while ($row = $res->fetch_assoc()) {
-    $shifts[] = $row;
-  }
-  $res->free();
+if ($res = $mysqli->query('SELECT id, name FROM shifts ORDER BY sort_order ASC')) {
+    while ($row = $res->fetch_assoc()) {
+        $shifts[] = $row;
+    }
+    $res->free();
 }
 ?>
 
@@ -83,9 +83,9 @@ if ($res = $mysqli->query("SELECT id, name FROM shifts ORDER BY sort_order ASC")
   <label>Ca:<br>
     <select id="shift-select" style="padding:8px; font-size:14px;">
       <option value="">Tất cả</option>
-      <?php foreach ($shifts as $s): ?>
+      <?php foreach ($shifts as $s) { ?>
         <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
-      <?php endforeach ?>
+      <?php } ?>
     </select>
   </label>
   <label>Từ ngày:<br>

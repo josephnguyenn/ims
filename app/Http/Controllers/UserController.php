@@ -1,4 +1,5 @@
-<?php  
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -21,16 +22,16 @@ class UserController extends Controller
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|min:6',
-                'role' => 'required|in:admin,manager,staff'
+                'role' => 'required|in:admin,manager,staff',
             ]);
-    
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
-                'role' => $request->role
+                'role' => $request->role,
             ]);
-    
+
             return response()->json(['message' => 'User created successfully', 'user' => $user], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
@@ -38,7 +39,6 @@ class UserController extends Controller
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
         }
     }
-    
 
     // ✅ Only Admins can delete users
     public function destroy($id)
@@ -48,7 +48,7 @@ class UserController extends Controller
         }
 
         User::destroy($id);
+
         return response()->json(['message' => 'User deleted successfully']);
     }
 }
-?>

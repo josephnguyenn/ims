@@ -1,10 +1,10 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 $csrfToken = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrfToken;
 ?>
@@ -79,9 +79,9 @@ $_SESSION['csrf_token'] = $csrfToken;
     </style>
 </head>
 <body>
-<?php include "../includes/header.php"; ?>
+<?php include '../includes/header.php'; ?>
 <div class="main">
-    <?php include "../includes/sidebar.php"; ?>
+    <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="dashboard-header">
@@ -95,7 +95,7 @@ $_SESSION['csrf_token'] = $csrfToken;
             </div>
         </div>
 
-        <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager')): ?>
+        <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'manager')) { ?>
         <div class="dashboard-grid">
             <div class="dashboard-card">
                 <h2>Tổng doanh thu</h2>
@@ -114,11 +114,11 @@ $_SESSION['csrf_token'] = $csrfToken;
                 <p id="dashboard-actual">0Kč</p>
             </div>
         </div>
-    <?php elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'staff'): ?>
+    <?php } elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'staff') { ?>
         <p>Chào mừng nhân viên!</p>
-        <?php else: ?>
+        <?php } else { ?>
         <p>Bạn không có quyền truy cập vào nội dung này.</p>
-    <?php endif; ?>
+    <?php } ?>
 
 
         <h2 class="section-title">🧯 Sản phẩm sắp hết hạn (Trong 30 ngày)</h2>

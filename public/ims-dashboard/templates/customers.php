@@ -1,25 +1,27 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
 // Lấy dữ liệu Khách hàng
-function fetchData($apiUrl) {
+function fetchData($apiUrl)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
-$customers = fetchData(BASE_URL . '/api/customers');
+$customers = fetchData(BASE_URL.'/api/customers');
 // Tạo mã CSRF
 $csrfToken = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrfToken;
@@ -35,9 +37,9 @@ $_SESSION['csrf_token'] = $csrfToken;
     <meta name="csrf-token" content="<?= $csrfToken ?>">
 </head>
 <body>
-    <?php include "../includes/header.php"; ?>
+    <?php include '../includes/header.php'; ?>
     <div class="main">
-    <?php include "../includes/sidebar.php"; ?>
+    <?php include '../includes/sidebar.php'; ?>
     <div class="main-content">
         <div class="main-content-header">
             <h1>Quản lý Khách hàng</h1>

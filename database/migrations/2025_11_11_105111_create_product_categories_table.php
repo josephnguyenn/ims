@@ -9,12 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('shipment_suppliers', function (Blueprint $table) {
+        Schema::create('product_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Supplier Name
-            $table->timestamps();
+            $table->string('name', 100);
+            $table->boolean('visible_in_pos')->default(true);
         });
     }
 
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shipment_suppliers');
+        Schema::dropIfExists('product_categories');
     }
 };

@@ -1,18 +1,18 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
 // Fetch revenue data from API
-$apiUrl = BASE_URL . '/api/reports/sales';
+$apiUrl = BASE_URL.'/api/reports/sales';
 $ch = curl_init($apiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json',
-    'Authorization: Bearer ' . $_SESSION['token']
+    'Authorization: Bearer '.$_SESSION['token'],
 ]);
 $response = curl_exec($ch);
 curl_close($ch);
@@ -24,12 +24,12 @@ $totalDebt = $data['total_debt'] ?? 0;
 $actualRevenue = $totalSales - $totalDebt;
 
 // Fetch order count
-$orderCountUrl = BASE_URL . '/api/orders';
+$orderCountUrl = BASE_URL.'/api/orders';
 $ch2 = curl_init($orderCountUrl);
 curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch2, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json',
-    'Authorization: Bearer ' . $_SESSION['token']
+    'Authorization: Bearer '.$_SESSION['token'],
 ]);
 $orderResponse = curl_exec($ch2);
 curl_close($ch2);
@@ -75,9 +75,9 @@ $_SESSION['csrf_token'] = $csrfToken;
     </style>
 </head>
 <body>
-    <?php include "../includes/header.php"; ?>
+    <?php include '../includes/header.php'; ?>
     <div class="main">
-        <?php include "../includes/sidebar.php"; ?>
+        <?php include '../includes/sidebar.php'; ?>
 
         <div class="main-content">
             <div class="main-content-header">
