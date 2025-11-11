@@ -1,6 +1,5 @@
 <?php
-$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
-$mysqli->set_charset("utf8");
+// Database connection is already loaded from settings.php via define.php
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rate = floatval($_POST['exchange_rate']);

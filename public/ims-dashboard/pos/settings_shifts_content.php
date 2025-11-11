@@ -1,8 +1,6 @@
 <?php
 // settings_shifts_content.php
-// Nếu bạn cần xử lý POST/DELETE, vẫn đặt code ở đây giống trong trước
-$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
-$mysqli->set_charset("utf8");
+// Database connection is already loaded from settings.php via define.php
 
 // Xử lý Thêm / Sửa
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
