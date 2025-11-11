@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Log;
 class GeminiService
 {
     private ?string $apiKey;
-    private string $baseUrl = 'https://generativelanguage.googleapis.com/v1/models';
-    private string $model = 'gemini-1.5-flash'; // Updated to current model
+    private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+    private string $model = 'gemini-1.5-flash'; // Free tier model
 
     public function __construct()
     {
