@@ -51,21 +51,32 @@ class GeminiService
             if ($response->successful()) {
                 $data = $response->json();
                 Log::info('Gemini API Success', ['has_candidates' => isset($data['candidates'])]);
-                return $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                
+                if (!$text) {
+                    Log::error('Gemini returned empty text', ['data' => $data]);
+                    return '⚠️ AI returned an empty response. Please try again.';
+                }
+                
+                return $text;
             }
 
             Log::error('Gemini API Error', [
                 'status' => $response->status(),
                 'response' => $response->body()
             ]);
-            return null;
+            
+            // Return the actual error message for debugging
+            $errorData = $response->json();
+            return '❌ Gemini API Error: ' . ($errorData['error']['message'] ?? 'Unknown error');
 
         } catch (\Exception $e) {
             Log::error('Gemini API Exception', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return null;
+            return '❌ Exception: ' . $e->getMessage();
         }
     }
 
