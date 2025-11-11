@@ -24,10 +24,9 @@ class CustomerController extends Controller
     // ✅ Only Admins can create customers
     public function store(Request $request)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
 
         $request->validate([
             'name' => 'required|string',
@@ -37,7 +36,7 @@ class CustomerController extends Controller
             'vat_code' => 'nullable|string',
             'postal_code' => 'nullable|string',
             'city' => 'nullable|string',
-            'tax_code' => 'nullable|string'
+            'tax_code' => 'nullable|string',
         ]);
 
         $customer = Customer::create($request->all());
@@ -50,7 +49,7 @@ class CustomerController extends Controller
     {
         $customer = Customer::with('orders')->find($id);
 
-        if (!$customer) {
+        if (! $customer) {
             return response()->json(['message' => 'Customer not found'], 404);
         }
 
@@ -63,26 +62,25 @@ class CustomerController extends Controller
     // ✅ Only Admins can update customers
     public function update(Request $request, $id)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-
         $customer = Customer::find($id);
 
-        if (!$customer) {
+        if (! $customer) {
             return response()->json(['message' => 'Customer not found'], 404);
         }
 
         $request->validate([
             'name' => 'sometimes|string',
-            'email' => 'sometimes|string|email|unique:customers,email,' . $customer->id,
+            'email' => 'sometimes|string|email|unique:customers,email,'.$customer->id,
             'address' => 'sometimes|string',
             'phone' => 'sometimes|string',
             'vat_code' => 'sometimes|string',
             'postal_code' => 'sometimes|string',
             'city' => 'sometimes|string',
-            'tax_code' => 'sometimes|string' // ✅ No need to validate tax_code if not provided
+            'tax_code' => 'sometimes|string', // ✅ No need to validate tax_code if not provided
         ]);
 
         $customer->update($request->all());
@@ -99,7 +97,7 @@ class CustomerController extends Controller
 
         $customer = Customer::find($id);
 
-        if (!$customer) {
+        if (! $customer) {
             return response()->json(['message' => 'Customer not found'], 404);
         }
 

@@ -11,4 +11,4 @@ class Storage extends Model
 
     protected $fillable = ['name', 'location'];
 }
-//end the code
+// end the code

@@ -1,24 +1,26 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 // Lấy danh sách người dùng
-function fetchData($apiUrl) {
+function fetchData($apiUrl)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
-$users = fetchData(BASE_URL . '/api/users');
+$users = fetchData(BASE_URL.'/api/users');
 ?>
 
 <head>
@@ -26,9 +28,9 @@ $users = fetchData(BASE_URL . '/api/users');
 </head>
 
 <body>
-<?php include "../includes/header.php"; ?>
+<?php include '../includes/header.php'; ?>
 <div class="main">
-<?php include "../includes/sidebar.php"; ?>
+<?php include '../includes/sidebar.php'; ?>
 
 <div class="main-content">
     <h1>Quản lý Người dùng</h1>
@@ -65,7 +67,7 @@ $users = fetchData(BASE_URL . '/api/users');
                 </tr>
             </thead>
             <tbody id="userTableBody">
-            <?php foreach ($users as $user): ?>
+            <?php foreach ($users as $user) { ?>
                 <tr data-id="<?= $user['id'] ?>">
                     <td><?= $user['id'] ?></td>
                     <td><?= htmlspecialchars($user['name']) ?></td>
@@ -73,7 +75,7 @@ $users = fetchData(BASE_URL . '/api/users');
                     <td><?= htmlspecialchars($user['role']) ?></td>
                     <td><button onclick="deleteUser(<?= $user['id'] ?>)">Xóa</button></td>
                 </tr>
-            <?php endforeach; ?>
+            <?php } ?>
             </tbody>
         </table>
 

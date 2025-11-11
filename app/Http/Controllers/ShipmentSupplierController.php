@@ -22,7 +22,7 @@ class ShipmentSupplierController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|unique:shipment_suppliers'
+            'name' => 'required|string|unique:shipment_suppliers',
         ]);
 
         $supplier = ShipmentSupplier::create($request->all());
@@ -35,7 +35,7 @@ class ShipmentSupplierController extends Controller
     {
         $supplier = ShipmentSupplier::find($id);
 
-        if (!$supplier) {
+        if (! $supplier) {
             return response()->json(['message' => 'Shipment Supplier not found'], 404);
         }
 
@@ -51,12 +51,12 @@ class ShipmentSupplierController extends Controller
 
         $supplier = ShipmentSupplier::find($id);
 
-        if (!$supplier) {
+        if (! $supplier) {
             return response()->json(['message' => 'Shipment Supplier not found'], 404);
         }
 
         $request->validate([
-            'name' => 'sometimes|string|unique:shipment_suppliers,name,' . $supplier->id
+            'name' => 'sometimes|string|unique:shipment_suppliers,name,'.$supplier->id,
         ]);
 
         $supplier->update($request->all());
@@ -73,7 +73,7 @@ class ShipmentSupplierController extends Controller
 
         $supplier = ShipmentSupplier::find($id);
 
-        if (!$supplier) {
+        if (! $supplier) {
             return response()->json(['message' => 'Shipment Supplier not found'], 404);
         }
 

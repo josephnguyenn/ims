@@ -1,28 +1,30 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
 // Lấy dữ liệu Đơn hàng, Khách hàng và Nhà cung cấp giao hàng
-function fetchData($apiUrl) {
+function fetchData($apiUrl)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $perPage = 10;
 
-$allOrders = fetchData(BASE_URL . '/api/orders');
+$allOrders = fetchData(BASE_URL.'/api/orders');
 $allOrders = array_reverse($allOrders); // ✅ Reverse the array to show latest first
 $totalOrders = count($allOrders);
 $totalPages = ceil($totalOrders / $perPage);
@@ -30,8 +32,8 @@ $totalPages = ceil($totalOrders / $perPage);
 // Slice orders for current page
 $start = ($page - 1) * $perPage;
 $orders = array_slice($allOrders, $start, $perPage);
-$customers = fetchData(BASE_URL . '/api/customers');
-$deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
+$customers = fetchData(BASE_URL.'/api/customers');
+$deliverySuppliers = fetchData(BASE_URL.'/api/delivery-suppliers');
 ?>
 
 <!DOCTYPE html>
@@ -43,9 +45,9 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <?php include "../includes/header.php"; ?>
+    <?php include '../includes/header.php'; ?>
     <div class="main">
-    <?php include "../includes/sidebar.php"; ?>
+    <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">  
         <div class="main-content-header">
@@ -65,7 +67,7 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                 </tr>
             </thead>
             <tbody id="order-table">
-                <?php foreach ($orders as $order): ?>
+                <?php foreach ($orders as $order) { ?>
                     <tr>
                         <td><?= htmlspecialchars($order['id']) ?></td>
                         <?php
@@ -73,13 +75,13 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                         $custName = isset($order['customer']['name'])
                                     ? $order['customer']['name']
                                     : 'Khách vãng lai';
-                        ?>
+                    ?>
                         <td><?= htmlspecialchars($custName) ?></td>
                         <td>
                         <?= htmlspecialchars(
-                                $order['delivery_supplier']['name'] 
-                                ?? '—'      // or “N/A” / “Khách vãng lai” / whatever makes sense
-                            ) ?>
+                            $order['delivery_supplier']['name']
+                            ?? '—'      // or “N/A” / “Khách vãng lai” / whatever makes sense
+                        ) ?>
                         </td>
                         <td><?= round($order['total_price']) ?> Kč</td>
                         <td><?= htmlspecialchars($order['paid_amount']) ?> Kč</td>
@@ -88,50 +90,50 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                             <script>
                             </script>
                             <?php
-                            $orderId = (int)$order['id'];
-                            $supplierId = isset($order['delivery_supplier']['id']) ? (int)$order['delivery_supplier']['id'] : 0;
-                            $paidAmount = isset($order['paid_amount']) ? (float)$order['paid_amount'] : 0;
-                            $totalPrice = isset($order['total_price']) ? (float)$order['total_price'] : 0;
-                            ?>
+                        $orderId = (int) $order['id'];
+                    $supplierId = isset($order['delivery_supplier']['id']) ? (int) $order['delivery_supplier']['id'] : 0;
+                    $paidAmount = isset($order['paid_amount']) ? (float) $order['paid_amount'] : 0;
+                    $totalPrice = isset($order['total_price']) ? (float) $order['total_price'] : 0;
+                    ?>
                             <button onclick="openEditOrderForm(<?= $orderId ?>, <?= $supplierId ?>, <?= $paidAmount ?>, <?= $totalPrice ?>)">Sửa</button>
                             <button onclick="deleteOrder(<?= $order['id'] ?>)">Xóa</button>
                         </td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </tbody>
         </table>
 
         <div class="pagination">
-            <?php if ($page > 1): ?>
+            <?php if ($page > 1) { ?>
                 <a href="?page=<?= $page - 1 ?>">&laquo;</a>
-            <?php endif; ?>
+            <?php } ?>
 
             <?php
             $range = 2; // Number of pages to show before/after current page
 
-            for ($i = 1; $i <= $totalPages; $i++) {
-                if (
-                    $i == 1 ||
-                    $i == $totalPages ||
-                    ($i >= $page - $range && $i <= $page + $range)
-                ) {
-                    if ($i == $page) {
-                        echo "<a class='active' href='?page=$i'>$i</a>";
-                    } else {
-                        echo "<a href='?page=$i'>$i</a>";
-                    }
-                } elseif (
-                    $i == $page - $range - 1 ||
-                    $i == $page + $range + 1
-                ) {
-                    echo "<span style='padding: 0 4px;'>...</span>";
-                }
-            }
-            ?>
+for ($i = 1; $i <= $totalPages; $i++) {
+    if (
+        $i == 1 ||
+        $i == $totalPages ||
+        ($i >= $page - $range && $i <= $page + $range)
+    ) {
+        if ($i == $page) {
+            echo "<a class='active' href='?page=$i'>$i</a>";
+        } else {
+            echo "<a href='?page=$i'>$i</a>";
+        }
+    } elseif (
+        $i == $page - $range - 1 ||
+        $i == $page + $range + 1
+    ) {
+        echo "<span style='padding: 0 4px;'>...</span>";
+    }
+}
+?>
 
-            <?php if ($page < $totalPages): ?>
+            <?php if ($page < $totalPages) { ?>
                 <a href="?page=<?= $page + 1 ?>">&raquo;</a>
-            <?php endif; ?>
+            <?php } ?>
         </div>
 
         <!-- ✅ Thêm Đơn hàng Modal -->
@@ -145,18 +147,18 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                     <label for="customer_id">Khách hàng:</label>
                     <select id="customer_id" required>
                         <option value="">Chọn Khách hàng</option>
-                        <?php foreach ($customers as $customer): ?>
+                        <?php foreach ($customers as $customer) { ?>
                             <option value="<?= htmlspecialchars($customer['id']) ?>"><?= htmlspecialchars($customer['name']) ?></option>
-                        <?php endforeach; ?>
+                        <?php } ?>
                     </select>
                 </div>
                 <div class="add-row">
                     <label for="delivery_supplier_id">Nhà cung cấp giao hàng:</label>
                     <select id="delivery_supplier_id" required>
                         <option value="">Chọn Nhà cung cấp giao hàng</option>
-                        <?php foreach ($deliverySuppliers as $supplier): ?>
+                        <?php foreach ($deliverySuppliers as $supplier) { ?>
                             <option value="<?= htmlspecialchars($supplier['id']) ?>"><?= htmlspecialchars($supplier['name']) ?></option>
-                        <?php endforeach; ?>
+                        <?php } ?>
                     </select>
                 </div>
 
@@ -176,9 +178,9 @@ $deliverySuppliers = fetchData(BASE_URL . '/api/delivery-suppliers');
                         <label for="edit_delivery_supplier_id">Nhà cung cấp giao hàng:</label>
                         <select id="edit_delivery_supplier_id" required>
                             <option value="">Chọn Nhà cung cấp giao hàng</option>
-                            <?php foreach ($deliverySuppliers as $supplier): ?>
+                            <?php foreach ($deliverySuppliers as $supplier) { ?>
                                 <option value="<?= htmlspecialchars($supplier['id']) ?>"><?= htmlspecialchars($supplier['name']) ?></option>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </select>
                     </div>
                      <div class="add-row">

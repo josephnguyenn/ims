@@ -36,7 +36,7 @@ class StorageController extends Controller
     {
         $storage = Storage::find($id);
 
-        if (!$storage) {
+        if (! $storage) {
             return response()->json(['message' => 'Storage not found'], 404);
         }
 
@@ -52,7 +52,7 @@ class StorageController extends Controller
 
         $storage = Storage::find($id);
 
-        if (!$storage) {
+        if (! $storage) {
             return response()->json(['message' => 'Storage not found'], 404);
         }
 
@@ -75,7 +75,7 @@ class StorageController extends Controller
 
         $storage = Storage::find($id);
 
-        if (!$storage) {
+        if (! $storage) {
             return response()->json(['message' => 'Storage not found'], 404);
         }
 

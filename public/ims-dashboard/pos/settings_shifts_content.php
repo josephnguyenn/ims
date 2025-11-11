@@ -1,31 +1,31 @@
 <?php
 // settings_shifts_content.php
 // Nếu bạn cần xử lý POST/DELETE, vẫn đặt code ở đây giống trong trước
-$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
-$mysqli->set_charset("utf8");
+$mysqli = new mysqli('localhost', 'root', '', 'tappomarket_ims');
+$mysqli->set_charset('utf8');
 
 // Xử lý Thêm / Sửa
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action     = $_POST['action']; // 'add' hoặc 'edit'
-    $name       = $mysqli->real_escape_string(trim($_POST['name']));
+    $action = $_POST['action']; // 'add' hoặc 'edit'
+    $name = $mysqli->real_escape_string(trim($_POST['name']));
     $start_time = $_POST['start_time'];
-    $end_time   = $_POST['end_time'];
+    $end_time = $_POST['end_time'];
     $sort_order = intval($_POST['sort_order']);
 
     if ($action === 'add') {
-        $stmt = $mysqli->prepare("
+        $stmt = $mysqli->prepare('
             INSERT INTO shifts (name, start_time, end_time, sort_order)
             VALUES (?, ?, ?, ?)
-        ");
-        $stmt->bind_param("sssi", $name, $start_time, $end_time, $sort_order);
+        ');
+        $stmt->bind_param('sssi', $name, $start_time, $end_time, $sort_order);
     } else {
-        $id   = intval($_POST['id']);
-        $stmt = $mysqli->prepare("
+        $id = intval($_POST['id']);
+        $stmt = $mysqli->prepare('
             UPDATE shifts
             SET name = ?, start_time = ?, end_time = ?, sort_order = ?
             WHERE id = ?
-        ");
-        $stmt->bind_param("sssii", $name, $start_time, $end_time, $sort_order, $id);
+        ');
+        $stmt->bind_param('sssii', $name, $start_time, $end_time, $sort_order, $id);
     }
     $stmt->execute();
     $stmt->close();
@@ -37,8 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Xử lý Xóa
 if (isset($_GET['delete_id'])) {
     $del_id = intval($_GET['delete_id']);
-    $stmt = $mysqli->prepare("DELETE FROM shifts WHERE id = ?");
-    $stmt->bind_param("i", $del_id);
+    $stmt = $mysqli->prepare('DELETE FROM shifts WHERE id = ?');
+    $stmt->bind_param('i', $del_id);
     $stmt->execute();
     $stmt->close();
     echo '<script>window.location.href="settings.php?section=shifts";</script>';
@@ -46,7 +46,7 @@ if (isset($_GET['delete_id'])) {
 }
 
 // Lấy danh sách shifts
-$result = $mysqli->query("SELECT * FROM shifts ORDER BY sort_order ASC");
+$result = $mysqli->query('SELECT * FROM shifts ORDER BY sort_order ASC');
 $shifts = $result->fetch_all(MYSQLI_ASSOC);
 $result->free();
 ?>
@@ -83,7 +83,7 @@ $result->free();
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($shifts as $s): ?>
+    <?php foreach ($shifts as $s) { ?>
       <tr>
         <td><?= $s['id'] ?></td>
         <td>
@@ -112,6 +112,6 @@ $result->free();
           </a>
         </td>
       </tr>
-    <?php endforeach ?>
+    <?php } ?>
   </tbody>
 </table>

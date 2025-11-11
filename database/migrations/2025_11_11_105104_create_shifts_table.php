@@ -9,11 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('shipment_suppliers', function (Blueprint $table) {
+        Schema::create('shifts', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Supplier Name
+            $table->string('name');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shipment_suppliers');
+        Schema::dropIfExists('shifts');
     }
 };

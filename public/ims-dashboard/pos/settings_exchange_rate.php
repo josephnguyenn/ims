@@ -1,6 +1,6 @@
 <?php
-$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
-$mysqli->set_charset("utf8");
+$mysqli = new mysqli('localhost', 'root', '', 'tappomarket_ims');
+$mysqli->set_charset('utf8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rate = floatval($_POST['exchange_rate']);
@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $stmt = $mysqli->prepare("INSERT INTO settings (name, value) VALUES ('exchange_rate', ?)");
     }
-    $stmt->bind_param("d", $rate);
+    $stmt->bind_param('d', $rate);
     $stmt->execute();
     $success = true;
 }
@@ -27,6 +27,6 @@ $current_rate = $result->fetch_assoc()['value'] ?? 25;
     <button type="submit">Lưu</button>
 </form>
 
-<?php if (isset($success)): ?>
+<?php if (isset($success)) { ?>
     <div class="success">Cập nhật tỷ giá thành công!</div>
-<?php endif; ?>
+<?php } ?>

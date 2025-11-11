@@ -1,18 +1,18 @@
 <?php
 session_set_cookie_params([
-  'lifetime' => 0,
-  'path'     => '/',             // <— make it valid site-wide
-  'domain'   => $_SERVER['HTTP_HOST'],
-  'secure'   => isset($_SERVER['HTTPS']),
-  'httponly' => true,
-  'samesite' => 'Lax'
+    'lifetime' => 0,
+    'path' => '/',             // <— make it valid site-wide
+    'domain' => $_SERVER['HTTP_HOST'],
+    'secure' => isset($_SERVER['HTTPS']),
+    'httponly' => true,
+    'samesite' => 'Lax',
 ]);
 session_start();
-include "../define.php";
+include '../define.php';
 
 // Redirect to POS if already logged in
 if (isset($_SESSION['token']) && isset($_SESSION['role'])) {
-    header("Location: pos.php");
+    header('Location: pos.php');
     exit;
 }
 

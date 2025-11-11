@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Product;
 
 class Shipment extends Model
 {
@@ -15,7 +14,7 @@ class Shipment extends Model
         'storage_id',
         'order_date',
         'received_date',
-        'expired_date'
+        'expired_date',
     ]; // ❌ 'cost' is NOT fillable because it's calculated
 
     public function supplier()

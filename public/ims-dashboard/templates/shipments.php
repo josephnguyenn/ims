@@ -1,29 +1,28 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
 // Lấy dữ liệu Kho & Nhà cung cấp lô hàng
-function fetchData($apiUrl) {
+function fetchData($apiUrl)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
-
-
-$storages = fetchData(BASE_URL . '/api/storages');
-$shipmentSuppliers = fetchData(BASE_URL . '/api/shipment-suppliers');
-
+$storages = fetchData(BASE_URL.'/api/storages');
+$shipmentSuppliers = fetchData(BASE_URL.'/api/shipment-suppliers');
 
 // Tạo mã CSRF
 $csrfToken = bin2hex(random_bytes(32));
@@ -41,11 +40,11 @@ $_SESSION['csrf_token'] = $csrfToken;
 </head>
 <body>
 
-<?php include "../includes/header.php"; ?>
+<?php include '../includes/header.php'; ?>
 
 
 <div class="main">
-    <?php include "../includes/sidebar.php"; ?>
+    <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="main-content-header">
@@ -80,18 +79,18 @@ $_SESSION['csrf_token'] = $csrfToken;
                         <label for="shipment_supplier_id">Nhà cung cấp lô hàng:</label>
                         <select id="shipment_supplier_id" required>
                             <option value="">Chọn nhà cung cấp</option>
-                            <?php foreach ($shipmentSuppliers as $supplier): ?>
+                            <?php foreach ($shipmentSuppliers as $supplier) { ?>
                                 <option value="<?= htmlspecialchars($supplier['id']) ?>"><?= htmlspecialchars($supplier['name']) ?></option>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </select>
                     </div>
                     <div class="add-row">
                         <label for="storage_id">Vị trí kho:</label>
                         <select id="storage_id" required>
                             <option value="">Chọn kho</option>
-                            <?php foreach ($storages as $storage): ?>
+                            <?php foreach ($storages as $storage) { ?>
                                 <option value="<?= htmlspecialchars($storage['id']) ?>"><?= htmlspecialchars($storage['name']) ?></option>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </select>
                     </div>
                     <div class="add-row">                

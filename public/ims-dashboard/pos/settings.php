@@ -1,9 +1,9 @@
 <?php
 session_start();
-if (!in_array($_SESSION['role'], ['admin', 'manager'])) {
-    die("Access Denied.");
+if (! in_array($_SESSION['role'], ['admin', 'manager'])) {
+    exit('Access Denied.');
 }
-include "../define.php";
+include '../define.php';
 
 // Xác định section hiện tại
 $section = $_GET['section'] ?? 'exchange';
@@ -59,24 +59,28 @@ $section = $_GET['section'] ?? 'exchange';
     <!-- Sidebar -->
     <div class="settings-menu">
     <h3>Cài Đặt</h3>
-    <a href="?section=exchange" class="<?= $section==='exchange'?'active':'' ?>">Tỷ giá</a>
-    <a href="?section=shifts"   class="<?= $section==='shifts'  ?'active':'' ?>">Ca làm việc</a>
-    <a href="?section=reports"  class="<?= $section==='reports' ?'active':'' ?>">Báo cáo</a>
-    <a href="?section=invoice" class="<?= $section==='invoice'?'active':'' ?>">Hoá đơn</a>
-    <a href="?section=other"    class="<?= $section==='other'   ?'active':'' ?>">Khác</a>
+    <a href="?section=exchange" class="<?= $section === 'exchange' ? 'active' : '' ?>">Tỷ giá</a>
+    <a href="?section=shifts"   class="<?= $section === 'shifts' ? 'active' : '' ?>">Ca làm việc</a>
+    <a href="?section=reports"  class="<?= $section === 'reports' ? 'active' : '' ?>">Báo cáo</a>
+    <a href="?section=invoice" class="<?= $section === 'invoice' ? 'active' : '' ?>">Hoá đơn</a>
+    <a href="?section=other"    class="<?= $section === 'other' ? 'active' : '' ?>">Khác</a>
     </div>
 
     <!-- Main content -->
     <div class="settings-content">
         <?php
             switch ($section) {
-            case 'exchange': include 'settings_exchange_rate.php'; break;
-            case 'shifts':   include 'settings_shifts_content.php'; break;
-            case 'reports':  include 'settings_reports_content.php'; break;
-            case 'invoice': include 'settings_invoice.php'; break;
-            default: echo '<h2>Coming Soon…</h2>';
+                case 'exchange': include 'settings_exchange_rate.php';
+                    break;
+                case 'shifts':   include 'settings_shifts_content.php';
+                    break;
+                case 'reports':  include 'settings_reports_content.php';
+                    break;
+                case 'invoice': include 'settings_invoice.php';
+                    break;
+                default: echo '<h2>Coming Soon…</h2>';
             }
-        ?>
+?>
     </div>
 
 </div>

@@ -1,38 +1,40 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
 // Ensure shipment ID is provided
-if (!isset($_GET['shipment_id'])) {
-    die("Shipment ID is required.");
+if (! isset($_GET['shipment_id'])) {
+    exit('Shipment ID is required.');
 }
 
 $shipment_id = htmlspecialchars($_GET['shipment_id']);
 
 // Fetch Shipment Data
-function fetchData($apiUrl) {
+function fetchData($apiUrl)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
 // Fetch Shipment Details and Products
-$shipment = fetchData(BASE_URL . '/api/shipments/$shipment_id');
-$products = fetchData(BASE_URL . '/api/products'); // Full product list for adding products
-$shipmentProducts = fetchData(BASE_URL . '/api/shipment-products/$shipment_id');
-echo "<pre>";
+$shipment = fetchData(BASE_URL.'/api/shipments/$shipment_id');
+$products = fetchData(BASE_URL.'/api/products'); // Full product list for adding products
+$shipmentProducts = fetchData(BASE_URL.'/api/shipment-products/$shipment_id');
+echo '<pre>';
 print_r($shipmentProducts);
-echo "</pre>";
+echo '</pre>';
 exit();
 
 ?>
@@ -46,7 +48,7 @@ exit();
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <?php include "../includes/sidebar.php"; ?>
+    <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
         <h1>Shipment #<?= htmlspecialchars($shipment['id']) ?> Details</h1>
@@ -69,8 +71,8 @@ exit();
                 </tr>
             </thead>
             <tbody id="shipment-product-table">
-                <?php if (!empty($shipmentProducts)) : ?>
-                    <?php foreach ($shipmentProducts as $product) : ?>
+                <?php if (! empty($shipmentProducts)) { ?>
+                    <?php foreach ($shipmentProducts as $product) { ?>
                         <tr>
                             <td><?= htmlspecialchars($product['product']['name'] ?? 'Unknown') ?></td>
                             <td><?= htmlspecialchars($product['quantity']) ?></td>
@@ -80,10 +82,10 @@ exit();
                                 <button onclick="deleteShipmentProduct(<?= htmlspecialchars($product['id']) ?>, <?= $shipment_id ?>)">Delete</button>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php else : ?>
+                    <?php } ?>
+                <?php } else { ?>
                     <tr><td colspan="5">No products in this shipment.</td></tr>
-                <?php endif; ?>
+                <?php } ?>
             </tbody>
         </table>
 
@@ -95,11 +97,11 @@ exit();
             <label for="product_id">Select Product:</label>
             <select id="product_id" required>
                 <option value="">Select Product</option>
-                <?php foreach ($products as $product): ?>
+                <?php foreach ($products as $product) { ?>
                     <option value="<?= htmlspecialchars($product['id']) ?>">
                         <?= htmlspecialchars($product['name']) ?>
                     </option>
-                <?php endforeach; ?>
+                <?php } ?>
             </select>
 
             <label for="quantity">Quantity:</label>

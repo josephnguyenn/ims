@@ -1,4 +1,5 @@
 <?php
+
 // 1. Tell the browser “this is JSON” so fetch().then(r=>r.json()) won’t choke
 header('Content-Type: application/json');
 
@@ -6,14 +7,14 @@ header('Content-Type: application/json');
 //    You can tighten this to your exact domain when you go to production.
 header('Access-Control-Allow-Origin: *');
 
-$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
+$mysqli = new mysqli('localhost', 'root', '', 'tappomarket_ims');
 if ($mysqli->connect_errno) {
     // On DB error, still return valid JSON
     http_response_code(500);
     echo json_encode(['error' => 'DB connect failed']);
     exit;
 }
-$mysqli->set_charset("utf8");
+$mysqli->set_charset('utf8');
 
 $result = $mysqli->query(
     "SELECT value
@@ -29,8 +30,8 @@ if (! $result) {
 }
 
 $row = $result->fetch_assoc();
-$rate = isset($row['value']) 
-      ? (float)$row['value'] 
+$rate = isset($row['value'])
+      ? (float) $row['value']
       : 25.0;
 
 echo json_encode(['rate' => $rate]);

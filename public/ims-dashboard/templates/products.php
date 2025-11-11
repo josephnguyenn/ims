@@ -1,39 +1,42 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
-include "../define.php";
+include '../define.php';
 
-function fetchData($apiUrl, $timeout = 10) {
+function fetchData($apiUrl, $timeout = 10)
+{
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $_SESSION['token']
+        'Authorization: Bearer '.$_SESSION['token'],
     ]);
     $response = curl_exec($ch);
-    
+
     if (curl_error($ch)) {
         curl_close($ch);
-        return ['error' => 'API request failed: ' . curl_error($ch)];
+
+        return ['error' => 'API request failed: '.curl_error($ch)];
     }
-    
+
     curl_close($ch);
+
     return json_decode($response, true);
 }
 
 // Get all products (for now, to maintain compatibility)
-$productsResponse = fetchData(BASE_URL .'/api/products?paginate=false');
+$productsResponse = fetchData(BASE_URL.'/api/products?paginate=false');
 $allProducts = isset($productsResponse['data']) ? $productsResponse['data'] : (is_array($productsResponse) ? $productsResponse : []);
 
 // For dropdowns, get smaller datasets
-$shipments = fetchData(BASE_URL .'/api/shipments');
-$storages = fetchData(BASE_URL .'/api/storages');
-$shipmentSuppliers = fetchData(BASE_URL .'/api/shipment-supplier');
+$shipments = fetchData(BASE_URL.'/api/shipments');
+$storages = fetchData(BASE_URL.'/api/storages');
+$shipmentSuppliers = fetchData(BASE_URL.'/api/shipment-supplier');
 
 $shipment_id = $_GET['shipment_id'] ?? null;
 $selectedShipment = [];
@@ -45,9 +48,9 @@ if ($shipment_id) {
         return $product['shipment_id'] == $shipment_id;
     });
 
-    if (!empty($shipments) && is_array($shipments)) {
+    if (! empty($shipments) && is_array($shipments)) {
         foreach ($shipments as $shipment) {
-            if ((string)$shipment['id'] === (string)$shipment_id) {
+            if ((string) $shipment['id'] === (string) $shipment_id) {
                 $selectedShipment = $shipment;
 
                 // ✅ Dùng dữ liệu lồng trong API response
@@ -64,7 +67,6 @@ if ($shipment_id) {
     $products = $allProducts ?? [];
 }
 
-
 $product_code_filter = $_GET['product_code_filter'] ?? null;
 
 if ($shipment_id) {
@@ -75,7 +77,7 @@ if ($shipment_id) {
     $products = $allProducts;
 }
 
-if (!empty($product_code_filter)) {
+if (! empty($product_code_filter)) {
     $products = array_filter($products, function ($product) use ($product_code_filter) {
         return strpos($product['code'], $product_code_filter) !== false;
     });
@@ -83,7 +85,7 @@ if (!empty($product_code_filter)) {
 
 // Cài đặt phân trang
 $perPage = 10;
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $totalProducts = count($products);
 $totalPages = ceil($totalProducts / $perPage);
 
@@ -91,7 +93,6 @@ $totalPages = ceil($totalProducts / $perPage);
 $products = array_reverse($products); // <-- Add this line before slicing
 $start = ($page - 1) * $perPage;
 $paginatedProducts = array_slice($products, $start, $perPage);
-
 
 $csrfToken = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrfToken;
@@ -110,10 +111,10 @@ $_SESSION['csrf_token'] = $csrfToken;
 
 </head>
 <body>
-    <?php include "../includes/header.php"; ?>
+    <?php include '../includes/header.php'; ?>
 
     <div class="main">
-        <?php include "../includes/sidebar.php"; ?>
+        <?php include '../includes/sidebar.php'; ?>
 
         <div class="main-content">
             <div class="main-content-header">
@@ -122,26 +123,26 @@ $_SESSION['csrf_token'] = $csrfToken;
         </div>
         <form method="get" style="margin-bottom: 20px; width: 30%;">
             <!-- Trường ẩn để giữ shipment_id trong URL -->
-            <?php if (!empty($shipment_id)): ?>
+            <?php if (! empty($shipment_id)) { ?>
                 <input type="hidden" name="shipment_id" value="<?= htmlspecialchars($shipment_id) ?>">
-            <?php endif; ?>
+            <?php } ?>
 
             <!-- Trường nhập để lọc mã sản phẩm -->
             <input type="text" name="product_code_filter" placeholder="Lọc theo mã sản phẩm" value="<?= htmlspecialchars($_GET['product_code_filter'] ?? '') ?>">
             <button type="submit">Lọc</button>
-            <a href="?<?= !empty($shipment_id) ? "shipment_id=$shipment_id" : "" ?>" class="reset-button">Đặt lại bộ lọc</a>
+            <a href="?<?= ! empty($shipment_id) ? "shipment_id=$shipment_id" : '' ?>" class="reset-button">Đặt lại bộ lọc</a>
         </form>
             
 
         <div class="shipment-meta">
-            <?php if ($shipment_id && !empty($selectedShipment)): ?>
+            <?php if ($shipment_id && ! empty($selectedShipment)) { ?>
                 <h3>Sản phẩm trong lô hàng <?= htmlspecialchars($shipment_id) ?></h3>
                 <p>Kho: <?= htmlspecialchars($storageName) ?></p>
                 <p>Nhà cung cấp: <?= htmlspecialchars($supplierName) ?></p>
                 <p>Ngày nhận: <?= htmlspecialchars($selectedShipment['received_date']) ?></p>
                 <p>Ngày hết hạn: <?= htmlspecialchars($selectedShipment['expired_date']) ?></p>
                 <p>Tổng chi phí: <?= htmlspecialchars($selectedShipment['cost']) ?> CZK</p>
-            <?php endif; ?>
+            <?php } ?>
         </div>
 
 
@@ -164,8 +165,8 @@ $_SESSION['csrf_token'] = $csrfToken;
                 </tr>
             </thead>
             <tbody id="product-table">
-                <?php if (!empty($paginatedProducts)): ?>
-                    <?php foreach ($paginatedProducts as $product): ?>
+                <?php if (! empty($paginatedProducts)) { ?>
+                    <?php foreach ($paginatedProducts as $product) { ?>
                         <tr>
                             <td><?= htmlspecialchars($product['id']) ?></td>
                             <td><?= htmlspecialchars($product['name']) ?></td>
@@ -182,64 +183,64 @@ $_SESSION['csrf_token'] = $csrfToken;
                             <button onclick="deleteProduct(<?= $product['id'] ?>)">Xóa</button>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
+                    <?php } ?>
+                <?php } else { ?>
                     <tr>
                         <td colspan="11">Không có sản phẩm nào trong lô hàng này.</td>
                     </tr>
-                <?php endif; ?>
+                <?php } ?>
             </tbody>
         </table>
     <div class="pagination">
         <?php
         $range = 2; // Number of pages to show before and after current page
 
-        if ($totalPages > 1) {
-            // Previous Button
-            if ($page > 1) {
-                $prevPage = $page - 1;
-                echo '<a href="?page=' . $prevPage . 
-                    ($shipment_id ? '&shipment_id=' . $shipment_id : '') . 
-                    ($product_code_filter ? '&product_code_filter=' . urlencode($product_code_filter) : '') . '">«</a>';
-            }
+if ($totalPages > 1) {
+    // Previous Button
+    if ($page > 1) {
+        $prevPage = $page - 1;
+        echo '<a href="?page='.$prevPage.
+            ($shipment_id ? '&shipment_id='.$shipment_id : '').
+            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">«</a>';
+    }
 
-            // First Page
-            if ($page > $range + 1) {
-                echo '<a href="?page=1' . 
-                    ($shipment_id ? '&shipment_id=' . $shipment_id : '') . 
-                    ($product_code_filter ? '&product_code_filter=' . urlencode($product_code_filter) : '') . '">1</a>';
-                if ($page > $range + 2) {
-                    echo '<span>...</span>';
-                }
-            }
-
-            // Page Range
-            for ($i = max(1, $page - $range); $i <= min($totalPages, $page + $range); $i++) {
-                echo '<a href="?page=' . $i . 
-                    ($shipment_id ? '&shipment_id=' . $shipment_id : '') . 
-                    ($product_code_filter ? '&product_code_filter=' . urlencode($product_code_filter) : '') . '"' .
-                    ($i === $page ? ' class="active"' : '') . '>' . $i . '</a>';
-            }
-
-            // Last Page
-            if ($page < $totalPages - $range) {
-                if ($page < $totalPages - $range - 1) {
-                    echo '<span>...</span>';
-                }
-                echo '<a href="?page=' . $totalPages . 
-                    ($shipment_id ? '&shipment_id=' . $shipment_id : '') . 
-                    ($product_code_filter ? '&product_code_filter=' . urlencode($product_code_filter) : '') . '">' . $totalPages . '</a>';
-            }
-
-            // Next Button
-            if ($page < $totalPages) {
-                $nextPage = $page + 1;
-                echo '<a href="?page=' . $nextPage . 
-                    ($shipment_id ? '&shipment_id=' . $shipment_id : '') . 
-                    ($product_code_filter ? '&product_code_filter=' . urlencode($product_code_filter) : '') . '">»</a>';
-            }
+    // First Page
+    if ($page > $range + 1) {
+        echo '<a href="?page=1'.
+            ($shipment_id ? '&shipment_id='.$shipment_id : '').
+            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">1</a>';
+        if ($page > $range + 2) {
+            echo '<span>...</span>';
         }
-        ?>
+    }
+
+    // Page Range
+    for ($i = max(1, $page - $range); $i <= min($totalPages, $page + $range); $i++) {
+        echo '<a href="?page='.$i.
+            ($shipment_id ? '&shipment_id='.$shipment_id : '').
+            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'"'.
+            ($i === $page ? ' class="active"' : '').'>'.$i.'</a>';
+    }
+
+    // Last Page
+    if ($page < $totalPages - $range) {
+        if ($page < $totalPages - $range - 1) {
+            echo '<span>...</span>';
+        }
+        echo '<a href="?page='.$totalPages.
+            ($shipment_id ? '&shipment_id='.$shipment_id : '').
+            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">'.$totalPages.'</a>';
+    }
+
+    // Next Button
+    if ($page < $totalPages) {
+        $nextPage = $page + 1;
+        echo '<a href="?page='.$nextPage.
+            ($shipment_id ? '&shipment_id='.$shipment_id : '').
+            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">»</a>';
+    }
+}
+?>
     </div>
 
 
@@ -303,9 +304,9 @@ $_SESSION['csrf_token'] = $csrfToken;
                         <label for="shipment_id">Lô hàng:</label>
                         <select id="shipment_id" required>
                             <option value="">Chọn lô hàng</option>
-                            <?php foreach ($shipments as $shipment): ?>
+                            <?php foreach ($shipments as $shipment) { ?>
                                 <option value="<?= htmlspecialchars($shipment['id']) ?>" <?= $shipment_id == $shipment['id'] ? 'selected' : '' ?>>Lô hàng #<?= htmlspecialchars($shipment['id']) ?></option>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </select>
                     </div>
 
@@ -377,9 +378,9 @@ $_SESSION['csrf_token'] = $csrfToken;
             <label for="edit_shipment_id">Lô hàng:</label>
             <select id="edit_shipment_id" required>
             <option value="">Chọn lô hàng</option>
-            <?php foreach ($shipments as $shipment): ?>
+            <?php foreach ($shipments as $shipment) { ?>
                 <option value="<?= $shipment['id'] ?>">Lô hàng #<?= $shipment['id'] ?></option>
-            <?php endforeach; ?>
+            <?php } ?>
             </select>
         </div>
 

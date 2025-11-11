@@ -1,11 +1,11 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header("Location: ../login.php");
+if (! isset($_SESSION['token'])) {
+    header('Location: ../login.php');
     exit();
 }
 
-include "../define.php";
+include '../define.php';
 
 // Tạo mã CSRF
 $csrfToken = bin2hex(random_bytes(32));
@@ -22,11 +22,11 @@ $_SESSION['csrf_token'] = $csrfToken;
     <meta name="csrf-token" content="<?= $csrfToken ?>"> <!-- Thêm mã CSRF -->
 </head>
 <body>    
-    <?php include "../includes/header.php"; ?>
+    <?php include '../includes/header.php'; ?>
 
 
 <div class="main">
-    <?php include "../includes/sidebar.php"; ?>
+    <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="main-content-header">

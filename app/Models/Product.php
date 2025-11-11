@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class Product extends Model
 {
-    public $expiry_mode = null; //memory only not from db
+    public $expiry_mode = null; // memory only not from db
+
     use HasFactory;
 
     protected $fillable = [
@@ -37,31 +37,30 @@ class Product extends Model
     protected static function boot()
     {
         parent::boot();
-    
+
         static::creating(function ($product) {
             $product->actual_quantity = $product->original_quantity;
             $product->total_cost = $product->original_quantity * $product->cost;
-        
+
             // Only apply expiry fallback if this comes from form and explicitly set
-            if (isset($product->expiry_mode) && $product->expiry_mode === 'inherit' && !$product->expired_date) {
+            if (isset($product->expiry_mode) && $product->expiry_mode === 'inherit' && ! $product->expired_date) {
                 $shipment = Shipment::find($product->shipment_id);
                 if ($shipment) {
                     $product->expired_date = $shipment->expired_date;
                 }
             }
         });
-        
+
         static::updating(function ($product) {
             $product->total_cost = $product->original_quantity * $product->cost;
-        
-            if (isset($product->expiry_mode) && $product->expiry_mode === 'inherit' && !$product->expired_date) {
+
+            if (isset($product->expiry_mode) && $product->expiry_mode === 'inherit' && ! $product->expired_date) {
                 $shipment = Shipment::find($product->shipment_id);
                 if ($shipment) {
                     $product->expired_date = $shipment->expired_date;
                 }
             }
         });
-        
+
     }
-    
 }
