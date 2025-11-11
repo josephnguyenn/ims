@@ -9,10 +9,11 @@ class GeminiService
 {
     private ?string $apiKey;
     private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+    private string $model = 'gemini-1.5-flash'; // Updated to current model
 
     public function __construct()
     {
-        $this->apiKey = env('GEMINI_API_KEY', '');
+        $this->apiKey = config('services.gemini.api_key') ?: env('GEMINI_API_KEY', '');
         
         if (empty($this->apiKey)) {
             Log::warning('GEMINI_API_KEY is not set in environment variables');
@@ -33,7 +34,7 @@ class GeminiService
             Log::info('Calling Gemini API', ['prompt_length' => strlen($prompt)]);
 
             $response = Http::timeout(30)->post(
-                "{$this->baseUrl}/gemini-pro:generateContent?key={$this->apiKey}",
+                "{$this->baseUrl}/{$this->model}:generateContent?key={$this->apiKey}",
                 [
                     'contents' => [
                         [
