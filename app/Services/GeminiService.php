@@ -7,12 +7,16 @@ use Illuminate\Support\Facades\Log;
 
 class GeminiService
 {
-    private string $apiKey;
+    private ?string $apiKey;
     private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
 
     public function __construct()
     {
-        $this->apiKey = env('GEMINI_API_KEY');
+        $this->apiKey = env('GEMINI_API_KEY', '');
+        
+        if (empty($this->apiKey)) {
+            Log::warning('GEMINI_API_KEY is not set in environment variables');
+        }
     }
 
     /**

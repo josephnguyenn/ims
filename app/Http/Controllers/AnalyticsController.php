@@ -9,11 +9,15 @@ use Carbon\Carbon;
 
 class AnalyticsController extends Controller
 {
-    protected GeminiService $gemini;
+    protected ?GeminiService $gemini = null;
 
-    public function __construct(GeminiService $gemini)
+    public function __construct()
     {
-        $this->gemini = $gemini;
+        try {
+            $this->gemini = new GeminiService();
+        } catch (\Exception $e) {
+            \Log::error('Failed to initialize GeminiService: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -156,64 +160,79 @@ class AnalyticsController extends Controller
      */
     public function aiInsights(Request $request)
     {
-        $type = $request->get('type', 'sales'); // sales, inventory, recommendations
+        try {
+            if (!$this->gemini) {
+                return response()->json([
+                    'type' => $request->get('type', 'sales'),
+                    'insights' => 'AI service is not available. Please configure GEMINI_API_KEY.',
+                    'generated_at' => now()->toDateTimeString()
+                ]);
+            }
 
-        switch ($type) {
-            case 'sales':
-                // Get recent sales data
-                $salesData = DB::table('orders')
-                    ->select(
-                        DB::raw('DATE(created_at) as date'),
-                        DB::raw('COUNT(*) as orders'),
-                        DB::raw('SUM(total) as revenue')
-                    )
-                    ->where('created_at', '>=', Carbon::now()->subDays(30))
-                    ->groupBy('date')
-                    ->get()
-                    ->toArray();
+            $type = $request->get('type', 'sales'); // sales, inventory, recommendations
 
-                $insights = $this->gemini->analyzeSalesData($salesData);
-                break;
+            switch ($type) {
+                case 'sales':
+                    // Get recent sales data
+                    $salesData = DB::table('orders')
+                        ->select(
+                            DB::raw('DATE(created_at) as date'),
+                            DB::raw('COUNT(*) as orders'),
+                            DB::raw('SUM(total) as revenue')
+                        )
+                        ->where('created_at', '>=', Carbon::now()->subDays(30))
+                        ->groupBy('date')
+                        ->get()
+                        ->toArray();
 
-            case 'inventory':
-                // Get low stock items
-                $inventoryData = DB::table('products')
-                    ->select('name', 'actual_quantity', 'price')
-                    ->where('actual_quantity', '<', 10)
-                    ->get()
-                    ->toArray();
+                    $insights = $this->gemini->analyzeSalesData($salesData);
+                    break;
 
-                $insights = $this->gemini->suggestReorderPoints($inventoryData);
-                break;
+                case 'inventory':
+                    // Get low stock items
+                    $inventoryData = DB::table('products')
+                        ->select('name', 'actual_quantity', 'price')
+                        ->where('actual_quantity', '<', 10)
+                        ->get()
+                        ->toArray();
 
-            case 'recommendations':
-                // Get product performance
-                $productPerformance = DB::table('order_products')
-                    ->join('products', 'order_products.product_id', '=', 'products.id')
-                    ->select(
-                        'products.name',
-                        DB::raw('SUM(order_products.quantity) as total_sold'),
-                        DB::raw('SUM(order_products.subtotal) as revenue'),
-                        'products.actual_quantity'
-                    )
-                    ->groupBy('products.id', 'products.name', 'products.actual_quantity')
-                    ->orderByDesc('total_sold')
-                    ->limit(20)
-                    ->get()
-                    ->toArray();
+                    $insights = $this->gemini->suggestReorderPoints($inventoryData);
+                    break;
 
-                $insights = $this->gemini->generateProductRecommendations($productPerformance);
-                break;
+                case 'recommendations':
+                    // Get product performance
+                    $productPerformance = DB::table('order_products')
+                        ->join('products', 'order_products.product_id', '=', 'products.id')
+                        ->select(
+                            'products.name',
+                            DB::raw('SUM(order_products.quantity) as total_sold'),
+                            DB::raw('SUM(order_products.subtotal) as revenue'),
+                            'products.actual_quantity'
+                        )
+                        ->groupBy('products.id', 'products.name', 'products.actual_quantity')
+                        ->orderByDesc('total_sold')
+                        ->limit(20)
+                        ->get()
+                        ->toArray();
 
-            default:
-                $insights = 'Invalid insight type';
+                    $insights = $this->gemini->generateProductRecommendations($productPerformance);
+                    break;
+
+                default:
+                    $insights = 'Invalid insight type';
+            }
+
+            return response()->json([
+                'type' => $type,
+                'insights' => $insights,
+                'generated_at' => now()->toDateTimeString()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to generate AI insights',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'type' => $type,
-            'insights' => $insights,
-            'generated_at' => now()->toDateTimeString()
-        ]);
     }
 
     /**
