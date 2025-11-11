@@ -1,19 +1,19 @@
 <?php
-// 1. Tell the browser “this is JSON” so fetch().then(r=>r.json()) won’t choke
+// Load database configuration
+require_once dirname(dirname(__DIR__)) . '/define.php';
+
+// Tell the browser "this is JSON"
 header('Content-Type: application/json');
 
-// 2. If your JS and PHP ever live on different origins, allow the call.
-//    You can tighten this to your exact domain when you go to production.
+// Allow CORS
 header('Access-Control-Allow-Origin: *');
 
-$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
+// Database connection is already available from define.php as $mysqli
 if ($mysqli->connect_errno) {
-    // On DB error, still return valid JSON
     http_response_code(500);
-    echo json_encode(['error' => 'DB connect failed']);
+    echo json_encode(['error' => 'DB connect failed: ' . $mysqli->connect_error]);
     exit;
 }
-$mysqli->set_charset("utf8");
 
 $result = $mysqli->query(
     "SELECT value

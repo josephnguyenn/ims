@@ -1,7 +1,13 @@
 <?php
-// Database connection
-$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
-$mysqli->set_charset("utf8");
+// Load database configuration
+require_once dirname(dirname(__DIR__)) . '/define.php';
+
+// Database connection is already available from define.php as $mysqli
+if ($mysqli->connect_errno) {
+    http_response_code(500);
+    echo json_encode(['error' => 'DB connect failed: ' . $mysqli->connect_error]);
+    exit;
+}
 
 if (isset($_GET['category'])) {
     $category = $_GET['category'];

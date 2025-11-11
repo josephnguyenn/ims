@@ -320,6 +320,11 @@ function adjustLastQty(delta) {
       setTimeout(() => window._printing = false, 500);
     }
   }
-  document.getElementById('print-invoice').addEventListener('click', printInvoice);
+  
+  // Only add listener if element exists
+  const printBtn = document.getElementById('print-invoice');
+  if (printBtn) {
+    printBtn.addEventListener('click', printInvoice);
+  }
 });
 
