@@ -1,6 +1,6 @@
 <?php
 // Database connection
-$mysqli = new mysqli("localhost", "root", "", "tappo_market");
+$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
 $mysqli->set_charset("utf8");
 
 if (isset($_GET['category'])) {

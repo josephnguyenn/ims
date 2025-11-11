@@ -6,19 +6,31 @@ if (!isset($_SESSION['token'])) {
 }
 include "../define.php";
 
-function fetchData($apiUrl) {
+function fetchData($apiUrl, $timeout = 10) {
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
         'Authorization: Bearer ' . $_SESSION['token']
     ]);
     $response = curl_exec($ch);
+    
+    if (curl_error($ch)) {
+        curl_close($ch);
+        return ['error' => 'API request failed: ' . curl_error($ch)];
+    }
+    
     curl_close($ch);
     return json_decode($response, true);
 }
 
-$allProducts = fetchData(BASE_URL .'/api/products');
+// Get all products (for now, to maintain compatibility)
+$productsResponse = fetchData(BASE_URL .'/api/products?paginate=false');
+$allProducts = isset($productsResponse['data']) ? $productsResponse['data'] : (is_array($productsResponse) ? $productsResponse : []);
+
+// For dropdowns, get smaller datasets
 $shipments = fetchData(BASE_URL .'/api/shipments');
 $storages = fetchData(BASE_URL .'/api/storages');
 $shipmentSuppliers = fetchData(BASE_URL .'/api/shipment-supplier');
@@ -385,6 +397,7 @@ $_SESSION['csrf_token'] = $csrfToken;
         const BASE_URL = "<?= BASE_URL ?>";
     </script>
     <script src="../js/products.js"></script>
+    <script src="../js/products-fix.js"></script>
     <link rel="stylesheet" href="../css/add.css">
     <style>
         .pagination {

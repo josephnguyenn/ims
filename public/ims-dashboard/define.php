@@ -2,7 +2,19 @@
 // ✅ 1. Define BASE_URL from .env or fallback
 if (!defined('BASE_URL')) {
     $envUrl = getenv('APP_URL');
-    $defaultLocalUrl = 'http://localhost/tappomarket/public';
+    
+    // Auto-detect the correct API URL based on how the page is accessed
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    if ($host === 'localhost' && strpos($_SERVER['REQUEST_URI'] ?? '', '/tappomarket/') !== false) {
+        // Accessed via XAMPP - API is on Laravel dev server
+        $defaultLocalUrl = 'http://127.0.0.1:8000';
+    } else {
+        // Accessed via Laravel dev server - use same URL
+        $defaultLocalUrl = 'http://127.0.0.1:8000';
+    }
+    
     define('BASE_URL', rtrim($envUrl ?: $defaultLocalUrl, '/'));
 }
 
@@ -22,7 +34,7 @@ if (!isset($mysqli)) {
     $dbHost = getenv('DB_HOST') ?: 'localhost';
     $dbUser = getenv('DB_USERNAME') ?: 'root';
     $dbPass = getenv('DB_PASSWORD') ?: '';
-    $dbName = getenv('DB_DATABASE') ?: 'tappo_market';
+    $dbName = getenv('DB_DATABASE') ?: 'tappomarket_ims';
 
     $mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
     if ($mysqli->connect_error) {

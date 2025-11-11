@@ -1,7 +1,7 @@
 <?php
 // settings_shifts_content.php
 // Nếu bạn cần xử lý POST/DELETE, vẫn đặt code ở đây giống trong trước
-$mysqli = new mysqli("localhost", "root", "", "tappo_market");
+$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
 $mysqli->set_charset("utf8");
 
 // Xử lý Thêm / Sửa

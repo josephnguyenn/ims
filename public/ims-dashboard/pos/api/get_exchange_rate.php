@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 //    You can tighten this to your exact domain when you go to production.
 header('Access-Control-Allow-Origin: *');
 
-$mysqli = new mysqli("localhost", "root", "", "tappo_market");
+$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
 if ($mysqli->connect_errno) {
     // On DB error, still return valid JSON
     http_response_code(500);

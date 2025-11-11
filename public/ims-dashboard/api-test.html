@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Connection Test</title>
+</head>
+<body>
+    <h2>Testing API Connection</h2>
+    <button onclick="testAPI()">Test API Connection</button>
+    <div id="results"></div>
+
+    <script>
+        const BASE_URL = "http://127.0.0.1:8000";
+        
+        function testAPI() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing connection...</p>';
+            
+            // Test 1: Basic connectivity
+            fetch(`${BASE_URL}/api/users`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                results.innerHTML += `<p>✅ API Reachable - Status: ${response.status}</p>`;
+                return response.json();
+            })
+            .then(data => {
+                results.innerHTML += `<p>📊 Response: ${JSON.stringify(data).substring(0, 100)}...</p>`;
+            })
+            .catch(error => {
+                results.innerHTML += `<p>❌ API Error: ${error.message}</p>`;
+                
+                // Test 2: Try login endpoint
+                return fetch(`${BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@test.com',
+                        password: 'wrongpassword'
+                    })
+                });
+            })
+            .then(response => {
+                if (response) {
+                    results.innerHTML += `<p>✅ Login Endpoint Reachable - Status: ${response.status}</p>`;
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data) {
+                    results.innerHTML += `<p>📊 Login Response: ${JSON.stringify(data)}</p>`;
+                }
+            })
+            .catch(error => {
+                results.innerHTML += `<p>❌ Login Endpoint Error: ${error.message}</p>`;
+                results.innerHTML += `<p>🔍 Check if Laravel server is running on http://127.0.0.1:8000</p>`;
+            });
+        }
+        
+        // Auto-run test
+        document.addEventListener('DOMContentLoaded', testAPI);
+    </script>
+</body>
+</html>

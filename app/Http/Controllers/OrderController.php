@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
-    // ✅ View all orders (Admin & Staff)
+    // ✅ View all orders (Admin & Staff) with pagination
     public function index(Request $request)
     {
         $query = OrderModel::with('customer', 'deliverySupplier', 'orderProducts.product');
@@ -24,8 +24,32 @@ class OrderController extends Controller
             $to = $request->input('to') . " 23:59:59";
             $query->whereBetween('created_at', [$from, $to]);
         }
+
+        // Add search functionality
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $query->where(function($q) use ($search) {
+                $q->whereHas('customer', function($customerQuery) use ($search) {
+                    $customerQuery->where('name', 'LIKE', "%{$search}%")
+                                  ->orWhere('phone', 'LIKE', "%{$search}%");
+                })
+                ->orWhere('id', 'LIKE', "%{$search}%")
+                ->orWhere('total_amount', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Order by latest first
+        $query->orderBy('created_at', 'desc');
         
-        $orders = $query->get(); // This line ensures the filtered query is executed.
+        // Pagination - default 25 items per page for orders
+        $perPage = min($request->query('per_page', 25), 100);
+        
+        if ($request->query('paginate', true)) {
+            $orders = $query->paginate($perPage);
+        } else {
+            $orders = $query->get();
+        }
+        
         return response()->json($orders, 200);
     }
     

@@ -375,3 +375,17 @@ button[disabled] {
     cursor: not-allowed;
     color: #666;
 }
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    padding: 20px;
+    color: #1a4ba8;
+    font-weight: bold;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}

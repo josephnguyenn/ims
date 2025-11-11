@@ -34,15 +34,15 @@ function getShipmentIdFromURL() {
             return;
         }
 
-        const url = shipmentId
-            ? `${BASE_URL}/api/products?shipment_id=${shipmentId}`
-            : `${BASE_URL}/api/products`;
-
-        fetch(url, {
+        const url = shipmentId 
+            ? `${BASE_URL}/api/products?shipment_id=${shipmentId}&paginate=false`
+            : `${BASE_URL}/api/products?paginate=false`;        fetch(url, {
             headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
         })
         .then(response => response.json())
-        .then(products => {
+        .then(response => {
+            // Handle both paginated and non-paginated responses
+            const products = Array.isArray(response) ? response : (response.data || []);
             productTable.innerHTML = "";
 
             if (!products || products.length === 0) {
@@ -325,7 +325,9 @@ function suggestProductCode() {
         }
     })
     .then(res => res.json())
-    .then(products => {
+    .then(response => {
+        // Handle both paginated and non-paginated responses
+        const products = Array.isArray(response) ? response : (response.data || []);
         suggestionBox.innerHTML = '';
         if (!Array.isArray(products)) return;
     

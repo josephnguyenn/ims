@@ -1,5 +1,5 @@
 <?php
-$mysqli = new mysqli("localhost", "root", "", "tappo_market");
+$mysqli = new mysqli("localhost", "root", "", "tappomarket_ims");
 $mysqli->set_charset("utf8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

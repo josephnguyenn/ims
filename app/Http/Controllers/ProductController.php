@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-    // ✅ View all products
+    // ✅ View all products with pagination
     public function index(Request $request)
     {
         // Start with the base query, eager‐loading shipment & category
@@ -20,8 +20,41 @@ class ProductController extends Controller
             $query->where('category_id', $request->query('category_id'));
         }
 
-        // Execute and return as JSON
-        $products = $query->get();
+        // Add search functionality with optimized indexes
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('code', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Add low stock filter
+        if ($request->query('low_stock')) {
+            $query->where('actual_quantity', '<', 10);
+        }
+
+        // Add price range filter
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->query('min_price'));
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->query('max_price'));
+        }
+
+        // Default sorting by name for better performance with index
+        $query->orderBy('name', 'asc');
+
+        // Pagination - default 50 items per page, max 100
+        $perPage = min($request->query('per_page', 50), 100);
+        
+        if ($request->query('paginate', true)) {
+            $products = $query->paginate($perPage);
+        } else {
+            // For cases where all products are needed (like dropdowns)
+            $products = $query->get();
+        }
+        
         return response()->json($products, 200);
     }
 

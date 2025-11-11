@@ -7,19 +7,6 @@ if (!isset($_SESSION['token'])) {
 
 include "../define.php";
 
-// Lấy dữ liệu kho từ API
-$apiUrl = BASE_URL . '/api/storages';
-$ch = curl_init($apiUrl);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/json',
-    'Authorization: Bearer ' . $_SESSION['token'] // ✅ Bao gồm JWT token
-]);
-$response = curl_exec($ch);
-curl_close($ch);
-
-$storages = json_decode($response, true);
-
 // Tạo mã CSRF
 $csrfToken = bin2hex(random_bytes(32));
 $_SESSION['csrf_token'] = $csrfToken;
@@ -56,25 +43,9 @@ $_SESSION['csrf_token'] = $csrfToken;
                 </tr>
             </thead>
             <tbody id="storage-table">
-                <?php if (!empty($storages)): ?>
-                    <?php foreach ($storages as $storage): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($storage['id']) ?></td>
-                            <td><?= htmlspecialchars($storage['name']) ?></td>
-                            <td><?= htmlspecialchars($storage['location']) ?></td>
-                            <td>
-                                <button onclick="openEditForm(
-                                    <?= $storage['id'] ?>,
-                                    '<?= htmlspecialchars($storage['name'], ENT_QUOTES) ?>',
-                                    '<?= htmlspecialchars($storage['location'], ENT_QUOTES) ?>'
-                                )">Sửa</button>
-                                <button onclick="deleteStorage(<?= $storage['id'] ?>)">Xóa</button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr><td colspan="4">Không tìm thấy kho nào.</td></tr>
-                <?php endif; ?>
+                <tr><td colspan="4" style="text-align: center;">
+                    <div class="loading-spinner">Đang tải dữ liệu...</div>
+                </td></tr>
             </tbody>
         </table>
 
