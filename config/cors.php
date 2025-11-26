@@ -19,9 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => explode(',', env('ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:8000')),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '/^https:\\/\\/.*\\.yourdomain\\.com$/',
+    ],
 
     'allowed_headers' => ['*'],
 

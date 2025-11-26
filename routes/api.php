@@ -25,113 +25,152 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-// 🔓 Public Routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+
+// 🔓 Public Routes with Rate Limiting
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 // 🔒 Protected Routes (Require Authentication)
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/users', [UserController::class, 'index']); // ✅ Get all users
-    Route::post('/users', [UserController::class, 'store']); // ✅ Only Admins can create users
-    Route::delete('/users/{id}', [UserController::class, 'destroy']); // ✅ Only Admins can delete users
-
+    // Dashboard
     Route::get('/dashboard', function () {
         return response()->json(['message' => 'Welcome to the dashboard']);
     });
 
+    // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // User Management - Admin Only
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/users', [UserController::class, 'index']);
+        Route::post('/users', [UserController::class, 'store']);
+        Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    });
 });
 
-// Storage Routes//
-
+// Storage Routes - Admin & Manager & Staff
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/storages', [StorageController::class, 'index']); // ✅ View all storage locations
-    Route::get('/storages/{id}', [StorageController::class, 'show']); // ✅ View a single storage location
-    Route::post('/storages', [StorageController::class, 'store']); // ❌ Only Admi and staff can add storage
-    Route::put('/storages/{id}', [StorageController::class, 'update']); // ❌ Only Admi and staff can add storage
-    Route::delete('/storages/{id}', [StorageController::class, 'destroy']); // ❌ Only Admi and staff can add storage
+    Route::get('/storages', [StorageController::class, 'index']);
+    Route::get('/storages/{id}', [StorageController::class, 'show']);
+
+    // Create/Update/Delete - Admin & Manager only
+    Route::middleware(['role:admin,manager'])->group(function () {
+        Route::post('/storages', [StorageController::class, 'store']);
+        Route::put('/storages/{id}', [StorageController::class, 'update']);
+        Route::delete('/storages/{id}', [StorageController::class, 'destroy']);
+    });
 });
 
-// Shipment Supplier Routes//
+// Shipment Supplier Routes
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/shipment-suppliers', [ShipmentSupplierController::class, 'index']); // ✅ View all suppliers
-    Route::get('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'show']); // ✅ View a single supplier
-    Route::post('/shipment-suppliers', [ShipmentSupplierController::class, 'store']); // ❌ Only Admin can add
-    Route::put('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'update']); // ❌ Only Admin can update
-    Route::delete('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'destroy']); // ❌ Only Admin can delete
+    Route::get('/shipment-suppliers', [ShipmentSupplierController::class, 'index']);
+    Route::get('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'show']);
+
+    // Create/Update/Delete - Admin & Manager only
+    Route::middleware(['role:admin,manager'])->group(function () {
+        Route::post('/shipment-suppliers', [ShipmentSupplierController::class, 'store']);
+        Route::put('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'update']);
+        Route::delete('/shipment-suppliers/{id}', [ShipmentSupplierController::class, 'destroy']);
+    });
 });
 
-// Shipment Routes//
+// Shipment Routes
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/shipments', [ShipmentController::class, 'index']); // ✅ View all shipments
-    Route::get('/shipments/{id}', [ShipmentController::class, 'show']); // ✅ View a single shipment
-    Route::post('/shipments', [ShipmentController::class, 'store']); // ✅ Add shipment
-    Route::put('/shipments/{id}', [ShipmentController::class, 'update']); // ✅ Update shipment
-    Route::delete('/shipments/{id}', [ShipmentController::class, 'destroy']); // ✅ Delete shipment
+    Route::get('/shipments', [ShipmentController::class, 'index']);
+    Route::get('/shipments/{id}', [ShipmentController::class, 'show']);
+
+    Route::middleware(['role:admin,manager'])->group(function () {
+        Route::post('/shipments', [ShipmentController::class, 'store']);
+        Route::put('/shipments/{id}', [ShipmentController::class, 'update']);
+        Route::delete('/shipments/{id}', [ShipmentController::class, 'destroy']);
+    });
 });
 
+// Product Routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('products/search', [ProductController::class, 'searchByCode']);
-    Route::apiResource('products', ProductController::class);
+    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/{id}', [ProductController::class, 'show']);
+
+    // Create/Update/Delete - Admin & Manager only
+    Route::middleware(['role:admin,manager'])->group(function () {
+        Route::post('products', [ProductController::class, 'store']);
+        Route::put('products/{id}', [ProductController::class, 'update']);
+        Route::delete('products/{id}', [ProductController::class, 'destroy']);
+    });
 });
 
-// Delivery Supplier Routes//
+// Delivery Supplier Routes
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/delivery-suppliers', [DeliverySupplierController::class, 'index']); // ✅ View all suppliers
-    Route::get('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'show']); // ✅ View a single supplier
-    Route::post('/delivery-suppliers', [DeliverySupplierController::class, 'store']); // ❌ Only Admin can add
-    Route::put('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'update']); // ❌ Only Admin can update
-    Route::delete('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'destroy']); // ❌ Only Admin can delete
+    Route::get('/delivery-suppliers', [DeliverySupplierController::class, 'index']);
+    Route::get('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'show']);
+
+    Route::middleware(['role:admin,manager'])->group(function () {
+        Route::post('/delivery-suppliers', [DeliverySupplierController::class, 'store']);
+        Route::put('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'update']);
+        Route::delete('/delivery-suppliers/{id}', [DeliverySupplierController::class, 'destroy']);
+    });
 });
 
-// customer routes//
+// Customer Routes
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/customers', [CustomerController::class, 'index']); // ✅ View all customers
-    Route::get('/customers/{id}', [CustomerController::class, 'show']); // ✅ View a single customer
-    Route::post('/customers', [CustomerController::class, 'store']); // ❌ Only Admin can add
-    Route::put('/customers/{id}', [CustomerController::class, 'update']); // ❌ Only Admin can update
-    Route::delete('/customers/{id}', [CustomerController::class, 'destroy']); // ❌ Only Admin can delete
+    Route::get('/customers', [CustomerController::class, 'index']);
+    Route::get('/customers/{id}', [CustomerController::class, 'show']);
+
+    Route::middleware(['role:admin,manager'])->group(function () {
+        Route::post('/customers', [CustomerController::class, 'store']);
+        Route::put('/customers/{id}', [CustomerController::class, 'update']);
+        Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
+    });
 });
 
-// order routes//
+// Order Routes
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/orders', [OrderController::class, 'index']); // ✅ View all orders
-    Route::get('/orders/{id}', [OrderController::class, 'show']); // ✅ View a single order
-    Route::post('/orders', [OrderController::class, 'store']); // ❌ Only Admin can create
-    Route::put('/orders/{id}', [OrderController::class, 'update']); // ❌ Only Admin can update
-    Route::delete('/orders/{id}', [OrderController::class, 'destroy']); // ❌ Only Admin can delete
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::post('/orders', [OrderController::class, 'store']); // All authenticated users can create orders
+    
+    Route::middleware(['role:admin,manager'])->group(function () {
+        Route::put('/orders/{id}', [OrderController::class, 'update']);
+        Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+    });
 });
 
-// order product routes//
+// Order Product Routes
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/order-products', [OrderProductController::class, 'index']); // ✅ View all order products
-    Route::get('/order-products/{id}', [OrderProductController::class, 'show']); // ✅ View order product by ID
-    Route::post('/order-products', [OrderProductController::class, 'store']); // ✅ Add product to order
-    Route::put('/order-products/{id}', [OrderProductController::class, 'update']); // ✅ FIXED: Add update route
-    Route::delete('/order-products/{id}', [OrderProductController::class, 'destroy']); // ✅ Remove product from order
+    Route::get('/order-products', [OrderProductController::class, 'index']);
+    Route::get('/order-products/{id}', [OrderProductController::class, 'show']);
+    Route::post('/order-products', [OrderProductController::class, 'store']);
+    Route::put('/order-products/{id}', [OrderProductController::class, 'update']);
+    Route::delete('/order-products/{id}', [OrderProductController::class, 'destroy']);
 });
 
-// report route//
-
+// Report Routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reports/sales', [ReportController::class, 'salesReport']);
     Route::get('/reports/top-products', [ReportController::class, 'topSellingProducts']);
     Route::get('/reports/monthly-sales', [ReportController::class, 'monthlySalesReport']);
-
-    // ✅ New POS Report endpoint (replaces old pos-reports.php)
     Route::get('/reports/pos', [ReportController::class, 'posReport']);
 });
 
-// 📊 Analytics & AI Routes
-Route::middleware(['auth:sanctum'])->group(function () {
+// 📊 Analytics & AI Routes - Rate limited for expensive operations
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/analytics/sales-trends', [AnalyticsController::class, 'salesTrends']);
     Route::get('/analytics/top-products', [AnalyticsController::class, 'topProducts']);
     Route::get('/analytics/revenue', [AnalyticsController::class, 'revenueAnalysis']);
     Route::get('/analytics/inventory-turnover', [AnalyticsController::class, 'inventoryTurnover']);
-    Route::get('/analytics/ai-insights', [AnalyticsController::class, 'aiInsights']);
     Route::get('/analytics/sales-forecast', [AnalyticsController::class, 'salesForecast']);
+    
+    // AI endpoint with stricter rate limit
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::get('/analytics/ai-insights', [AnalyticsController::class, 'aiInsights']);
+    });
 });
 
-Route::middleware('auth:api')->group(function () {
+// Category Routes - Admin only
+Route::middleware(['auth:sanctum', 'role:admin,manager'])->group(function () {
     Route::apiResource('categories', CategoryController::class);
 });
+

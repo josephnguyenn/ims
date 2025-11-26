@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,staff',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|in:admin,staff,manager',
         ]);
 
-        $role = $request->role === 'admin' ? 'admin' : 'staff'; // Ensure role is set correctly
+        $role = in_array($request->role, ['admin', 'manager']) ? $request->role : 'staff';
 
         $user = User::create([
             'name' => $request->name,
@@ -26,21 +29,42 @@ class AuthController extends Controller
             'role' => $role,
         ]);
 
-        return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
+        return response()->json([
+            'message' => 'User registered successfully',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+        ], 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        // Rate limiting key
+        $key = 'login:'.$request->ip();
+
+        // Check if too many attempts
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+
+            throw ValidationException::withMessages([
+                'email' => ["Too many login attempts. Please try again in {$seconds} seconds."],
+            ]);
+        }
 
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
+            // Increment attempts
+            RateLimiter::hit($key, 60);
+
             return response()->json(['message' => 'Lỗi Đăng Nhập'], 401);
         }
+
+        // Clear rate limiter on successful login
+        RateLimiter::clear($key);
 
         $token = $user->createToken('API Token')->plainTextToken;
 
@@ -50,14 +74,14 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role, // Include role in response
+                'role' => $user->role,
             ],
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully']);
     }
