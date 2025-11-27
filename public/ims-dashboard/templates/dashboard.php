@@ -53,10 +53,11 @@ $_SESSION['csrf_token'] = $csrfToken;
             margin-bottom: 40px;
         }
         .dashboard-card {
-            background-color: #fff;
+            background-color: transparent;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: none;
+            border: 2px solid rgba(26, 75, 168, 0.1);
         }
         .dashboard-card h2 {
             font-size: 16px;
@@ -81,10 +82,11 @@ $_SESSION['csrf_token'] = $csrfToken;
             margin-bottom: 30px;
         }
         .chart-card {
-            background-color: #fff;
+            background-color: transparent;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: none;
+            border: 2px solid rgba(26, 75, 168, 0.1);
         }
         .chart-card h3 {
             font-size: 16px;
@@ -96,12 +98,14 @@ $_SESSION['csrf_token'] = $csrfToken;
         }
         [data-theme="dark"] .chart-card {
             background-color: #2d2d2d;
+            border-color: rgba(148, 185, 241, 0.2);
         }
         [data-theme="dark"] .chart-card h3 {
             color: #94B9F1;
         }
         [data-theme="dark"] .dashboard-card {
             background-color: #2d2d2d;
+            border-color: rgba(148, 185, 241, 0.2);
         }
         [data-theme="dark"] .dashboard-card h2 {
             color: #e0e0e0;

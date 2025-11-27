@@ -100,7 +100,7 @@ body {
 .dashboard-card,
 .chart-card,
 .main-content {
-    background-color: var(--bg-card);
+    background-color: transparent;
     color: var(--text-primary);
 }
 
