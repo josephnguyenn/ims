@@ -227,13 +227,22 @@ for ($i = 1; $i <= $totalPages; $i++) {
         const BASE_URL = "<?= BASE_URL ?>";
         console.log('BASE_URL defined:', BASE_URL);
     </script>
-    <script src="../js/orders.js?v=<?= time() ?>&build=20251127-v2"></script>
+    <script src="../js/orders.js?v=<?= time() ?>&build=20251127-v3-fixed"></script>
     <script>
         // Verify functions are loaded
         console.log('openModal function available:', typeof window.openModal);
         console.log('closeModal function available:', typeof window.closeModal);
         console.log('openEditOrderForm function available:', typeof window.openEditOrderForm);
         console.log('deleteOrder function available:', typeof window.deleteOrder);
+        
+        // If functions are not available, force reload the page once
+        if (typeof window.openModal !== 'function') {
+            console.error('Functions not loaded! Forcing page reload...');
+            sessionStorage.setItem('reloadAttempted', 'true');
+            if (!sessionStorage.getItem('reloadAttempted')) {
+                location.reload(true);
+            }
+        }
     </script>
 </body>
 </html>
