@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Tappo Market IMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a4ba8 0%, #94B9F1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .offline-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        
+        h1 {
+            color: #1a4ba8;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .retry-button {
+            background: #1a4ba8;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .retry-button:hover {
+            background: #0d3a7a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 75, 168, 0.4);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .status.checking {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .features {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .features h3 {
+            color: #1a4ba8;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .features li {
+            padding: 8px 0;
+            color: #666;
+        }
+        
+        .features li::before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .offline-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .offline-icon {
+                font-size: 60px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .retry-button {
+                width: 100%;
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        <h1>You're Offline</h1>
+        <p>It looks like you've lost your internet connection. Some features may not be available until you're back online.</p>
+        
+        <button class="retry-button" onclick="checkConnection()">Try Again</button>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div class="features">
+            <h3>Available Offline:</h3>
+            <ul>
+                <li>View cached products</li>
+                <li>Access recent orders</li>
+                <li>Browse dashboard data</li>
+                <li>View customer information</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function checkConnection() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status checking';
+            statusDiv.textContent = 'Checking connection...';
+            
+            // Try to fetch a small resource
+            fetch('/favicon.ico', {
+                method: 'HEAD',
+                cache: 'no-cache'
+            })
+            .then(response => {
+                if (response.ok) {
+                    statusDiv.className = 'status online';
+                    statusDiv.textContent = '✓ Connection restored! Redirecting...';
+                    
+                    setTimeout(() => {
+                        window.location.href = '/ims-dashboard/templates/dashboard.php';
+                    }, 1000);
+                } else {
+                    throw new Error('Not connected');
+                }
+            })
+            .catch(() => {
+                statusDiv.className = 'status offline';
+                statusDiv.textContent = '✕ Still offline. Please check your internet connection.';
+            });
+        }
+        
+        // Auto-check connection every 5 seconds
+        setInterval(() => {
+            if (navigator.onLine) {
+                checkConnection();
+            }
+        }, 5000);
+        
+        // Listen for online event
+        window.addEventListener('online', () => {
+            checkConnection();
+        });
+    </script>
+</body>
+</html>

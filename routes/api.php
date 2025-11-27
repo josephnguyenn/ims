@@ -99,6 +99,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('products', [ProductController::class, 'store']);
         Route::put('products/{id}', [ProductController::class, 'update']);
         Route::delete('products/{id}', [ProductController::class, 'destroy']);
+        
+        // Bulk operations
+        Route::post('products/bulk/update', [ProductController::class, 'bulkUpdate']);
+        Route::post('products/bulk/delete', [ProductController::class, 'bulkDelete']);
     });
 });
 

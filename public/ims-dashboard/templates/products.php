@@ -106,6 +106,11 @@ $_SESSION['csrf_token'] = $csrfToken;
     <title>Quản lý sản phẩm</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/shipment-product.css">
+    <link rel="stylesheet" href="../css/enhancements.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 
     <meta name="csrf-token" content="<?= $csrfToken ?>">
 
@@ -148,7 +153,7 @@ $_SESSION['csrf_token'] = $csrfToken;
 
 
 
-        <table border="1">
+        <table border="1" id="productsDataTable" class="display" style="width:100%">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -165,83 +170,11 @@ $_SESSION['csrf_token'] = $csrfToken;
                 </tr>
             </thead>
             <tbody id="product-table">
-                <?php if (! empty($paginatedProducts)) { ?>
-                    <?php foreach ($paginatedProducts as $product) { ?>
-                        <tr>
-                            <td><?= htmlspecialchars($product['id']) ?></td>
-                            <td><?= htmlspecialchars($product['name']) ?></td>
-                            <td><?= htmlspecialchars($product['code']) ?></td>
-                            <td><?= htmlspecialchars($product['original_quantity']) ?></td>
-                            <td><?= htmlspecialchars($product['actual_quantity']) ?></td>
-                            <td><?= htmlspecialchars($product['price']) ?>Kč</td>
-                            <td><?= htmlspecialchars($product['cost']) ?>Kč</td>
-                            <td><?= htmlspecialchars($product['total_cost']) ?>Kč</td>
-                            <td>Lô hàng <?= htmlspecialchars($product['shipment_id']) ?></td>
-                            <td><?= htmlspecialchars($product['expired_date'] ?? 'Không có') ?></td>
-                            <td>
-                            <button onclick="openEditModal(<?= $product['id'] ?>)">Sửa</button>
-                            <button onclick="deleteProduct(<?= $product['id'] ?>)">Xóa</button>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                <?php } else { ?>
-                    <tr>
-                        <td colspan="11">Không có sản phẩm nào trong lô hàng này.</td>
-                    </tr>
-                <?php } ?>
+                <!-- DataTables will populate this via AJAX -->
             </tbody>
         </table>
-    <div class="pagination">
-        <?php
-        $range = 2; // Number of pages to show before and after current page
 
-if ($totalPages > 1) {
-    // Previous Button
-    if ($page > 1) {
-        $prevPage = $page - 1;
-        echo '<a href="?page='.$prevPage.
-            ($shipment_id ? '&shipment_id='.$shipment_id : '').
-            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">«</a>';
-    }
-
-    // First Page
-    if ($page > $range + 1) {
-        echo '<a href="?page=1'.
-            ($shipment_id ? '&shipment_id='.$shipment_id : '').
-            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">1</a>';
-        if ($page > $range + 2) {
-            echo '<span>...</span>';
-        }
-    }
-
-    // Page Range
-    for ($i = max(1, $page - $range); $i <= min($totalPages, $page + $range); $i++) {
-        echo '<a href="?page='.$i.
-            ($shipment_id ? '&shipment_id='.$shipment_id : '').
-            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'"'.
-            ($i === $page ? ' class="active"' : '').'>'.$i.'</a>';
-    }
-
-    // Last Page
-    if ($page < $totalPages - $range) {
-        if ($page < $totalPages - $range - 1) {
-            echo '<span>...</span>';
-        }
-        echo '<a href="?page='.$totalPages.
-            ($shipment_id ? '&shipment_id='.$shipment_id : '').
-            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">'.$totalPages.'</a>';
-    }
-
-    // Next Button
-    if ($page < $totalPages) {
-        $nextPage = $page + 1;
-        echo '<a href="?page='.$nextPage.
-            ($shipment_id ? '&shipment_id='.$shipment_id : '').
-            ($product_code_filter ? '&product_code_filter='.urlencode($product_code_filter) : '').'">»</a>';
-    }
-}
-?>
-    </div>
+        <!-- Pagination removed - handled by DataTables -->
 
 
         
@@ -397,30 +330,168 @@ if ($totalPages > 1) {
     <script>
         const BASE_URL = "<?= BASE_URL ?>";
     </script>
+    
+    <!-- jQuery (required for DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- DataTables Core -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    
+    <!-- DataTables Buttons -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    
     <script src="../js/products.js"></script>
     <script src="../js/products-fix.js"></script>
+    <script src="../js/notification-manager.js"></script>
+    <script src="../js/theme-toggle.js"></script>
+    <script src="../js/keyboard-shortcuts.js"></script>
+    <script src="../js/autocomplete.js"></script>
+    
+    <script>
+        // Initialize DataTables
+        $(document).ready(function() {
+            const token = localStorage.getItem("token");
+            const shipmentFilter = "<?= $shipment_id ?? '' ?>";
+            
+            window.productsTable = $('#productsDataTable').DataTable({
+                ajax: {
+                    url: BASE_URL + '/api/products?paginate=false',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    dataSrc: function(json) {
+                        // Filter by shipment if needed
+                        if (shipmentFilter) {
+                            return json.data ? json.data.filter(p => p.shipment_id == shipmentFilter) : json.filter(p => p.shipment_id == shipmentFilter);
+                        }
+                        return json.data || json;
+                    }
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { data: 'code' },
+                    { data: 'original_quantity' },
+                    { 
+                        data: 'actual_quantity',
+                        render: function(data, type, row) {
+                            let className = '';
+                            if (data === 0) className = 'out-of-stock';
+                            else if (data <= 10) className = 'low-stock';
+                            return '<span class="' + className + '">' + data + '</span>';
+                        }
+                    },
+                    { 
+                        data: 'price',
+                        render: (data) => parseFloat(data).toLocaleString() + ' Kč'
+                    },
+                    { 
+                        data: 'cost',
+                        render: (data) => parseFloat(data).toLocaleString() + ' Kč'
+                    },
+                    { 
+                        data: 'total_cost',
+                        render: (data) => parseFloat(data).toLocaleString() + ' Kč'
+                    },
+                    { 
+                        data: 'shipment_id',
+                        render: (data) => 'Lô hàng ' + data
+                    },
+                    { 
+                        data: 'expired_date',
+                        render: (data) => data || 'Không có'
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function(data, type, row) {
+                            return '<button onclick="openEditModal(' + row.id + ')">Sửa</button> ' +
+                                   '<button onclick="deleteProduct(' + row.id + ')">Xóa</button>';
+                        }
+                    }
+                ],
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: '📋 Copy'
+                    },
+                    {
+                        extend: 'excel',
+                        text: '📊 Excel',
+                        title: 'Danh sách sản phẩm'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '📄 PDF',
+                        title: 'Danh sách sản phẩm'
+                    },
+                    {
+                        extend: 'print',
+                        text: '🖨️ Print'
+                    }
+                ],
+                pageLength: 25,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                language: {
+                    search: "Tìm kiếm:",
+                    lengthMenu: "Hiển thị _MENU_ dòng",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ sản phẩm",
+                    infoEmpty: "Không có dữ liệu",
+                    infoFiltered: "(lọc từ _MAX_ sản phẩm)",
+                    paginate: {
+                        first: "Đầu",
+                        last: "Cuối",
+                        next: "Tiếp",
+                        previous: "Trước"
+                    },
+                    emptyTable: "Không có sản phẩm nào"
+                },
+                order: [[0, 'desc']] // Sort by ID descending
+            });
+            
+            // Reload table after operations
+            window.reloadProductsTable = function() {
+                window.productsTable.ajax.reload(null, false);
+            };
+        });
+    </script>
+    
     <link rel="stylesheet" href="../css/add.css">
     <style>
+        /* DataTables custom styling */
+        .dataTables_wrapper .dt-buttons {
+            margin-bottom: 10px;
+        }
+        .dt-button {
+            background: #1a4ba8 !important;
+            color: white !important;
+            border: none !important;
+            padding: 8px 15px !important;
+            border-radius: 4px !important;
+            margin-right: 5px !important;
+            cursor: pointer !important;
+        }
+        .dt-button:hover {
+            background: #153d8a !important;
+        }
+        .low-stock {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        .out-of-stock {
+            color: #f44336;
+            font-weight: bold;
+        }
+        /* Remove old pagination styles */
         .pagination {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
-}
-.pagination a {
-    padding: 6px 12px;
-    margin: 0 2px;
-    border: 1px solid #ccc;
-    text-decoration: none;
-    color: #333;
-}
-.pagination a.active {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-}
-.pagination a:hover:not(.active) {
-    background-color: #ddd;
-}
+            display: none;
+        }
     </style>
 
 </body>

@@ -13,10 +13,21 @@ $_SESSION['csrf_token'] = $csrfToken;
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Trang Chủ - Tappo Market</title>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a4ba8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tappo IMS">
+    <link rel="apple-touch-icon" href="/ims-dashboard/images/icon-192x192.png">
+    
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/enhancements.css">
     <meta name="csrf-token" content="<?= $csrfToken ?>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         .dashboard-header {
             display: flex;
@@ -114,6 +125,27 @@ $_SESSION['csrf_token'] = $csrfToken;
                 <p id="dashboard-actual">0Kč</p>
             </div>
         </div>
+
+        <!-- Chart.js Visualizations -->
+        <h2 class="section-title">📊 Biểu đồ và Phân tích</h2>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Xu hướng doanh thu 30 ngày</h3>
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Top 10 sản phẩm bán chạy</h3>
+                <canvas id="topProductsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Doanh thu vs Nợ</h3>
+                <canvas id="revenueDebtChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Tình trạng kho hàng</h3>
+                <canvas id="inventoryPieChart"></canvas>
+            </div>
+        </div>
     <?php } elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'staff') { ?>
         <p>Chào mừng nhân viên!</p>
         <?php } else { ?>
@@ -167,5 +199,11 @@ $_SESSION['csrf_token'] = $csrfToken;
     const BASE_URL = "<?= BASE_URL ?>";
 </script>   
 <script src="../js/dashboard.js"></script>
+<script src="../js/dashboard-charts.js"></script>
+<script src="../js/notification-manager.js"></script>
+<script src="../js/theme-toggle.js"></script>
+<script src="../js/keyboard-shortcuts.js"></script>
+<script src="../js/autocomplete.js"></script>
+<script src="../js/pwa-installer.js"></script>
 </body>
 </html>

@@ -139,7 +139,14 @@ function addProduct() {
     .then(data => {
         if (data.message === "Product created successfully") {
             alert("Product added successfully!");
-            window.location.reload();
+            // Reload DataTable instead of full page reload
+            if (typeof window.reloadProductsTable === 'function') {
+                window.reloadProductsTable();
+            } else {
+                window.location.reload();
+            }
+            // Close modal
+            document.getElementById("addProductForm").style.display = "none";
         } else {
             alert("Error adding product: " + (data.message || "Unknown error"));
         }
@@ -246,7 +253,14 @@ function updateProduct() {
     .then(data => {
         if (data.message === "Product updated successfully") {
             alert("Product updated successfully!");
-            window.location.reload();
+            // Reload DataTable instead of full page reload
+            if (typeof window.reloadProductsTable === 'function') {
+                window.reloadProductsTable();
+            } else {
+                window.location.reload();
+            }
+            // Close modal
+            document.getElementById("editProductForm").style.display = "none";
         } else {
             alert("Error updating product: " + (data.message || "Unknown error"));
         }
@@ -284,7 +298,12 @@ function deleteProduct(id) {
 
         const data = await response.json();
         alert(data.message || "Product deleted successfully");
-        window.location.reload();
+        // Reload DataTable instead of full page reload
+        if (typeof window.reloadProductsTable === 'function') {
+            window.reloadProductsTable();
+        } else {
+            window.location.reload();
+        }
     })
     .catch(error => {
         console.error("Error deleting product:", error);

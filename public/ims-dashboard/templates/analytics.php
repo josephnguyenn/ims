@@ -14,10 +14,16 @@ require_once '../define.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard - IMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Advanced Analytics - Tappo Market IMS</title>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a4ba8">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="../css/enhancements.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -147,14 +153,27 @@ require_once '../define.php';
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
+        [data-theme="dark"] .chart-card {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+
         .chart-card h2 {
             color: #333;
             margin-bottom: 20px;
             font-size: 18px;
         }
 
+        [data-theme="dark"] .chart-card h2 {
+            color: #94B9F1;
+        }
+
         .chart-card canvas {
             max-height: 300px;
+        }
+        
+        .chart-card .apexcharts-canvas {
+            margin: 0 auto;
         }
 
         .ai-insights {
@@ -283,26 +302,48 @@ require_once '../define.php';
             </div>
         </div>
 
-        <!-- Charts -->
+        <!-- Advanced Charts with ApexCharts -->
         <div class="charts-grid">
             <div class="chart-card">
-                <h2><i class="fas fa-chart-area"></i> Sales Trend</h2>
-                <canvas id="salesTrendChart"></canvas>
+                <h2><i class="fas fa-chart-area"></i> Sales Trend (Advanced)</h2>
+                <div id="salesTrendChart"></div>
             </div>
             <div class="chart-card">
                 <h2><i class="fas fa-chart-bar"></i> Top Products</h2>
-                <canvas id="topProductsChart"></canvas>
+                <div id="topProductsChart"></div>
             </div>
         </div>
 
         <div class="charts-grid">
             <div class="chart-card">
-                <h2><i class="fas fa-chart-pie"></i> Revenue by Month</h2>
-                <canvas id="revenueChart"></canvas>
+                <h2><i class="fas fa-chart-pie"></i> Sales by Category</h2>
+                <div id="salesByCategoryChart"></div>
             </div>
             <div class="chart-card">
                 <h2><i class="fas fa-sync"></i> Inventory Turnover</h2>
-                <canvas id="inventoryChart"></canvas>
+                <div id="inventoryChart"></div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h2><i class="fas fa-chart-line"></i> Profit Margins by Product</h2>
+                <div id="profitMarginsChart"></div>
+            </div>
+            <div class="chart-card">
+                <h2><i class="fas fa-clock"></i> Hourly Sales Pattern</h2>
+                <div id="hourlySalesChart"></div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h2><i class="fas fa-users"></i> Customer Segments</h2>
+                <div id="customerSegmentsChart"></div>
+            </div>
+            <div class="chart-card">
+                <h2><i class="fas fa-chart-line"></i> Sales Forecast (7 Days)</h2>
+                <div id="salesForecastChart"></div>
             </div>
         </div>
 
@@ -326,243 +367,10 @@ require_once '../define.php';
     <script>
         const BASE_URL = '<?= BASE_URL ?>';
         const AUTH_TOKEN = '<?= $_SESSION["token"] ?>';
-        let charts = {};
-
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDashboardData();
-            loadAIInsights('sales');
-        });
-
-        document.getElementById('period-select').addEventListener('change', () => {
-            loadDashboardData();
-        });
-
-        async function fetchAPI(endpoint) {
-            try {
-                console.log('Fetching:', `${BASE_URL}/api${endpoint}`);
-                const response = await fetch(`${BASE_URL}/api${endpoint}`, {
-                    headers: {
-                        'Authorization': `Bearer ${AUTH_TOKEN}`,
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('API Error Response:', errorData);
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Unknown error'}`);
-                }
-                
-                const data = await response.json();
-                console.log('API Response:', data);
-                return data;
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
-            }
-        }
-
-        async function loadDashboardData() {
-            const days = document.getElementById('period-select').value;
-            
-            try {
-                // Load all data
-                const [salesTrends, topProducts, revenue, inventory] = await Promise.all([
-                    fetchAPI(`/analytics/sales-trends?days=${days}`),
-                    fetchAPI('/analytics/top-products?limit=10'),
-                    fetchAPI('/analytics/revenue?period=month'),
-                    fetchAPI('/analytics/inventory-turnover')
-                ]);
-
-                console.log('Sales Trends:', salesTrends);
-                console.log('Top Products:', topProducts);
-                console.log('Revenue:', revenue);
-                console.log('Inventory:', inventory);
-
-                // Update stats cards
-                if (revenue && revenue.total_revenue !== undefined) {
-                    updateStatsCards(revenue);
-                }
-                
-                // Update charts
-                if (salesTrends && salesTrends.data) {
-                    updateSalesTrendChart(salesTrends.data);
-                }
-                if (topProducts && topProducts.data) {
-                    updateTopProductsChart(topProducts.data);
-                }
-                if (revenue && revenue.by_period) {
-                    updateRevenueChart(revenue.by_period);
-                }
-                if (inventory && inventory.data) {
-                    updateInventoryChart(inventory.data);
-                }
-                
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-                alert('Failed to load analytics data. Please check console for details.');
-            }
-        }
-
-        function updateStatsCards(revenue) {
-            document.getElementById('total-revenue').textContent = 
-                new Intl.NumberFormat('cs-CZ').format(revenue.total_revenue) + ' CZK';
-            document.getElementById('total-orders').textContent = revenue.total_orders;
-            document.getElementById('avg-order-value').textContent = 
-                new Intl.NumberFormat('cs-CZ').format(revenue.average_order_value) + ' CZK';
-        }
-
-        function updateSalesTrendChart(data) {
-            if (!data || !Array.isArray(data) || data.length === 0) {
-                console.warn('No sales trend data available');
-                return;
-            }
-            
-            const ctx = document.getElementById('salesTrendChart');
-            
-            if (charts.salesTrend) charts.salesTrend.destroy();
-            
-            charts.salesTrend = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.map(d => d.date),
-                    datasets: [{
-                        label: 'Revenue (CZK)',
-                        data: data.map(d => d.total_revenue),
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { display: true }
-                    }
-                }
-            });
-        }
-
-        function updateTopProductsChart(data) {
-            const ctx = document.getElementById('topProductsChart');
-            
-            if (charts.topProducts) charts.topProducts.destroy();
-            
-            charts.topProducts = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.map(p => p.name.substring(0, 20)),
-                    datasets: [{
-                        label: 'Units Sold',
-                        data: data.map(p => p.total_sold),
-                        backgroundColor: [
-                            '#667eea', '#764ba2', '#f093fb', '#f5576c',
-                            '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-                            '#fa709a', '#fee140'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        function updateRevenueChart(data) {
-            const ctx = document.getElementById('revenueChart');
-            
-            if (charts.revenue) charts.revenue.destroy();
-            
-            charts.revenue = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: data.map(d => d.period),
-                    datasets: [{
-                        data: data.map(d => d.revenue),
-                        backgroundColor: [
-                            '#667eea', '#764ba2', '#f093fb', '#f5576c',
-                            '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-                            '#fa709a', '#fee140', '#30cfd0', '#330867'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true
-                }
-            });
-        }
-
-        function updateInventoryChart(data) {
-            const ctx = document.getElementById('inventoryChart');
-            
-            if (charts.inventory) charts.inventory.destroy();
-            
-            charts.inventory = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.map(p => p.name.substring(0, 15)),
-                    datasets: [{
-                        label: 'Turnover Rate',
-                        data: data.map(p => p.turnover_rate),
-                        backgroundColor: '#43e97b'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        async function loadAIInsights(type) {
-            // Update button states
-            document.querySelectorAll('.insight-type button').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent.toLowerCase().includes(type)) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            const content = document.getElementById('ai-content');
-            content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>AI is analyzing your data...</p></div>';
-            
-            try {
-                const data = await fetchAPI(`/analytics/ai-insights?type=${type}`);
-                content.innerHTML = `<div class="content">${formatAIInsights(data.insights)}</div>`;
-            } catch (error) {
-                content.innerHTML = '<p>Unable to generate insights at this time.</p>';
-                console.error('Error loading AI insights:', error);
-            }
-        }
-
-        function formatAIInsights(text) {
-            if (!text) return '<p>No insights available.</p>';
-            
-            // Convert markdown-style formatting to HTML
-            return text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n- /g, '<br>• ')
-                .replace(/^/,'<p>')
-                .replace(/$/, '</p>');
-        }
-
-        function refreshData() {
-            loadDashboardData();
-            loadAIInsights('sales');
-        }
     </script>
+    <script src="../js/advanced-analytics.js"></script>
+    <script src="../js/theme-toggle.js"></script>
+    <script src="../js/keyboard-shortcuts.js"></script>
+    <script src="../js/pwa-installer.js"></script>
 </body>
 </html>

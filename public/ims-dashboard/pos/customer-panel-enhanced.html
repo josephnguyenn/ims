@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#1a4ba8">
+  <title>Customer Display - Tappo Market</title>
+  <link rel="stylesheet" href="../css/enhancements.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+      font-family: 'Arial', sans-serif; 
+      height: 100vh; 
+      display: flex;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden;
+    }
+    
+    .panel { 
+      width: 50%; 
+      padding: 2rem; 
+      overflow-y: auto;
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .left {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .header h1 {
+      color: #1a4ba8;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      animation: slideDown 0.6s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .header p {
+      color: #666;
+      font-size: 1.2rem;
+    }
+    
+    .summary {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .summary .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    
+    .summary .row:last-child { 
+      margin-bottom: 0;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #1a4ba8;
+      padding-top: 1rem;
+      border-top: 2px solid #1a4ba8;
+    }
+    
+    .loyalty-section {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffe082 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .loyalty-section h3 {
+      color: #856404;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    .loyalty-points {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #ff9800;
+      margin: 1rem 0;
+    }
+    
+    .loyalty-message {
+      color: #856404;
+      font-size: 0.9rem;
+    }
+    
+    .qr-container {
+      text-align: center;
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .qr-container img {
+      max-width: 280px;
+      height: auto;
+      border: 3px solid #1a4ba8;
+      border-radius: 12px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .qr-label {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #1a4ba8;
+      font-weight: bold;
+    }
+    
+    .right {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    
+    .right h1 {
+      color: #1a4ba8;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+    }
+    
+    .order-status {
+      background: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: bold;
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    th { 
+      background: linear-gradient(135deg, #1a4ba8 0%, #2563eb 100%);
+      color: white;
+      font-weight: bold;
+    }
+    
+    tbody tr:hover {
+      background: #f5f5f5;
+    }
+    
+    .item-row {
+      animation: fadeInUp 0.4s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .order-history {
+      margin-top: 2rem;
+    }
+    
+    .history-item {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .history-item h4 {
+      color: #1a4ba8;
+      margin-bottom: 0.5rem;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-processing { background: #d1ecf1; color: #0c5460; }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      body { flex-direction: column; height: auto; }
+      .panel { width: 100%; padding: 1.5rem; }
+      .header h1 { font-size: 2rem; }
+      .loyalty-points { font-size: 2.5rem; }
+      .qr-container img { max-width: 200px; }
+      table { font-size: 0.9rem; }
+      th, td { padding: 0.75rem; }
+    }
+    
+    /* Connection status indicator */
+    .connection-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      z-index: 1000;
+    }
+    
+    .connection-status.connected {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .connection-status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+
+<div class="connection-status connected" id="connectionStatus">
+  🟢 Connected
+</div>
+
+<div class="panel left">
+  <div>
+    <div class="header">
+      <h1>🛒 Tappo Market</h1>
+      <p>Thank you for shopping with us!</p>
+    </div>
+    
+    <div class="summary">
+      <div class="row">
+        <span>Subtotal (CZK):</span>
+        <span id="cust-sub-czk">0 CZK</span>
+      </div>
+      <div class="row">
+        <span>Subtotal (EUR):</span>
+        <span id="cust-sub-eur">€0.00</span>
+      </div>
+      <div class="row">
+        <span>Total (CZK):</span>
+        <span id="cust-grand-czk">0 CZK</span>
+      </div>
+      <div class="row">
+        <span>Total (EUR):</span>
+        <span id="cust-grand-eur">€0.00</span>
+      </div>
+    </div>
+    
+    <div class="loyalty-section">
+      <h3>💎 Loyalty Points</h3>
+      <div class="loyalty-points" id="loyaltyPoints">0</div>
+      <p class="loyalty-message" id="loyaltyMessage">
+        Earn points with every purchase!
+      </p>
+    </div>
+  </div>
+
+  <div class="qr-container">
+    <img id="cust-qr" src="./uploads/qe.jpg" alt="Payment QR Code">
+    <div class="qr-label" id="cust-pay-label">
+      Select payment method at checkout
+    </div>
+  </div>
+</div>
+
+<div class="panel right">
+  <div id="orderStatus" class="order-status" style="display: none;">
+    ✓ Order received and being processed
+  </div>
+  
+  <h1>🛍️ Your Cart</h1>
+  
+  <table id="cust-cart">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  
+  <div class="order-history" id="orderHistory" style="display: none;">
+    <h2 style="color: #1a4ba8; margin-bottom: 1rem;">📜 Recent Orders</h2>
+    <div id="historyItems"></div>
+  </div>
+</div>
+
+<script>
+  // BroadcastChannel for real-time updates from POS
+  const ch = new BroadcastChannel('pos-cart');
+  const tbody = document.querySelector('#cust-cart tbody');
+  const subCzkEl = document.getElementById('cust-sub-czk');
+  const subEurEl = document.getElementById('cust-sub-eur');
+  const grandCzkEl = document.getElementById('cust-grand-czk');
+  const grandEurEl = document.getElementById('cust-grand-eur');
+  const qrImg = document.getElementById('cust-qr');
+  const payLabel = document.getElementById('cust-pay-label');
+  const loyaltyPointsEl = document.getElementById('loyaltyPoints');
+  const loyaltyMessageEl = document.getElementById('loyaltyMessage');
+  const orderStatusEl = document.getElementById('orderStatus');
+  const connectionStatusEl = document.getElementById('connectionStatus');
+  
+  let currentPoints = 0;
+  let pollingInterval = null;
+  
+  // Handle real-time cart updates
+  ch.onmessage = ({ data }) => {
+    const { cart, subtotal_czk, subtotal_eur, payment_method, qr_url, order_id } = data;
+    
+    // Rebuild cart rows with animation
+    tbody.innerHTML = '';
+    let index = 0;
+    Object.values(cart).forEach(item => {
+      const tr = document.createElement('tr');
+      tr.className = 'item-row';
+      tr.style.animationDelay = `${index * 0.1}s`;
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${item.price.toFixed(2)} CZK</td>
+        <td><strong>${(item.price * item.qty).toFixed(2)} CZK</strong></td>
+      `;
+      tbody.appendChild(tr);
+      index++;
+    });
+    
+    // Update totals
+    subCzkEl.textContent = `${subtotal_czk} CZK`;
+    subEurEl.textContent = `€${subtotal_eur}`;
+    grandCzkEl.textContent = `${subtotal_czk} CZK`;
+    grandEurEl.textContent = `€${subtotal_eur}`;
+    
+    // Update loyalty points (1 point per 10 CZK)
+    const newPoints = Math.floor(parseFloat(subtotal_czk) / 10);
+    if (newPoints !== currentPoints) {
+      currentPoints = newPoints;
+      animatePoints(newPoints);
+    }
+    
+    // QR code and payment method
+    if (payment_method === 'transfer' && qr_url) {
+      qrImg.src = qr_url;
+      payLabel.textContent = '📱 Scan to pay via bank transfer';
+    } else if (payment_method === 'cash') {
+      qrImg.src = './uploads/cash-icon.jpg';
+      payLabel.textContent = '💵 Cash payment selected';
+    } else {
+      qrImg.src = './uploads/qe.jpg';
+      payLabel.textContent = 'Select payment method at checkout';
+    }
+    
+    // Show order status if order_id exists
+    if (order_id) {
+      orderStatusEl.style.display = 'block';
+      orderStatusEl.textContent = `✓ Order #${order_id} confirmed!`;
+      setTimeout(() => {
+        orderStatusEl.style.display = 'none';
+      }, 5000);
+    }
+  };
+  
+  // Animate loyalty points
+  function animatePoints(targetPoints) {
+    const current = parseInt(loyaltyPointsEl.textContent);
+    const increment = targetPoints > current ? 1 : -1;
+    const duration = 1000;
+    const steps = Math.abs(targetPoints - current);
+    const stepDuration = steps > 0 ? duration / steps : 0;
+    
+    let counter = current;
+    const timer = setInterval(() => {
+      counter += increment;
+      loyaltyPointsEl.textContent = counter;
+      
+      if (counter === targetPoints) {
+        clearInterval(timer);
+        updateLoyaltyMessage(targetPoints);
+      }
+    }, stepDuration);
+  }
+  
+  // Update loyalty message based on points
+  function updateLoyaltyMessage(points) {
+    if (points === 0) {
+      loyaltyMessageEl.textContent = 'Earn points with every purchase!';
+    } else if (points < 50) {
+      loyaltyMessageEl.textContent = `${50 - points} more points to redeem!`;
+    } else if (points < 100) {
+      loyaltyMessageEl.textContent = '🎉 You can redeem 50 CZK discount!';
+    } else {
+      loyaltyMessageEl.textContent = '🎁 VIP customer! Special rewards available!';
+    }
+  }
+  
+  // Poll for order history (fallback if WebSocket not available)
+  function startPolling() {
+    pollingInterval = setInterval(async () => {
+      try {
+        // This would fetch recent orders for the customer
+        // For now, it's a placeholder
+        console.log('Polling for updates...');
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+  }
+  
+  // Stop polling
+  function stopPolling() {
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      pollingInterval = null;
+    }
+  }
+  
+  // Monitor connection status
+  function updateConnectionStatus(connected) {
+    if (connected) {
+      connectionStatusEl.className = 'connection-status connected';
+      connectionStatusEl.textContent = '🟢 Connected';
+    } else {
+      connectionStatusEl.className = 'connection-status disconnected';
+      connectionStatusEl.textContent = '🔴 Disconnected';
+    }
+  }
+  
+  // Listen for online/offline events
+  window.addEventListener('online', () => {
+    updateConnectionStatus(true);
+  });
+  
+  window.addEventListener('offline', () => {
+    updateConnectionStatus(false);
+  });
+  
+  // Initialize
+  updateConnectionStatus(navigator.onLine);
+  
+  // Optional: Load recent order history on page load
+  // loadOrderHistory();
+</script>
+
+</body>
+</html>

@@ -263,4 +263,93 @@ class ProductController extends Controller
             ], 500);
         }
     }
+    
+    /**
+     * Bulk update products
+     */
+    public function bulkUpdate(Request $request)
+    {
+        $user = Auth::user();
+
+        if (! in_array($user->role, ['admin', 'manager'])) {
+            return response()->json([
+                'message' => 'Unauthorized. Only admin or manager can bulk update products.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'product_ids' => 'required|array',
+            'product_ids.*' => 'exists:products,id',
+            'updates' => 'required|array',
+        ]);
+
+        try {
+            $updatedCount = 0;
+            
+            foreach ($validated['product_ids'] as $id) {
+                $product = Product::find($id);
+                if ($product) {
+                    // Only update allowed fields
+                    $allowedFields = ['price', 'cost', 'tax', 'category_id', 'selling_price'];
+                    foreach ($validated['updates'] as $field => $value) {
+                        if (in_array($field, $allowedFields)) {
+                            $product->{$field} = $value;
+                        }
+                    }
+                    
+                    // Recalculate if cost changed
+                    if (isset($validated['updates']['cost'])) {
+                        $product->total_cost = $product->original_quantity * $product->cost;
+                    }
+                    
+                    $product->save();
+                    $updatedCount++;
+                }
+            }
+
+            return response()->json([
+                'message' => "Successfully updated {$updatedCount} products",
+                'updated_count' => $updatedCount
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Bulk update failed',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
+    /**
+     * Bulk delete products
+     */
+    public function bulkDelete(Request $request)
+    {
+        $user = Auth::user();
+
+        if (! in_array($user->role, ['admin', 'manager'])) {
+            return response()->json([
+                'message' => 'Unauthorized. Only admin or manager can bulk delete products.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'product_ids' => 'required|array',
+            'product_ids.*' => 'exists:products,id',
+        ]);
+
+        try {
+            $deletedCount = Product::whereIn('id', $validated['product_ids'])->delete();
+
+            return response()->json([
+                'message' => "Successfully deleted {$deletedCount} products",
+                'deleted_count' => $deletedCount
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Bulk delete failed',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
+

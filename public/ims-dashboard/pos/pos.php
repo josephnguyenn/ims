@@ -22,9 +22,14 @@ while ($row = $res->fetch_assoc()) {
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>POS System</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a4ba8">
+  <title>POS System - Tappo Market</title>
   <link rel="stylesheet" href="css/pos-style.css">
+  <link rel="stylesheet" href="css/mobile-responsive.css">
+  <link rel="stylesheet" href="../css/enhancements.css">
 </head>
 <body>
 
