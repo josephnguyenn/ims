@@ -53,27 +53,46 @@ $_SESSION['csrf_token'] = $csrfToken;
             margin-bottom: 40px;
         }
         .dashboard-card {
-            background-color: transparent;
-            border-radius: 8px;
+            background-color: var(--bg-card);
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: none;
-            border: 2px solid rgba(26, 75, 168, 0.1);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .dashboard-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
         }
         .dashboard-card h2 {
-            font-size: 16px;
+            font-size: 14px;
             margin-bottom: 8px;
-            color: #444;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .dashboard-card p {
-            font-size: 22px;
+            font-size: 28px;
             font-weight: bold;
-            color: #1a4ba8;
+            color: var(--accent-primary);
+            margin: 0;
         }
         .section-title {
-            margin: 40px 0 10px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
+            margin: 40px 0 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 2px;
         }
         .charts-grid {
             display: grid;
@@ -82,43 +101,49 @@ $_SESSION['csrf_token'] = $csrfToken;
             margin-bottom: 30px;
         }
         .chart-card {
-            background-color: transparent;
-            border-radius: 8px;
+            background-color: var(--bg-card);
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: none;
-            border: 2px solid rgba(26, 75, 168, 0.1);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .chart-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
         }
         .chart-card h3 {
             font-size: 16px;
             margin-bottom: 15px;
-            color: #1a4ba8;
+            color: var(--text-primary);
+            font-weight: 600;
         }
         .chart-card canvas {
             max-height: 300px;
         }
         [data-theme="dark"] .chart-card {
-            background-color: #2d2d2d;
-            border-color: rgba(148, 185, 241, 0.2);
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
         }
         [data-theme="dark"] .chart-card h3 {
-            color: #94B9F1;
+            color: var(--text-primary);
         }
         [data-theme="dark"] .dashboard-card {
-            background-color: #2d2d2d;
-            border-color: rgba(148, 185, 241, 0.2);
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
         }
         [data-theme="dark"] .dashboard-card h2 {
-            color: #e0e0e0;
+            color: var(--text-secondary);
         }
         [data-theme="dark"] .dashboard-card p {
-            color: #94B9F1;
+            color: var(--accent-primary);
         }
         [data-theme="dark"] th {
-            background-color: #3d3d3d;
-            color: #e0e0e0;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
         }
         [data-theme="dark"] td {
-            color: #94B9F1;
+            color: var(--text-secondary);
         }
         @media (max-width: 768px) {
             .charts-grid {
@@ -128,15 +153,32 @@ $_SESSION['csrf_token'] = $csrfToken;
         table {
             width: 100%;
             border-collapse: collapse;
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
         }
         th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
+            padding: 12px 15px;
             text-align: left;
-            color: #10408b;
+            border-bottom: 1px solid var(--border-color);
         }
         th {
-            background-color: #f5f5f5;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        td {
+            color: var(--text-secondary);
+        }
+        tr:hover {
+            background-color: var(--bg-hover);
+        }
+        tr:last-child td {
+            border-bottom: none;
         }
     </style>
 </head>
