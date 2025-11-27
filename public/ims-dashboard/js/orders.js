@@ -94,15 +94,15 @@ function renderPagination(currentPage) {
 }
 
 
-// ✅ Open Modal
-function openModal(modalId) {
+// ✅ Open Modal - Exposed globally for inline onclick handlers
+window.openModal = function(modalId) {
     document.getElementById(modalId).style.display = 'flex';
-}
+};
 
-// ✅ Close Modal
-function closeModal(modalId) {
+// ✅ Close Modal - Exposed globally for inline onclick handlers
+window.closeModal = function(modalId) {
     document.getElementById(modalId).style.display = 'none';
-}
+};
 // ✅ Function to Add Order
 function addOrder() {
     let customerId = document.getElementById("customer_id").value;
