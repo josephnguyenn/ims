@@ -110,11 +110,15 @@ button:hover {
     border-radius: 8px;
     text-align: left;
     cursor: pointer;
+    border: 2px solid rgba(26, 75, 168, 0.2);
+    transition: all 0.3s ease;
 }
 
 .sidebar ul li:hover {
     background-color: #1a4ba8;
     color: #ffffff;
+    border-color: #1a4ba8;
+    transform: translateX(5px);
 }
 
 .sidebar ul li a {
@@ -131,6 +135,8 @@ button:hover {
 .sidebar ul li.active {
     background-color: #1a4ba8;
     color: #ffffff;
+    border-color: #1a4ba8;
+    box-shadow: 0 2px 8px rgba(26, 75, 168, 0.3);
 }
 
 .sidebar ul li.active a {
