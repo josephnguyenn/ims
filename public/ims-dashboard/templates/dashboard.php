@@ -74,6 +74,53 @@ $_SESSION['csrf_token'] = $csrfToken;
             font-weight: 600;
             color: #333;
         }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .chart-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .chart-card h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #1a4ba8;
+        }
+        .chart-card canvas {
+            max-height: 300px;
+        }
+        [data-theme="dark"] .chart-card {
+            background-color: #2d2d2d;
+        }
+        [data-theme="dark"] .chart-card h3 {
+            color: #94B9F1;
+        }
+        [data-theme="dark"] .dashboard-card {
+            background-color: #2d2d2d;
+        }
+        [data-theme="dark"] .dashboard-card h2 {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] .dashboard-card p {
+            color: #94B9F1;
+        }
+        [data-theme="dark"] th {
+            background-color: #3d3d3d;
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] td {
+            color: #94B9F1;
+        }
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         table {
             width: 100%;
             border-collapse: collapse;
