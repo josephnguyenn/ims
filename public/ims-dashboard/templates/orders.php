@@ -195,11 +195,8 @@ for ($i = 1; $i <= $totalPages; $i++) {
         </div>
     </div>
 </div>
-    <script>
-        const BASE_URL = "<?= BASE_URL ?>";
-    </script>
+    
     <link rel="stylesheet" href="../css/add.css">
-    <script src="../js/orders.js"></script>
     <style>
     .pagination {
         margin-top: 20px;
@@ -221,7 +218,17 @@ for ($i = 1; $i <= $totalPages; $i++) {
     .pagination a:hover:not(.active) {
         background-color: #ddd;
     }
-        </style>
+    </style>
 
+    <script>
+        const BASE_URL = "<?= BASE_URL ?>";
+        console.log('BASE_URL defined:', BASE_URL);
+    </script>
+    <script src="../js/orders.js?v=<?= time() ?>"></script>
+    <script>
+        // Verify functions are loaded
+        console.log('openModal function available:', typeof window.openModal);
+        console.log('closeModal function available:', typeof window.closeModal);
+    </script>
 </body>
 </html>
