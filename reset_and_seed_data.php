@@ -40,7 +40,6 @@ echo "Adding storage...\n";
 $storageId = DB::table('storages')->insertGetId([
     'name' => 'Main Warehouse',
     'location' => 'Prague, Czech Republic',
-    'capacity' => 10000,
     'created_at' => now(),
     'updated_at' => now(),
 ]);
