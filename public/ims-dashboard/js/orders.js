@@ -134,8 +134,8 @@ function addOrder() {
     });
 }
 
-// ✅ Function to Open Edit Order Form
-function openEditOrderForm(orderId, deliverySupplierId, paidAmount) {
+// ✅ Function to Open Edit Order Form - Exposed globally for inline onclick handlers
+window.openEditOrderForm = function(orderId, deliverySupplierId, paidAmount) {
     document.getElementById("edit_order_id").value = orderId;
     document.getElementById("edit_delivery_supplier_id").value = deliverySupplierId;
     document.getElementById("edit_paid_amount").value = paidAmount;
@@ -172,7 +172,8 @@ function editOrder() {
         alert("Error updating order: " + error.message);
     });
 }
-function deleteOrder(orderId) {
+// Exposed globally for inline onclick handlers
+window.deleteOrder = function(orderId) {
     if (!confirm("Are you sure you want to delete this order?")) return;
 
     fetch(`${BASE_URL}/api/orders/${orderId}`, {

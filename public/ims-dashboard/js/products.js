@@ -154,7 +154,8 @@ function addProduct() {
     .catch(error => console.error("Error:", error));
 }
 
-function openEditModal(productId) {
+// Exposed globally for inline onclick handlers
+window.openEditModal = function(productId) {
     console.log("edit_product_id", document.getElementById("edit_product_id")); // should not be null
     fetch(`${BASE_URL}/api/products/${productId}`, {
         headers: {
@@ -268,7 +269,8 @@ function updateProduct() {
     .catch(error => console.error("Error updating product:", error));
 }
 
-function deleteProduct(id) {
+// Exposed globally for inline onclick handlers
+window.deleteProduct = function(id) {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     fetch(`${BASE_URL}/api/products/${id}`, {
@@ -312,16 +314,17 @@ function deleteProduct(id) {
 }
 
 
-function openModal(modalId) {
+// ✅ Exposed globally for inline onclick handlers
+window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) {
         console.error(`❌ Modal with ID '${modalId}' not found.`);
         return;
     }
     modal.style.display = 'flex';
-}
+};
 
-function closeModal(modalId) {
+window.closeModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) {
         console.error(`❌ Modal with ID '${modalId}' not found.`);

@@ -71,8 +71,8 @@ function openEditSupplierModal(id, name) {
     document.getElementById("editShipmentSupplierForm").style.display = "block";
 }
 
-// ✅ Hàm cập nhật Nhà cung cấp lô hàng
-function updateShipmentSupplier() {
+// ✅ Hàm cập nhật Nhà cung cấp lô hàng - Exposed globally for inline onclick handlers
+window.updateShipmentSupplier = function() {
     let id = document.getElementById("edit_supplier_id").value;
     let name = document.getElementById("edit_supplier_name").value;
 

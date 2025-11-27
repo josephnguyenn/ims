@@ -105,11 +105,11 @@ function deleteShipment(id) {
 }
 
 
-// ✅ Modal Functions
-function openModal(modalId) {
+// ✅ Modal Functions - Exposed globally for inline onclick handlers
+window.openModal = function(modalId) {
     document.getElementById(modalId).style.display = 'flex';
-}
+};
 
-function closeModal(modalId) {
+window.closeModal = function(modalId) {
     document.getElementById(modalId).style.display = 'none';
-}
+};

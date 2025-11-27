@@ -109,8 +109,8 @@ function editUser() {
     .catch(error => console.error("Error updating user:", error));
 }
 
-// ✅ Function to Delete User
-function deleteUser(userId) {
+// ✅ Function to Delete User - Exposed globally for inline onclick handlers
+window.deleteUser = function(userId) {
     if (!confirm("Are you sure you want to delete this user?")) return;
 
     fetch(`${BASE_URL}/api/users/${userId}`, {

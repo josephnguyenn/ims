@@ -70,8 +70,8 @@ function openEditDeliverySupplierModal(id, name) {
     document.getElementById("editDeliverySupplierForm").style.display = "block";
 }
 
-// ✅ Function to Update Delivery Supplier
-function updateDeliverySupplier() {
+// ✅ Function to Update Delivery Supplier - Exposed globally for inline onclick handlers
+window.updateDeliverySupplier = function() {
     let id = document.getElementById("edit_delivery_supplier_id").value;
     let name = document.getElementById("edit_delivery_supplier_name").value;
 

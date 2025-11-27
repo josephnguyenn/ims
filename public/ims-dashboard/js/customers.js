@@ -116,8 +116,8 @@ function openEditCustomerModal(id, name, email, phone, address, vat_code, city, 
     openModal("editCustomerForm");
 }
 
-// ✅ Update Customer
-function updateCustomer() {
+// ✅ Update Customer - Exposed globally for inline onclick handlers
+window.updateCustomer = function() {
     const id = document.getElementById("edit_customer_id").value;
     const name = document.getElementById("edit_customer_name").value;
     const email = document.getElementById("edit_customer_email").value;
@@ -143,16 +143,16 @@ function updateCustomer() {
     });
 }
 
-// ✅ Modal Functions
-function openModal(modalId) {
+// ✅ Modal Functions - Exposed globally for inline onclick handlers
+window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     modal.style.display = "flex"; // To match your existing flexbox layout
-}
+};
 
-function closeModal(modalId) {
+window.closeModal = function(modalId) {
     const modal = document.getElementById(modalId);
     modal.style.display = "none";
-}
+};
 
 function deleteCustomer(id) {
     if (!confirm("Bạn có chắc muốn xóa khách hàng này không?")) return;

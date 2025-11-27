@@ -84,8 +84,8 @@ function openEditCategory(id) {
     .catch(err => console.error('Error fetching category:', err));
 }
 
-// Update existing category
-function updateCategory() {
+// Update existing category - Exposed globally for inline onclick handlers
+window.updateCategory = function() {
   const id = document.getElementById('edit_cat_id').value;
   const name = document.getElementById('edit_cat_name').value.trim();
   const visible = document.getElementById('edit_cat_visible').checked;

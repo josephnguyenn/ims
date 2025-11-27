@@ -7,8 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// ✅ Add Product to Shipment
-function addShipmentProduct() {
+// ✅ Add Product to Shipment - Exposed globally for inline onclick handlers
+window.addShipmentProduct = function() {
     let shipmentId = document.getElementById("shipment_id").value;
     let productId = document.getElementById("product_id").value;
     let quantity = document.getElementById("quantity").value;
@@ -34,8 +34,8 @@ function addShipmentProduct() {
     .catch(error => console.error("Error adding product:", error));
 }
 
-// ✅ Delete Product from Shipment
-function deleteShipmentProduct(productId, shipmentId) {
+// ✅ Delete Product from Shipment - Exposed globally for inline onclick handlers
+window.deleteShipmentProduct = function(productId, shipmentId) {
     if (!confirm("Are you sure you want to delete this product from the shipment?")) return;
 
     fetch(`${BASE_URL}/api/shipment-products/${productId}`, {

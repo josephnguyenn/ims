@@ -109,9 +109,9 @@ function addProductToOrder() {
     });
 }
 
-// ✅ Function to Open Edit Order Product Form
+// ✅ Function to Open Edit Order Product Form - Exposed globally for inline onclick handlers
 // ✅ Unified Function to Open and Optionally Fetch Edit Order Product Form
-function openEditOrderProductForm(orderProductId, quantity, fetchDetails = false) {
+window.openEditOrderProductForm = function(orderProductId, quantity, fetchDetails = false) {
     const editForm = document.getElementById("editProductForm");
     if (!editForm) {
         console.error("❌ Edit Product Form Not Found!");
@@ -191,8 +191,8 @@ function editProductInOrder() {
 
 
 
-// ✅ Function to Delete Product from Order
-function deleteOrderProduct(orderProductId, orderId) {
+// ✅ Function to Delete Product from Order - Exposed globally for inline onclick handlers
+window.deleteOrderProduct = function(orderProductId, orderId) {
     if (!confirm("Are you sure you want to remove this product from the order?")) return;
 
     fetch(`${BASE_URL}/api/order-products/${orderProductId}`, {
