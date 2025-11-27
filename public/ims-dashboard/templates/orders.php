@@ -41,6 +41,9 @@ $deliverySuppliers = fetchData(BASE_URL.'/api/delivery-suppliers');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Quản lý Đơn hàng</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -224,11 +227,13 @@ for ($i = 1; $i <= $totalPages; $i++) {
         const BASE_URL = "<?= BASE_URL ?>";
         console.log('BASE_URL defined:', BASE_URL);
     </script>
-    <script src="../js/orders.js?v=<?= time() ?>"></script>
+    <script src="../js/orders.js?v=<?= time() ?>&build=20251127-v2"></script>
     <script>
         // Verify functions are loaded
         console.log('openModal function available:', typeof window.openModal);
         console.log('closeModal function available:', typeof window.closeModal);
+        console.log('openEditOrderForm function available:', typeof window.openEditOrderForm);
+        console.log('deleteOrder function available:', typeof window.deleteOrder);
     </script>
 </body>
 </html>
