@@ -25,14 +25,20 @@ function getPageFromURL() {
 }
 
 function loadOrders(page = 1) {
-    fetch(`${BASE_URL}/api/orders`, {
+    fetch(`${BASE_URL}/api/orders?paginate=false`, {
         headers: { "Authorization": "Bearer " + sessionStorage.getItem("token") }
     })
     .then(res => res.json())
     .then(data => {
-        allOrders = data.reverse(); // ✅ Newest orders first
+        // Handle both paginated response and plain array
+        allOrders = Array.isArray(data) ? data : (data.data || []);
+        allOrders = allOrders.reverse(); // ✅ Newest orders first
         renderOrders(page);
         renderPagination(page);
+    })
+    .catch(err => {
+        console.error("Error loading orders:", err);
+        document.getElementById("order-table").innerHTML = "<tr><td colspan='6'>Error loading orders. Please refresh.</td></tr>";
     });
 }
 
