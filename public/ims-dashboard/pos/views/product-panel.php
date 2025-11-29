@@ -10,5 +10,5 @@
 </div>
 
 <div class="product-list" id="product-list">
-  <div class="loading">Chọn danh mục để xem sản phẩm…</div>
+  <div class="loading">Đang tải sản phẩm…</div>
 </div>

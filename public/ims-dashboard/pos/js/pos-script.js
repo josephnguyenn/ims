@@ -20,21 +20,26 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => { EUR_RATE = parseFloat(data.rate); updateCart(); })
     .catch(console.error);
 
-  // 2) Wire up category tabs (click first on load)
+  // 2) Wire up category tabs and load all products initially
   const tabs = document.querySelectorAll('.category-tab');
-  tabs.forEach((btn, idx) => {
+  tabs.forEach((btn) => {
     btn.addEventListener('click', () => {
       tabs.forEach(t=>t.classList.remove('active'));
       btn.classList.add('active');
       loadProducts(btn.dataset.categoryId);
     });
-    if (idx === 0) btn.click();
   });
+
+  // Load all products on initial page load
+  loadProducts(null);
 
   // Fetch + render products
   function loadProducts(categoryId) {
     productList.innerHTML = '<div class="loading">Đang tải sản phẩm…</div>';
-    fetch(`${BASE_URL}/api/products?category_id=${categoryId}`, {
+    const url = categoryId 
+      ? `${BASE_URL}/api/products?category_id=${categoryId}`
+      : `${BASE_URL}/api/products?paginate=false`;
+    fetch(url, {
       headers: {
         'Authorization': `Bearer ${AUTH_TOKEN}`,
         'Accept':        'application/json'
