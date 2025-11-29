@@ -208,7 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Add active state styling
-const style = document.createElement('style');
+// Avoid redeclaration conflict
+if (!document.getElementById('autocomplete-styles')) {
+    const style = document.createElement('style');
+    style.id = 'autocomplete-styles';
 style.textContent = `
     .autocomplete-item.active {
         background: #e3f2fd !important;
@@ -217,4 +220,5 @@ style.textContent = `
         background: #1a4ba8 !important;
     }
 `;
-document.head.appendChild(style);
+    document.head.appendChild(style);
+}

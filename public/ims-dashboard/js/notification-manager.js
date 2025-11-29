@@ -21,8 +21,11 @@ class NotificationManager {
     }
     
     startMonitoring() {
-        this.checkInventory();
-        setInterval(() => this.checkInventory(), this.checkInterval);
+        // Delay first check by 3 seconds to avoid rate limiting with other page loads
+        setTimeout(() => {
+            this.checkInventory();
+            setInterval(() => this.checkInventory(), this.checkInterval);
+        }, 3000);
     }
     
     async checkInventory() {
