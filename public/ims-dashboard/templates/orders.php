@@ -232,6 +232,13 @@ for ($i = 1; $i <= $totalPages; $i++) {
     <script>
         const BASE_URL = "<?= BASE_URL ?>";
         console.log('BASE_URL defined:', BASE_URL);
+        
+        // ✅ Pass PHP session token to JavaScript sessionStorage
+        const token = "<?= $_SESSION['token'] ?? '' ?>";
+        if (token) {
+            sessionStorage.setItem('token', token);
+            console.log('Token stored in sessionStorage');
+        }
     </script>
     <script src="../js/orders.js?v=<?= time() ?>&build=20251127-v3-fixed"></script>
     <script>
