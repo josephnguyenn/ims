@@ -233,10 +233,10 @@ DB::table('order_products')->insert(['order_id' => $orderIds[1], 'product_id' =>
 
 // Order 3: Laptop + Running Shoes
 DB::table('order_products')->insert(['order_id' => $orderIds[2], 'product_id' => $productIds[2], 'quantity' => 1, 'price' => 25999, 'created_at' => now()->subDays(3), 'updated_at' => now()->subDays(3)]);
-DB::table('order_products')->insert(['order_id' => $orderIds[2], 'product_id' => $productIds[44], 'quantity' => 1, 'price' => 2499, 'created_at' => now()->subDays(3), 'updated_at' => now()->subDays(3)]);
+DB::table('order_products')->insert(['order_id' => $orderIds[2], 'product_id' => $productIds[34], 'quantity' => 1, 'price' => 2499, 'created_at' => now()->subDays(3), 'updated_at' => now()->subDays(3)]);
 
-// Order 4: Vacuum Cleaner + Garden Tools
-DB::table('order_products')->insert(['order_id' => $orderIds[3], 'product_id' => $productIds[29], 'quantity' => 1, 'price' => 4999, 'created_at' => now()->subDays(4), 'updated_at' => now()->subDays(4)]);
+// Order 4: Garden Tools
+DB::table('order_products')->insert(['order_id' => $orderIds[3], 'product_id' => $productIds[29], 'quantity' => 1, 'price' => 1999, 'created_at' => now()->subDays(4), 'updated_at' => now()->subDays(4)]);
 
 // Order 5: Smart Watch + Yoga Mat
 DB::table('order_products')->insert(['order_id' => $orderIds[4], 'product_id' => $productIds[7], 'quantity' => 1, 'price' => 7999, 'created_at' => now()->subDays(5), 'updated_at' => now()->subDays(5)]);
@@ -245,8 +245,8 @@ DB::table('order_products')->insert(['order_id' => $orderIds[4], 'product_id' =>
 DB::table('order_products')->insert(['order_id' => $orderIds[5], 'product_id' => $productIds[10], 'quantity' => 3, 'price' => 499, 'created_at' => now()->subDays(6), 'updated_at' => now()->subDays(6)]);
 DB::table('order_products')->insert(['order_id' => $orderIds[5], 'product_id' => $productIds[13], 'quantity' => 1, 'price' => 1599, 'created_at' => now()->subDays(6), 'updated_at' => now()->subDays(6)]);
 
-// Order 7: Running Shoes + Gym Bag
-DB::table('order_products')->insert(['order_id' => $orderIds[6], 'product_id' => $productIds[44], 'quantity' => 1, 'price' => 2499, 'created_at' => now()->subDays(7), 'updated_at' => now()->subDays(7)]);
+// Order 7: Running Shoes
+DB::table('order_products')->insert(['order_id' => $orderIds[6], 'product_id' => $productIds[34], 'quantity' => 1, 'price' => 2499, 'created_at' => now()->subDays(7), 'updated_at' => now()->subDays(7)]);
 
 // Order 8: Wireless Headphones + Power Bank + Keyboard
 DB::table('order_products')->insert(['order_id' => $orderIds[7], 'product_id' => $productIds[1], 'quantity' => 2, 'price' => 2499, 'created_at' => now()->subDays(8), 'updated_at' => now()->subDays(8)]);
@@ -272,10 +272,10 @@ DB::table('order_products')->insert(['order_id' => $orderIds[10], 'product_id' =
 DB::table('order_products')->insert(['order_id' => $orderIds[11], 'product_id' => $productIds[7], 'quantity' => 1, 'price' => 7999, 'created_at' => now()->subDays(18), 'updated_at' => now()->subDays(18)]);
 DB::table('order_products')->insert(['order_id' => $orderIds[11], 'product_id' => $productIds[8], 'quantity' => 1, 'price' => 1799, 'created_at' => now()->subDays(18), 'updated_at' => now()->subDays(18)]);
 
-// Order 13: Dumbbell Set + Yoga Mat + Water Bottle
-DB::table('order_products')->insert(['order_id' => $orderIds[12], 'product_id' => $productIds[45], 'quantity' => 1, 'price' => 1899, 'created_at' => now()->subDays(20), 'updated_at' => now()->subDays(20)]);
-DB::table('order_products')->insert(['order_id' => $orderIds[12], 'product_id' => $productIds[43], 'quantity' => 2, 'price' => 799, 'created_at' => now()->subDays(20), 'updated_at' => now()->subDays(20)]);
-DB::table('order_products')->insert(['order_id' => $orderIds[12], 'product_id' => $productIds[47], 'quantity' => 1, 'price' => 299, 'created_at' => now()->subDays(20), 'updated_at' => now()->subDays(20)]);
+// Order 13: Dumbbells + Yoga Mat + Water Bottle
+DB::table('order_products')->insert(['order_id' => $orderIds[12], 'product_id' => $productIds[35], 'quantity' => 1, 'price' => 1899, 'created_at' => now()->subDays(20), 'updated_at' => now()->subDays(20)]);
+DB::table('order_products')->insert(['order_id' => $orderIds[12], 'product_id' => $productIds[33], 'quantity' => 2, 'price' => 799, 'created_at' => now()->subDays(20), 'updated_at' => now()->subDays(20)]);
+DB::table('order_products')->insert(['order_id' => $orderIds[12], 'product_id' => $productIds[36], 'quantity' => 1, 'price' => 299, 'created_at' => now()->subDays(20), 'updated_at' => now()->subDays(20)]);
 
 // Order 14: Smart Watch + Running Shoes
 DB::table('order_products')->insert(['order_id' => $orderIds[13], 'product_id' => $productIds[7], 'quantity' => 1, 'price' => 7999, 'created_at' => now()->subDays(22), 'updated_at' => now()->subDays(22)]);
