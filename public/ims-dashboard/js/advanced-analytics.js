@@ -54,7 +54,8 @@ const getChartBaseConfig = () => ({
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboardData();
-    loadAIInsights('sales');
+    // Don't auto-load AI insights to prevent rate limiting
+    // User can click buttons to load them manually
     
     // Listen for theme changes
     const observer = new MutationObserver((mutations) => {

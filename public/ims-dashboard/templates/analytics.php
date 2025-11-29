@@ -348,10 +348,10 @@ require_once '../define.php';
                 <button onclick="loadAIInsights('recommendations')">Product Recommendations</button>
             </div>
             <div id="ai-content" class="content">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Analyzing data with AI...</p>
-                </div>
+                <p style="text-align: center; padding: 40px 20px; color: #666;">
+                    <i class="fas fa-click" style="font-size: 48px; display: block; margin-bottom: 15px; color: #667eea;"></i>
+                    Click a button above to load AI-powered insights
+                </p>
             </div>
         </div>
     </div>
