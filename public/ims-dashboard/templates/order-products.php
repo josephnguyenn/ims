@@ -245,12 +245,18 @@ if (! isset($order['id'])) {
     let allProducts = [];
 
     document.addEventListener("DOMContentLoaded", function () {
-        fetch(`${BASE_URL}/api/products`, {
+        fetch(`${BASE_URL}/api/products?paginate=false`, {
             headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
         })
         .then(res => res.json())
         .then(data => {
-            allProducts = data;
+            // Handle both paginated and plain array responses
+            allProducts = Array.isArray(data) ? data : (data.data || []);
+            console.log('✅ Loaded products:', allProducts.length);
+        })
+        .catch(err => {
+            console.error('❌ Error loading products:', err);
+            allProducts = [];
         });
 
         const productSearch = document.getElementById("product_search");
