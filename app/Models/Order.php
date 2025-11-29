@@ -45,9 +45,15 @@ class Order extends Model
         return $this->hasMany(OrderProduct::class);
     }
 
-    // ✅ Auto-calculate total price dynamically
+    // ✅ Auto-calculate total price dynamically from loaded relationship
     public function getTotalPriceAttribute()
     {
+        // Use loaded relationship if available, otherwise query database
+        if ($this->relationLoaded('orderProducts')) {
+            return $this->orderProducts->sum(function($op) {
+                return $op->price * $op->quantity;
+            });
+        }
         return $this->orderProducts()->sum(DB::raw('price * quantity'));
     }
 
