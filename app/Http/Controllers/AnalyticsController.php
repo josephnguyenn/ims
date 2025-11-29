@@ -252,25 +252,64 @@ class AnalyticsController extends Controller
      */
     public function salesForecast()
     {
-        // Get last 90 days of sales
-        $historicalData = DB::table('orders')
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as orders'),
-                DB::raw('SUM(total) as revenue')
-            )
-            ->where('created_at', '>=', Carbon::now()->subDays(90))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->toArray();
+        try {
+            // Get last 90 days of sales with order_products totals
+            $historicalData = DB::table('orders')
+                ->join('order_products', 'orders.id', '=', 'order_products.order_id')
+                ->select(
+                    DB::raw('DATE(orders.created_at) as date'),
+                    DB::raw('COUNT(DISTINCT orders.id) as orders'),
+                    DB::raw('SUM(order_products.price * order_products.quantity) as revenue')
+                )
+                ->where('orders.created_at', '>=', Carbon::now()->subDays(90))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->toArray();
 
-        $forecast = $this->gemini->predictSalesTrend($historicalData);
+            // If no Gemini integration, return simple forecast
+            if (!isset($this->gemini)) {
+                // Simple linear forecast based on average daily sales
+                $avgRevenue = count($historicalData) > 0 
+                    ? array_sum(array_column($historicalData, 'revenue')) / count($historicalData) 
+                    : 0;
+                
+                $forecast = [];
+                for ($i = 1; $i <= 7; $i++) {
+                    $forecast[] = [
+                        'date' => Carbon::now()->addDays($i)->format('Y-m-d'),
+                        'predicted_revenue' => round($avgRevenue, 2),
+                        'confidence' => 'medium'
+                    ];
+                }
+            } else {
+                $forecast = $this->gemini->predictSalesTrend($historicalData);
+            }
 
-        return response()->json([
-            'forecast' => $forecast,
-            'based_on_days' => 90,
-            'generated_at' => now()->toDateTimeString()
-        ]);
+            return response()->json([
+                'forecast' => $forecast,
+                'based_on_days' => 90,
+                'generated_at' => now()->toDateTimeString()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Sales forecast error: ' . $e->getMessage());
+            
+            // Return simple fallback forecast
+            $forecast = [];
+            for ($i = 1; $i <= 7; $i++) {
+                $forecast[] = [
+                    'date' => Carbon::now()->addDays($i)->format('Y-m-d'),
+                    'predicted_revenue' => 0,
+                    'confidence' => 'low'
+                ];
+            }
+            
+            return response()->json([
+                'forecast' => $forecast,
+                'based_on_days' => 0,
+                'generated_at' => now()->toDateTimeString(),
+                'note' => 'Forecast unavailable - using fallback data'
+            ]);
+        }
     }
 }
