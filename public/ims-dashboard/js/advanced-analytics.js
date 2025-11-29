@@ -105,11 +105,11 @@ async function loadDashboardData() {
     
     try {
         const [salesTrends, topProducts, revenue, inventory, forecast] = await Promise.all([
-            fetchAPI(`/analytics/sales-trends?days=${days}`),
-            fetchAPI('/analytics/top-products?limit=10'),
-            fetchAPI('/analytics/revenue?period=month'),
-            fetchAPI('/analytics/inventory-turnover'),
-            fetchAPI('/analytics/sales-forecast?days=7').catch(() => null)
+            fetchAPI(`/analytics/sales-trends?days=${days}`).catch(e => { console.warn('Sales trends failed:', e); return null; }),
+            fetchAPI('/analytics/top-products?limit=10').catch(e => { console.warn('Top products failed:', e); return null; }),
+            fetchAPI('/analytics/revenue?period=month').catch(e => { console.warn('Revenue failed:', e); return null; }),
+            fetchAPI('/analytics/inventory-turnover').catch(e => { console.warn('Inventory failed:', e); return null; }),
+            fetchAPI('/analytics/sales-forecast?days=7').catch(e => { console.warn('Forecast failed:', e); return null; })
         ]);
 
         // Update stats cards
@@ -117,7 +117,7 @@ async function loadDashboardData() {
             updateStatsCards(revenue);
         }
         
-        // Update charts
+        // Update charts with null checks
         if (salesTrends?.data) updateSalesTrendChart(salesTrends.data);
         if (topProducts?.data) updateTopProductsChart(topProducts.data);
         if (revenue?.by_category) updateSalesByCategoryChart(revenue.by_category);
@@ -644,26 +644,44 @@ function updateChartsTheme() {
     });
 }
 
-// AI Insights
+// AI Insights with debounce to prevent 429 errors
+let aiInsightsTimeout = null;
 async function loadAIInsights(type) {
-    // Update button states
-    document.querySelectorAll('.insight-type button').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent.toLowerCase().includes(type)) {
-            btn.classList.add('active');
-        }
-    });
-    
-    const content = document.getElementById('ai-content');
-    content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>AI is analyzing your data...</p></div>';
-    
-    try {
-        const data = await fetchAPI(`/analytics/ai-insights?type=${type}`);
-        content.innerHTML = `<div class="content">${formatAIInsights(data.insights)}</div>`;
-    } catch (error) {
-        content.innerHTML = '<p>Unable to generate insights at this time.</p>';
-        console.error('Error loading AI insights:', error);
+    // Clear previous timeout to prevent rapid calls (rate limiting)
+    if (aiInsightsTimeout) {
+        clearTimeout(aiInsightsTimeout);
     }
+    
+    // Debounce for 500ms
+    aiInsightsTimeout = setTimeout(async () => {
+        // Update button states
+        document.querySelectorAll('.insight-type button').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent.toLowerCase().includes(type)) {
+                btn.classList.add('active');
+            }
+        });
+        
+        const content = document.getElementById('ai-content');
+        content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>AI is analyzing your data...</p></div>';
+        
+        try {
+            const data = await fetchAPI(`/analytics/ai-insights?type=${type}`);
+            if (data?.insights) {
+                content.innerHTML = `<div class="content">${formatAIInsights(data.insights)}</div>`;
+            } else {
+                content.innerHTML = '<p>No AI insights available at this time.</p>';
+            }
+        } catch (error) {
+            // Check if it's a rate limit error (429)
+            if (error.message.includes('429')) {
+                content.innerHTML = '<p style="color: #ff9800;">⚠️ AI insights temporarily unavailable due to rate limiting. Please try again in a few minutes.</p>';
+            } else {
+                content.innerHTML = '<p>AI insights are currently unavailable. Analytics data is still available above.</p>';
+            }
+            console.warn('AI insights unavailable:', error);
+        }
+    }, 500);
 }
 
 function formatAIInsights(text) {

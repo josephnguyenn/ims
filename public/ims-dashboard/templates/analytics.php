@@ -18,7 +18,7 @@ require_once '../define.php';
     <title>Advanced Analytics - Tappo Market IMS</title>
     
     <!-- PWA Support -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/ims-dashboard/manifest.json">
     <meta name="theme-color" content="#1a4ba8">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -251,14 +251,6 @@ require_once '../define.php';
     </style>
 </head>
 <body>
-    <?php
-    session_start();
-    if (!isset($_SESSION['token'])) {
-        header('Location: ../login.php');
-        exit();
-    }
-    include '../define.php';
-    ?>
 
     <div class="container">
         <div class="header">
@@ -369,8 +361,5 @@ require_once '../define.php';
         const AUTH_TOKEN = '<?= $_SESSION["token"] ?>';
     </script>
     <script src="../js/advanced-analytics.js"></script>
-    <script src="../js/theme-toggle.js"></script>
-    <script src="../js/keyboard-shortcuts.js"></script>
-    <script src="../js/pwa-installer.js"></script>
 </body>
 </html>
