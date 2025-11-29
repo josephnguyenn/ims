@@ -25,6 +25,12 @@ $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $perPage = 10;
 
 $allOrders = fetchData(BASE_URL.'/api/orders');
+
+// Filter out empty/invalid orders (orders without id)
+$allOrders = array_filter($allOrders, function($order) {
+    return isset($order['id']) && !empty($order['id']);
+});
+
 $allOrders = array_reverse($allOrders); // ✅ Reverse the array to show latest first
 $totalOrders = count($allOrders);
 $totalPages = ceil($totalOrders / $perPage);
