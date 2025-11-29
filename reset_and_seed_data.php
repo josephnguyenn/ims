@@ -47,9 +47,9 @@ $storageId = DB::table('storages')->insertGetId([
 // Shipment Suppliers
 echo "Adding shipment suppliers...\n";
 $shipmentSuppliers = [
-    ['name' => 'ABC Wholesale Ltd.', 'contact_person' => 'Jan Novák', 'phone' => '+420 123 456 789', 'email' => 'jan@abcwholesale.cz', 'address' => 'Prague 1, Czech Republic'],
-    ['name' => 'Global Imports s.r.o.', 'contact_person' => 'Petra Svobodová', 'phone' => '+420 987 654 321', 'email' => 'petra@globalimports.cz', 'address' => 'Brno, Czech Republic'],
-    ['name' => 'EuroTrade Partners', 'contact_person' => 'Martin Dvořák', 'phone' => '+420 555 123 456', 'email' => 'martin@eurotrade.eu', 'address' => 'Ostrava, Czech Republic'],
+    ['name' => 'ABC Wholesale Ltd.'],
+    ['name' => 'Global Imports s.r.o.'],
+    ['name' => 'EuroTrade Partners'],
 ];
 
 $shipmentSupplierIds = [];
@@ -62,9 +62,9 @@ foreach ($shipmentSuppliers as $supplier) {
 // Delivery Suppliers
 echo "Adding delivery suppliers...\n";
 $deliverySuppliers = [
-    ['name' => 'Fast Delivery Express', 'contact_person' => 'Lukáš Procházka', 'phone' => '+420 111 222 333', 'email' => 'lukas@fastdelivery.cz'],
-    ['name' => 'Quick Transport s.r.o.', 'contact_person' => 'Eva Černá', 'phone' => '+420 444 555 666', 'email' => 'eva@quicktransport.cz'],
-    ['name' => 'Speed Logistics', 'contact_person' => 'Tomáš Veselý', 'phone' => '+420 777 888 999', 'email' => 'tomas@speedlogistics.cz'],
+    ['name' => 'Fast Delivery Express'],
+    ['name' => 'Quick Transport s.r.o.'],
+    ['name' => 'Speed Logistics'],
 ];
 
 $deliverySupplierIds = [];
