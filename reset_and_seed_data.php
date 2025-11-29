@@ -69,16 +69,16 @@ $deliverySupplierIds[] = DB::table('delivery_suppliers')->insertGetId(['name' =>
 // Product Categories
 echo "Adding product categories...\n";
 $categoryIds = [];
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Electronics', 'description' => 'Electronic devices', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Clothing', 'description' => 'Apparel items', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Food & Beverages', 'description' => 'Food products', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Home & Garden', 'description' => 'Home supplies', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Sports', 'description' => 'Sports equipment', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Books & Stationery', 'description' => 'Books and office supplies', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Beauty & Health', 'description' => 'Beauty and healthcare products', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Toys & Games', 'description' => 'Toys and entertainment', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Automotive', 'description' => 'Car accessories', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
-$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Pet Supplies', 'description' => 'Pet care products', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Electronics', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Clothing', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Food & Beverages', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Home & Garden', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Sports', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Books & Stationery', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Beauty & Health', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Toys & Games', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Automotive', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
+$categoryIds[] = DB::table('product_categories')->insertGetId(['name' => 'Pet Supplies', 'visible_in_pos' => 1, 'created_at' => now(), 'updated_at' => now()]);
 
 // Shipments
 echo "Adding shipments...\n";
