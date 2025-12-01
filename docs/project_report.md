@@ -374,25 +374,21 @@ This structure reflects the static dashboard hosted alongside Laravel. JavaScrip
 
 ### 8.4 Back End
 #### 8.4.1 Project Folder Structure
-```
-app/
-├─ Console/
-├─ Exceptions/
-├─ Http/
-│  ├─ Controllers/
-│  ├─ Middleware/
-│  └─ Requests/
-├─ Models/
-├─ Providers/
-├─ Repositories/
-└─ Services/
-```
-Controllers orchestrate requests; Form Requests validate payloads; Services encapsulate business logic (e.g., AI insights); Repositories handle data access patterns such as caching and sorting. Providers register Sanctum and other bindings.
+Key Laravel backend directories (vendor/node_modules excluded):
+- `app/` contains the core application (Console, Exceptions, Providers, domain Models) plus reusable Repositories and Services shared across modules.【4f8467†L1-L10】
+- `app/Http/` segments the web layer into Controllers, Middleware, Requests, and Resources so routing, validation, and response transformation remain cohesive.【436d8d†L1-L6】
+- `app/Http/Controllers/` holds the business-facing controllers for auth, inventory, suppliers, POS/orders, reporting, and analytics/AI insights.【4ae117†L1-L13】
+- `app/Http/Middleware/` covers authentication, RBAC (`CheckRole`), maintenance/CSRF, proxy, and signature middleware configured in the HTTP kernel.【b60e20†L1-L12】
+- `app/Repositories/` centralises data-access patterns (e.g., cached product lookups, FIFO barcode ordering) to keep controllers lean.【895939†L1-L3】
+- `app/Services/` encapsulates inventory depletion and Gemini-backed forecasting/insights helpers referenced by analytics flows.【864174†L1-L4】
+- `routes/api.php` exposes REST endpoints; `routes/web.php`, `routes/console.php`, and `routes/channels.php` manage browser, CLI, and broadcast routes respectively.【d56672†L1-L5】
 
 #### 8.4.2 Swagger Documentation
 OpenAPI/Swagger documentation is generated for public endpoints (products, orders, forecasts), detailing request/response schemas and authentication requirements. (Figure 10 placeholder.)
 
 #### 8.4.3 Source code samples (300–500 words)
+- **POS / order creation (`OrderController@store`)** validates cashier identity, totals, tendered/rounded amounts, and per-item barcode/price data for `source=pos`, then creates the order, assigns the current shift, decrements stock FIFO across shipments for each barcode, and records line items; a legacy branch handles admin-captured orders when no POS source is provided.【F:app/Http/Controllers/OrderController.php†L57-L197】
+- **Sales forecasting (`AnalyticsController@salesForecast`)** aggregates the last 90 days of orders into a date/revenue series and delegates to `GeminiService::predictSalesTrend`, returning the projected trend plus metadata on generation time and lookback window.【F:app/Http/Controllers/AnalyticsController.php†L253-L274】
 - **ProductRepository:** consolidates filtering, FIFO barcode lookups, and cache invalidation so POS search endpoints remain fast even with shared barcodes; cache entries expire after five minutes and are flushed on create/update/delete to avoid stale data.【F:app/Repositories/ProductRepository.php†L15-L86】 Database-level performance complements this with targeted indexes across hot columns for products, orders, order_products, customers, users, and shipments.【F:database/migrations/2025_11_27_000001_add_performance_indexes.php†L14-L56】
 - **InventoryService:** enforces FIFO depletion by barcode, decrementing the oldest stock first and throwing clear exceptions when quantities are insufficient.【F:app/Services/InventoryService.php†L7-L32】
 - **ReportController:** aggregates sales, top products, monthly revenue, and POS shift summaries. The POS report endpoint returns invoice-level detail plus currency/tip summaries for a date range or shift, matching cashier and shift filters in the API route map.【F:routes/api.php†L88-L125】【F:app/Http/Controllers/ReportController.php†L66-L134】
