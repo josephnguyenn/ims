@@ -4,19 +4,19 @@ Use these Mermaid snippets to embed architecture and workflow visuals for the In
 
 ## 1. Use Case Diagram (Admin and Cashier)
 ```mermaid
-%% Store Owner -> Admin, Store Clerk -> Cashier
-usecaseDiagram
-  actor "Store Owner" as Admin
-  actor "Store Clerk" as Cashier
+%% GitHub's Mermaid version does not yet support the `usecaseDiagram` DSL, so this
+%% flowchart-based layout renders a use-case style view that works in GitHub
+%% previews. Store Owner maps to Admin; Store Clerk maps to Cashier.
+flowchart LR
+  Admin([Store Owner])
+  Cashier([Store Clerk])
 
-  rectangle IMS {
-    usecase "Manage Products" as UCManageProducts
-    usecase "Record Sales" as UCRecordSales
-    usecase "View Sales Dashboard" as UCSalesDashboard
-    usecase "View Forecast" as UCForecast
-    usecase "Print Receipt" as UCPrintReceipt
-    usecase "Login" as UCLogin
-  }
+  UCManageProducts((Manage Products))
+  UCRecordSales((Record Sales))
+  UCSalesDashboard((View Sales Dashboard))
+  UCForecast((View Forecast))
+  UCPrintReceipt((Print Receipt))
+  UCLogin((Login))
 
   Admin --> UCManageProducts
   Admin --> UCSalesDashboard
