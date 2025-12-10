@@ -203,6 +203,61 @@ require_once '../define.php';
             color: #444;
         }
 
+        /* AI Insights Formatted Styling */
+        .ai-insights-formatted h3 {
+            color: #667eea;
+            font-size: 20px;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        .ai-insights-formatted h3:first-child {
+            margin-top: 0;
+        }
+
+        .ai-insights-formatted h4 {
+            color: #764ba2;
+            font-size: 18px;
+            margin: 20px 0 10px 0;
+        }
+
+        .ai-insights-formatted p {
+            margin: 12px 0;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .ai-insights-formatted strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .ai-insights-formatted ul {
+            margin: 15px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .ai-insights-formatted ul li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s;
+        }
+
+        .ai-insights-formatted ul li:hover {
+            background: #e8eaf6;
+            transform: translateX(5px);
+        }
+
+        .ai-insights-formatted ul li strong {
+            display: inline-block;
+            min-width: 30px;
+        }
+
         .ai-insights .insight-type {
             display: flex;
             gap: 10px;

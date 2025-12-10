@@ -688,12 +688,46 @@ async function loadAIInsights(type) {
 function formatAIInsights(text) {
     if (!text) return '<p>No insights available.</p>';
     
-    return text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n- /g, '<br>• ')
-        .replace(/^/, '<p>')
-        .replace(/$/, '</p>');
+    // Convert markdown-style formatting to HTML
+    let formatted = text
+        // Headers (##, ###)
+        .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^# (.+)$/gm, '<h3>$1</h3>')
+        
+        // Bold text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        
+        // Numbered lists (1., 2., etc.)
+        .replace(/^(\d+)\. (.+)$/gm, '<li><strong>$1.</strong> $2</li>')
+        
+        // Bullet points (*, -, •)
+        .replace(/^[*-] (.+)$/gm, '<li>$1</li>')
+        .replace(/^• (.+)$/gm, '<li>$1</li>')
+        
+        // Wrap consecutive <li> in <ul>
+        .replace(/(<li>.*?<\/li>)(\s*<li>)/g, '$1\n$2')
+        .replace(/(<li>.*?<\/li>)(?!\s*<li>)/gs, (match) => {
+            return '<ul>' + match.split('\n').join('') + '</ul>';
+        })
+        
+        // Paragraphs (double line break)
+        .split('\n\n')
+        .map(para => {
+            // Don't wrap if already has HTML tags
+            if (para.match(/^<[h3-6|ul]/)) {
+                return para;
+            }
+            return para.trim() ? `<p>${para.trim()}</p>` : '';
+        })
+        .join('\n');
+    
+    // Clean up extra spacing
+    formatted = formatted
+        .replace(/<\/ul>\s*<ul>/g, '') // Merge adjacent lists
+        .replace(/\n{3,}/g, '\n\n'); // Remove excessive line breaks
+    
+    return `<div class="ai-insights-formatted">${formatted}</div>`;
 }
 
 // Refresh all data

@@ -87,7 +87,12 @@ class GeminiService
     {
         $prompt = "Analyze this sales data and provide 3-5 actionable business insights:\n\n";
         $prompt .= json_encode($salesData, JSON_PRETTY_PRINT);
-        $prompt .= "\n\nProvide insights in bullet points covering: trends, opportunities, and recommendations.";
+        $prompt .= "\n\nFormat your response as:\n";
+        $prompt .= "1. Use **bold** for key terms\n";
+        $prompt .= "2. Number each insight (1., 2., 3., etc.)\n";
+        $prompt .= "3. Include: **Trend**, **Opportunity**, and **Recommendation** for each insight\n";
+        $prompt .= "4. Keep each insight concise and actionable\n";
+        $prompt .= "5. Use clear paragraph breaks between insights";
 
         return $this->generateContent($prompt);
     }
@@ -99,7 +104,12 @@ class GeminiService
     {
         $prompt = "Based on this historical sales data, predict the trend for the next 30 days:\n\n";
         $prompt .= json_encode($historicalData, JSON_PRETTY_PRINT);
-        $prompt .= "\n\nProvide: expected trend (up/down/stable), confidence level, and key factors.";
+        $prompt .= "\n\nFormat your response as:\n";
+        $prompt .= "### Trend Prediction\n";
+        $prompt .= "- **Expected Trend**: (up/down/stable)\n";
+        $prompt .= "- **Confidence Level**: (percentage)\n";
+        $prompt .= "- **Key Factors**: List the main factors influencing this prediction\n";
+        $prompt .= "\nUse bullet points and bold for key terms.";
 
         return $this->generateContent($prompt);
     }
@@ -111,7 +121,12 @@ class GeminiService
     {
         $prompt = "Analyze this inventory data and suggest optimal reorder points:\n\n";
         $prompt .= json_encode($inventoryData, JSON_PRETTY_PRINT);
-        $prompt .= "\n\nFor each product, provide: suggested reorder point, reasoning, and risk level.";
+        $prompt .= "\n\nFormat each product recommendation as:\n";
+        $prompt .= "### Product Name\n";
+        $prompt .= "- **Suggested Reorder Point**: (quantity)\n";
+        $prompt .= "- **Reasoning**: Explanation\n";
+        $prompt .= "- **Risk Level**: (Low/Medium/High)\n";
+        $prompt .= "\nUse clear sections and bold for key information.";
 
         return $this->generateContent($prompt);
     }
@@ -123,7 +138,12 @@ class GeminiService
     {
         $prompt = "Based on this product performance data, recommend actions:\n\n";
         $prompt .= json_encode($productPerformance, JSON_PRETTY_PRINT);
-        $prompt .= "\n\nSuggest which products to: promote, discount, restock, or discontinue.";
+        $prompt .= "\n\nOrganize recommendations by action category:\n";
+        $prompt .= "### 🔥 Products to Promote\n";
+        $prompt .= "### 💰 Products to Discount\n";
+        $prompt .= "### 📦 Products to Restock\n";
+        $prompt .= "### ⚠️ Products to Discontinue\n";
+        $prompt .= "\nFor each product, explain the reasoning using bullet points and bold key terms.";
 
         return $this->generateContent($prompt);
     }
